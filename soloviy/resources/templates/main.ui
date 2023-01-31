@@ -32,7 +32,7 @@
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout" stretch="1,10">
         <property name="spacing">
          <number>0</number>
@@ -235,7 +235,7 @@
     <item>
      <layout class="QHBoxLayout" name="media_status" stretch="0,10">
       <property name="spacing">
-       <number>5</number>
+       <number>4</number>
       </property>
       <item>
        <widget class="QGraphicsView" name="graphicsView">
