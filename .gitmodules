@@ -1,0 +1,3 @@
+[submodule "soloviy/resources/breeze-icons"]
+	path = soloviy/resources/breeze-icons
+	url = ../../KDE/breeze-icons
