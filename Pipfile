@@ -4,11 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+python-mpd2 = "*"
 pyqt6 = "*"
+pyqt6-tools = "*"
 
 [dev-packages]
 black = "*"
 flake8 = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.9"
