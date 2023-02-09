@@ -29,6 +29,9 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+      <property name="handleWidth">
+       <number>1</number>
+      </property>
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
@@ -57,7 +60,7 @@
               </property>
               <property name="icon">
                <iconset theme="media-skip-backward">
-                <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+                <normaloff>.</normaloff>.</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -86,7 +89,7 @@
               </property>
               <property name="icon">
                <iconset theme="media-playback-start">
-                <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+                <normaloff>.</normaloff>.</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -118,7 +121,7 @@
               </property>
               <property name="icon">
                <iconset theme="media-skip-forward">
-                <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+                <normaloff>.</normaloff>.</iconset>
               </property>
               <property name="iconSize">
                <size>
@@ -148,7 +151,7 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
+             <enum>QSizePolicy::Minimum</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -168,15 +171,30 @@
               <property name="enabled">
                <bool>true</bool>
               </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../icons.qrc">
-                <normaloff>:/icons/breeze-icons/icons-dark/actions/16/media-repeat-none.svg</normaloff>:/icons/breeze-icons/icons-dark/actions/16/media-repeat-none.svg</iconset>
+               <iconset theme="media-playlist-repeat">
+                <normaloff>.</normaloff>.</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>16</width>
+                <height>16</height>
+               </size>
               </property>
               <property name="checkable">
-               <bool>true</bool>
+               <bool>false</bool>
+              </property>
+              <property name="autoRepeat">
+               <bool>false</bool>
               </property>
               <property name="flat">
                <bool>true</bool>
@@ -185,15 +203,27 @@
             </item>
             <item>
              <widget class="QPushButton" name="media_shuffle">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../icons.qrc">
-                <normaloff>:/icons/breeze-icons/icons-dark/actions/16/media-playlist-shuffle.svg</normaloff>:/icons/breeze-icons/icons-dark/actions/16/media-playlist-shuffle.svg</iconset>
+               <iconset theme="media-playlist-shuffle">
+                <normaloff>.</normaloff>.</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>16</width>
+                <height>16</height>
+               </size>
               </property>
               <property name="checkable">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
               <property name="flat">
                <bool>true</bool>
@@ -205,7 +235,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView">
+         <widget class="QListView" name="listView">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>1</horstretch>
@@ -366,8 +396,6 @@
    </property>
   </action>
  </widget>
- <resources>
-  <include location="../icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
