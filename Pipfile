@@ -5,14 +5,13 @@ name = "pypi"
 
 [packages]
 python-mpd2 = "*"
-pyqt6 = "*"
-pyqt6-tools = "*"
 pyqtconfig = "*"
 xdg = "*"
+pyqt6 = "*"
 
 [dev-packages]
 black = "*"
 flake8 = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
