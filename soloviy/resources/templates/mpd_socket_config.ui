@@ -13,14 +13,14 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,10">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,0">
      <property name="spacing">
-      <number>2</number>
+      <number>8</number>
      </property>
      <item>
-      <widget class="AppLogoWidget" name="widget" native="true">
+      <widget class="QSvgWidget" name="logo" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>1</horstretch>
@@ -42,41 +42,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QTextBrowser" name="textBrowser">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-         <horstretch>1</horstretch>
-         <verstretch>1</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="autoFillBackground">
-        <bool>true</bool>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="lineWidth">
-        <number>0</number>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContents</enum>
-       </property>
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'M PLUS 1 Code Nerd Font'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:20pt;&quot;&gt;Soloviy&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Choose which mpd config you want to use.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="openLinks">
-        <bool>true</bool>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Soloviy&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Choose mpd socket to use.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -96,9 +64,40 @@ p, li { white-space: pre-wrap; }
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="4,6">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="7,3">
      <item>
-      <widget class="QComboBox" name="comboBox"/>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QComboBox" name="mpd_socket_type">
+         <item>
+          <property name="text">
+           <string>Built-in</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>External</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="mpd_socket">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="inputMask">
+          <string/>
+         </property>
+         <property name="text">
+          <string>Enter mpd socket</string>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -142,9 +141,9 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>AppLogoWidget</class>
+   <class>QSvgWidget</class>
    <extends>QWidget</extends>
-   <header>resources.widgets.app_logo_widget</header>
+   <header>PyQt6.QtSvgWidgets</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

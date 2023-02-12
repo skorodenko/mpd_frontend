@@ -1,4 +1,5 @@
 import sys
+from PyQt6 import QtCore
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from pyqtconfig import ConfigManager
@@ -40,17 +41,17 @@ class MainWindow(QMainWindow, Ui_MainWindow, MpdConnector):
     def __init__(self):
         super().__init__()
 
+        QtCore.QDir.addSearchPath("logo", "./soloviy/resources/logo/")        
         self.config = ConfigManager(APP_DEFAULT_SETTINGS, filename=APP_CONFIG_FILE)
+        self.timer = QtCore.QTimer 
 
         self.setupUi(self)
-        self.__init_gui()       
+        self.__init_gui()
+
+        self.timer.singleShot(0, self.show)
+        self.timer.singleShot(100, self._mpd_connect_dialog)
         
-        self.show()
-        
-        if self.config.get("mpd_socket") is None:
-            ... #TODO Add initial mpd config dialog
-        else:
-            self._mpd_connect(self.config.get("mpd_socket"))
+
 
     def _media_play_pause(self):
         match self.mpd_client.status()["state"]:
@@ -68,7 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, MpdConnector):
         ... #TODO Add mpd client next
 
     def closeEvent(self, event):
-        self._mpd_disconnect()
+        self._mpd_disconnect(self.config.get("mpd_socket"))
         super().closeEvent(event)
     
 
