@@ -9,7 +9,7 @@ MPD_NATIVE_CONFIG_FILE = path.join(CONFIG_DIR, "mpd.conf")
 MPD_NATIVE_SOCKET = path.join(CONFIG_DIR, "mpd.socket")
 
 APP_DEFAULT_SETTINGS = {
-    "mpd_socket": MPD_NATIVE_SOCKET, #TODO Should be None
+    "mpd_socket": None,
     "media_repeat": "no",
     "media_shuffle": "no",
 }
