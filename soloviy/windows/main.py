@@ -1,72 +1,61 @@
 import sys
+import qtinter
+from mpd.asyncio import MPDClient
 from PyQt6 import QtCore
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6.QtWidgets import QApplication
 from pyqtconfig import ConfigManager
+from ..widgets.init_main import InitMainWindow
 from ..utils.mpd_connector import MpdConnector
-from ..widgets.ui_main import Ui_MainWindow
 from ..constants import APP_CONFIG_FILE, APP_DEFAULT_SETTINGS
 
 
-class MainWindow(QMainWindow, Ui_MainWindow, MpdConnector):
+class MainWindow(InitMainWindow, MpdConnector):
     
-    def __playback_control_init(self):
-        self.media_previous.setIcon(QIcon.fromTheme("media-skip-backward"))
-        self.media_play_pause.setIcon(QIcon.fromTheme("media-playback-start"))
-        self.media_next.setIcon(QIcon.fromTheme("media-skip-forward"))
+    @staticmethod
+    def status_diff(old, new):
+        return [k for k in old.keys() 
+            if old.get(k) != new.get(k)
+            and old.get(k) is not None
+            and new.get(k) is not None]
 
-        self.media_previous.clicked.connect(self._media_previous)
-        self.media_play_pause.clicked.connect(self._media_play_pause)
-        self.media_next.clicked.connect(self._media_next)
-
-    def __playlist_control_init(self):
-        match self.config.get("media_repeat"):
-            case "no":
-                self.media_repeat.setIcon(QIcon.fromTheme("media-repeat-none"))
-            case "all":
-                self.media_repeat.setIcon(QIcon.fromTheme("media-repeat-all"))
-            case "single":
-                self.media_repeat.setIcon(QIcon.fromTheme("media-repeat-single"))
-        
-        match self.config.get("media_shuffle"):
-            case "no":
-                self.media_shuffle.setIcon(QIcon.fromTheme("media-playlist-normal"))
-            case "yes":
-                self.media_shuffle.setIcon(QIcon.fromTheme("media-playlist-shuffle"))
-
-    def __init_gui(self):
-        self.__playback_control_init()
-        self.__playlist_control_init()
-    
     def __init__(self):
-        super().__init__()
-
         QtCore.QDir.addSearchPath("logo", "./soloviy/resources/logo/")        
         self.config = ConfigManager(APP_DEFAULT_SETTINGS, filename=APP_CONFIG_FILE)
         self.timer = QtCore.QTimer 
-
-        self.setupUi(self)
-        self.__init_gui()
+        
+        super().__init__()
 
         self.timer.singleShot(0, self.show)
-        self.timer.singleShot(100, self._mpd_connect_dialog)
-        
+        self.timer.singleShot(150, self._mpd_connect_dialog)
 
+    async def _mpd_idle(self, socket):
+        self._idle_client = MPDClient()
+        await self._idle_client.connect(socket)
+        self._idle_cache = await self._idle_client.status()
+        await self._init_gui(self._idle_cache)
+        async for subsystem in self._idle_client.idle(["palyer", "options"]):
+            match subsystem:
+                case ["player"] | ["options"]:
+                    new = await self._idle_client.status()
+                    await self._route_async_changes(
+                        self.status_diff(self._idle_cache, new),
+                        new
+                    )
+                    self._idle_cache = new
 
-    def _media_play_pause(self):
-        match self.mpd_client.status()["state"]:
-            case "pause" | "stop":
-                self.media_play_pause.setIcon(QIcon.fromTheme("media-playback-start"))
-                #TODO Add mpd client play
-            case "play":
-                self.media_play_pause.setIcon(QIcon.fromTheme("media-playback-pause"))
-                #TODO Add mpd client pause
-    
-    def _media_previous(self):
-        ... #TODO Add mpd client previous
-    
-    def _media_next(self):
-        ... #TODO Add mpd client next
+    async def _route_async_changes(self, diff, status):
+        for d in diff:
+            match d:
+                case "state":
+                    state = status["state"]
+                    await self._icon_media_play_pause(state)
+                case "repeat" | "single":
+                    repeat = status["repeat"]
+                    single = status["single"]
+                    await self._icon_media_repeat(repeat, single)
+                case "random":
+                    shuffle = status["random"]
+                    await self._icon_media_shuffle(shuffle)
 
     def closeEvent(self, event):
         self._mpd_disconnect(self.config.get("mpd_socket"))
@@ -75,5 +64,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, MpdConnector):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    main_window = MainWindow()
-    sys.exit(app.exec())
+    with qtinter.using_asyncio_from_qt():
+        main_window = MainWindow()
+        sys.exit(app.exec())
