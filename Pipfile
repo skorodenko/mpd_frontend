@@ -8,6 +8,7 @@ python-mpd2 = "*"
 pyqtconfig = "*"
 xdg = "*"
 pyqt6 = "*"
+qtinter = "*"
 
 [dev-packages]
 black = "*"

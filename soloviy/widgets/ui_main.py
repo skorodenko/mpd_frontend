@@ -172,7 +172,7 @@ class Ui_MainWindow(object):
         self.label_info.setObjectName("label_info")
         self.gridLayout.addWidget(self.label_info, 0, 2, 1, 1)
         self.media_progres.addLayout(self.gridLayout)
-        self.media_seek = QtWidgets.QSlider(parent=self.centralwidget)
+        self.media_seek = JumpSlider(parent=self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -206,6 +206,7 @@ class Ui_MainWindow(object):
         self.label_time.setText(_translate("MainWindow", "Time"))
         self.label_info.setText(_translate("MainWindow", "Format"))
         self.actionre.setText(_translate("MainWindow", "re"))
+from soloviy.widgets.custom_classes.jump_slider import JumpSlider
 
 
 if __name__ == "__main__":

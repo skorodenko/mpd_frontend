@@ -359,7 +359,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QSlider" name="media_seek">
+         <widget class="JumpSlider" name="media_seek">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
             <horstretch>0</horstretch>
@@ -396,6 +396,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>JumpSlider</class>
+   <extends>QSlider</extends>
+   <header>soloviy.widgets.custom_classes.jump_slider</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
