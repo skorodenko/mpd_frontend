@@ -9,6 +9,7 @@ pyqtconfig = "*"
 xdg = "*"
 qtinter = "*"
 pyqt5 = "*"
+pillow = "*"
 
 [dev-packages]
 black = "*"

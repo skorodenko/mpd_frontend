@@ -274,21 +274,15 @@
        <number>4</number>
       </property>
       <item>
-       <widget class="QGraphicsView" name="cover_preview">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <widget class="QLabel" name="label_art">
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>64</width>
-          <height>64</height>
-         </size>
+        <property name="lineWidth">
+         <number>0</number>
         </property>
-        <property name="frameShape">
-         <enum>QFrame::Box</enum>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -316,18 +310,15 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_info">
+            <property name="text">
+             <string>Format</string>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
-           </spacer>
+           </widget>
           </item>
           <item row="1" column="1">
            <spacer name="horizontalSpacer_2">
@@ -352,15 +343,18 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_info">
-            <property name="text">
-             <string>Format</string>
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
             </property>
-           </widget>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -389,7 +383,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>28</height>
+     <height>32</height>
     </rect>
    </property>
    <property name="defaultUp">
