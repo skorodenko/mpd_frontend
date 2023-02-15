@@ -29,14 +29,15 @@ class MainWindow(InitMainWindow, MpdConnector):
         self.timer.singleShot(150, self._mpd_connect_dialog)
 
     async def _mpd_idle(self, socket):
-        self._idle_client = MPDClient()
-        await self._idle_client.connect(socket)
-        self._idle_cache = await self._idle_client.status()
-        await self._init_gui(self._idle_cache)
-        async for subsystem in self._idle_client.idle(["palyer", "options"]):
+        self.mpd_client = MPDClient()
+        await self.mpd_client.connect(socket)
+        self._idle_cache = await self.mpd_client.status()
+        song = await self.mpd_client.currentsong()
+        await self._init_gui(self._idle_cache, song)
+        async for subsystem in self.mpd_client.idle():
             match subsystem:
                 case ["player"] | ["options"]:
-                    new = await self._idle_client.status()
+                    new = await self.mpd_client.status()
                     await self._route_async_changes(
                         self.status_diff(self._idle_cache, new),
                         new
@@ -56,6 +57,9 @@ class MainWindow(InitMainWindow, MpdConnector):
                 case "random":
                     shuffle = status["random"]
                     await self._icon_media_shuffle(shuffle)
+                case "song":
+                    song = await self.mpd_client.currentsong()
+                    await self._label_song_change(song)
 
     def closeEvent(self, event):
         self._mpd_disconnect(self.config.get("mpd_socket"))
