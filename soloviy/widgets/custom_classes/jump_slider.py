@@ -1,5 +1,5 @@
-from PyQt6 import QtWidgets
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt, pyqtSignal
 
 
 class JumpSlider(QtWidgets.QSlider):
@@ -12,7 +12,7 @@ class JumpSlider(QtWidgets.QSlider):
         self.__pressed = False
 
     def __setPosVal(self, event):
-        value = QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), int(event.position().x()), self.width())
+        value = QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), int(event.x()), self.width())
         self.setValue(value)
         return value
 

@@ -143,7 +143,7 @@
   <customwidget>
    <class>QSvgWidget</class>
    <extends>QWidget</extends>
-   <header>PyQt6.QtSvgWidgets</header>
+   <header>PyQt5.QtSvg</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

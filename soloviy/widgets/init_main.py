@@ -2,8 +2,8 @@ import asyncio
 import qtinter
 import pathlib
 from .ui_main import Ui_MainWindow
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMainWindow
 
 
 class InitMainWindow(QMainWindow, Ui_MainWindow):
@@ -88,8 +88,8 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
         name = song.get("title", "<title>")
         artist = song.get("artist", "<artist>")
         album = song.get("album", "<album>")
-        freq,bitr,_ = song.get("format").split(":")
-        file = song.get("file")
+        freq,bitr,_ = song.get("format", "<format>").split(":")
+        file = song.get("file", "<file>")
         _, ext = pathlib.Path(file).suffix.split(".")
         self.label_title.setText(name)
         self.label_author.setText(f"{artist} | {album}")

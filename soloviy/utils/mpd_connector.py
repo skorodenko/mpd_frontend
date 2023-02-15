@@ -1,7 +1,7 @@
 import time
 import asyncio
 from mpd import MPDClient
-from PyQt6.QtCore import QProcess
+from PyQt5.QtCore import QProcess
 from ..windows.mpd_socket_config import MpdSocketConfig
 from ..constants import MPD_NATIVE_SOCKET, MPD_NATIVE_CONFIG_FILE
 
