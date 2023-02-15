@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 from ..widgets.ui_mpd_socket_config import Ui_Dialog
 from ..constants import MPD_NATIVE_SOCKET
 

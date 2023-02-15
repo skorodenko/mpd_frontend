@@ -1,8 +1,8 @@
 import sys
 import qtinter
 from mpd.asyncio import MPDClient
-from PyQt6 import QtCore
-from PyQt6.QtWidgets import QApplication
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication
 from pyqtconfig import ConfigManager
 from ..widgets.init_main import InitMainWindow
 from ..utils.mpd_connector import MpdConnector

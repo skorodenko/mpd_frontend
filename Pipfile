@@ -7,8 +7,8 @@ name = "pypi"
 python-mpd2 = "*"
 pyqtconfig = "*"
 xdg = "*"
-pyqt6 = "*"
 qtinter = "*"
+pyqt5 = "*"
 
 [dev-packages]
 black = "*"
