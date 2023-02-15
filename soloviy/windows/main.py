@@ -1,5 +1,6 @@
 import sys
 import qtinter
+import asyncio
 from mpd.asyncio import MPDClient
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
@@ -32,17 +33,14 @@ class MainWindow(InitMainWindow, MpdConnector):
         self.mpd_client = MPDClient()
         await self.mpd_client.connect(socket)
         self._idle_cache = await self.mpd_client.status()
-        song = await self.mpd_client.currentsong()
-        await self._init_gui(self._idle_cache, song)
-        async for subsystem in self.mpd_client.idle():
-            match subsystem:
-                case ["player"] | ["options"]:
-                    new = await self.mpd_client.status()
-                    await self._route_async_changes(
-                        self.status_diff(self._idle_cache, new),
-                        new
-                    )
-                    self._idle_cache = new
+        await self._init_gui(self._idle_cache)
+        async for _ in self.mpd_client.idle():
+            new = await self.mpd_client.status()
+            await self._route_async_changes(
+                self.status_diff(self._idle_cache, new),
+                new
+            )
+            self._idle_cache = new
 
     async def _route_async_changes(self, diff, status):
         for d in diff:
@@ -57,9 +55,8 @@ class MainWindow(InitMainWindow, MpdConnector):
                 case "random":
                     shuffle = status["random"]
                     await self._icon_media_shuffle(shuffle)
-                case "song":
-                    song = await self.mpd_client.currentsong()
-                    await self._label_song_change(song)
+                case "song" | "playlist":
+                    await self._label_song_change()
 
     def closeEvent(self, event):
         self._mpd_disconnect(self.config.get("mpd_socket"))

@@ -2,11 +2,27 @@ import asyncio
 import qtinter
 import pathlib
 from .ui_main import Ui_MainWindow
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QMainWindow
+from PIL import Image, ImageQt
+from io import BytesIO
 
 
 class InitMainWindow(QMainWindow, Ui_MainWindow):
+
+    @staticmethod
+    def expand2square(pil_img, background_color):
+        width, height = pil_img.size
+        if width == height:
+            return pil_img
+        elif width > height:
+            result = Image.new(pil_img.mode, (width, width), background_color)
+            result.paste(pil_img, (0, (width - height) // 2))
+            return result
+        else:
+            result = Image.new(pil_img.mode, (height, height), background_color)
+            result.paste(pil_img, ((height - width) // 2, 0))
+            return result
 
     def __init__(self):
         super().__init__()
@@ -55,10 +71,10 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
 
             await asyncio.sleep(0.6)
     
-    async def _init_gui(self, init_status, song):
+    async def _init_gui(self, init_status):
         await self.__playback_control_init(init_status)
         await self.__playlist_control_init(init_status)
-        await self._label_song_change(song)
+        await self._label_song_change()
         self._media_seek_task = asyncio.create_task(self.__media_seek_init())
 
     async def _icon_media_play_pause(self, state):
@@ -84,13 +100,24 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
             case "1":
                 self.media_shuffle.setIcon(QIcon.fromTheme("media-playlist-shuffle"))
 
-    async def _label_song_change(self, song):
+    async def _label_song_change(self):
+        song = await self.mpd_client.currentsong()
+        art = await self.mpd_client.readpicture(song["file"])
+        
         name = song.get("title", "<title>")
         artist = song.get("artist", "<artist>")
         album = song.get("album", "<album>")
-        freq,bitr,_ = song.get("format", "<format>").split(":")
-        file = song.get("file", "<file>")
+        freq,bitr,_ = song.get("format", "0:0:0").split(":")
+        file = song.get("file", "<name>.<ext>")
         _, ext = pathlib.Path(file).suffix.split(".")
+        
+        art = Image.open(BytesIO(art["binary"]))
+        art.thumbnail((64,64), resample=Image.LANCZOS)
+        art = self.expand2square(art, (0,0,0))
+        cover = ImageQt.ImageQt(art)
+        cover = QPixmap.fromImage(cover)
+        
         self.label_title.setText(name)
         self.label_author.setText(f"{artist} | {album}")
         self.label_info.setText(f"{int(freq)/1000}kHz, {bitr} bit, {ext.upper()}")
+        self.label_art.setPixmap(cover)
