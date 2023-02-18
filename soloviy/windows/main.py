@@ -1,7 +1,6 @@
 import sys
 import qtinter
-import asyncio
-from mpd.asyncio import MPDClient
+from aiocache import Cache
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
 from pyqtconfig import ConfigManager
@@ -23,15 +22,14 @@ class MainWindow(InitMainWindow, MpdConnector):
         QtCore.QDir.addSearchPath("logo", "./soloviy/resources/logo/")        
         self.config = ConfigManager(APP_DEFAULT_SETTINGS, filename=APP_CONFIG_FILE)
         self.timer = QtCore.QTimer 
+        self.cache = Cache()
         
         super().__init__()
 
         self.timer.singleShot(0, self.show)
-        self.timer.singleShot(150, self._mpd_connect_dialog)
+        self.timer.singleShot(150, qtinter.asyncslot(self._mpd_connect_dialog))
 
-    async def _mpd_idle(self, socket):
-        self.mpd_client = MPDClient()
-        await self.mpd_client.connect(socket)
+    async def _mpd_idle(self):
         self._idle_cache = await self.mpd_client.status()
         await self._init_gui(self._idle_cache)
         async for _ in self.mpd_client.idle():

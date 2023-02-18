@@ -10,6 +10,7 @@ xdg = "*"
 qtinter = "*"
 pyqt5 = "*"
 pillow = "*"
+aiocache = "*"
 
 [dev-packages]
 black = "*"

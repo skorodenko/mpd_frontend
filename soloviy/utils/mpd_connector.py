@@ -1,38 +1,40 @@
-import time
 import asyncio
-from mpd import MPDClient
+import socket
+from mpd.asyncio import MPDClient
 from PyQt5.QtCore import QProcess
 from ..windows.mpd_socket_config import MpdSocketConfig
 from ..constants import MPD_NATIVE_SOCKET, MPD_NATIVE_CONFIG_FILE
 
 
 class MpdConnector():
-    def _mpd_connect(self, socket):
+    async def _mpd_connect(self, socket):
         if socket == MPD_NATIVE_SOCKET:
             self.mpd_server = QProcess()
             self.mpd_server.start("mpd", [MPD_NATIVE_CONFIG_FILE, "--no-daemon"])
-            time.sleep(0.5)
+            await asyncio.sleep(0.5)
         
         self.mpd_client = MPDClient()
-        self.mpd_client.connect(socket)
+        await self.mpd_client.connect(socket)
     
     def _mpd_disconnect(self, socket):
         if socket == MPD_NATIVE_SOCKET:
             self.mpd_server.terminate()
             self.mpd_server.waitForFinished(-1)
     
-    def _mpd_connect_dialog(self):
+    async def _mpd_connect_dialog(self):
         while True:
             try:
-                self._mpd_connect(self.config.get("mpd_socket"))
-                self.mpd_client.disconnect()
-                self._mpd_idle_task = asyncio.create_task(self._mpd_idle(self.config.get("mpd_socket")))
+                task = asyncio.create_task(self._mpd_connect(self.config.get("mpd_socket")))
+                if not task.done():
+                    await task
+                e = task.exception()
+                self._mpd_idle_task = asyncio.create_task(self._mpd_idle())
                 break
-            except (ConnectionRefusedError, AttributeError, ValueError):
+            except (socket.gaierror, ConnectionRefusedError):
                 if not MpdSocketConfig(self).exec():
                     self.close()
                     break
-    
+
     async def _media_previous(self):
         await self.mpd_client.previous()
     
@@ -45,7 +47,9 @@ class MpdConnector():
     async def _media_play_pause(self):
         status = await self.mpd_client.status()
         match status["state"]:
-            case "pause" | "stop":
+            case "stop":
+                await self.mpd_client.play(status["song"])
+            case "pause":
                 await self.mpd_client.pause(0)
             case "play":
                 await self.mpd_client.pause(1)
