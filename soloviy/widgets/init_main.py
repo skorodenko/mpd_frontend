@@ -2,8 +2,9 @@ import asyncio
 import qtinter
 import pathlib
 from .ui_main import Ui_MainWindow
+from .custom_classes.playlists_model import PlaylistsModel
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QApplication
 from PIL import Image, ImageQt
 from io import BytesIO
 
@@ -44,6 +45,10 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
         
         self.media_seek.sliderMoved.connect(
             qtinter.asyncslot(self._media_seeker))
+        
+        self.playlists_view.doubleClicked.connect(
+            qtinter.asyncslot(self._change_playlist)
+        )
 
     async def __playback_control_init(self, init_status):
         play_state = init_status["state"]
@@ -69,12 +74,24 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
             self.media_seek.setMaximum(duration)
             self.media_seek.setSliderPosition(elapsed)
 
-            await asyncio.sleep(0.6)
-    
+            await asyncio.sleep(0.3)
+
+    async def _change_playlist(self, index):
+        await self.mpd_client.clear()
+        await self.mpd_client.add(index.data())
+        await self.mpd_client.play(0) #TODO remove this
+        #TODO Add playlist to playlists
+
+    async def _playlists_view_update(self):
+        playlists = await self.mpd_client.listfiles(".")
+        self.playlists_model = PlaylistsModel(playlists)
+        self.playlists_view.setModel(self.playlists_model)
+
     async def _init_gui(self, init_status):
         await self.__playback_control_init(init_status)
         await self.__playlist_control_init(init_status)
         await self._label_song_change()
+        await self._playlists_view_update()
         self._media_seek_task = asyncio.create_task(self.__media_seek_init())
 
     async def _icon_media_play_pause(self, state):
@@ -102,7 +119,6 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
 
     async def _label_song_change(self):
         song = await self.mpd_client.currentsong()
-        art = await self.mpd_client.readpicture(song["file"])
         
         name = song.get("title", "<title>")
         artist = song.get("artist", "<artist>")
@@ -111,13 +127,31 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
         file = song.get("file", "<name>.<ext>")
         _, ext = pathlib.Path(file).suffix.split(".")
         
-        art = Image.open(BytesIO(art["binary"]))
-        art.thumbnail((64,64), resample=Image.LANCZOS)
-        art = self.expand2square(art, (0,0,0))
-        cover = ImageQt.ImageQt(art)
-        cover = QPixmap.fromImage(cover)
-        
+        light_font = QApplication.font()
+        light_font.setWeight(light_font.weight()//2)
+        light_font.setPointSize(light_font.pointSize() - 1)
+
+        self.label_time.setFont(light_font)
         self.label_title.setText(name)
         self.label_author.setText(f"{artist} | {album}")
+        self.label_author.setFont(light_font)
         self.label_info.setText(f"{int(freq)/1000}kHz, {bitr} bit, {ext.upper()}")
-        self.label_art.setPixmap(cover)
+        self.label_info.setFont(light_font)
+        
+        await self._change_cover(song.get("file"))
+
+    async def _change_cover(self, file):
+        if file:
+            if not (art := await self.cache.get(file)):
+                art = await self.mpd_client.readpicture(file)
+                art = art.get("binary")
+                if art:
+                    await self.cache.set(file, art)    
+            if art:
+                art = Image.open(BytesIO(art))
+                art.thumbnail((128,128), resample=Image.NEAREST)
+                cover = self.expand2square(art, (0,0,0))
+                cover = ImageQt.ImageQt(cover)
+                cover = QPixmap.fromImage(cover)
+                
+                self.label_art.setPixmap(cover)
