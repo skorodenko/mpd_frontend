@@ -13,5 +13,5 @@ APP_DEFAULT_SETTINGS = {
     "mpd_socket":"/home/rinkuro/.local/share/cantata/mpd/socket",
     "media_repeat": "single", #TODO Should be "no"
     "media_shuffle": "no",
-    "playlists_mode":"2",
+    "playlists_mode":"1",
 }
