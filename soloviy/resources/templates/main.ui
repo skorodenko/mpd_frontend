@@ -291,7 +291,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="widget" native="true">
+      <widget class="PTilingWidget" name="widget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>3</horstretch>
@@ -470,6 +470,12 @@
    <class>JumpSlider</class>
    <extends>QSlider</extends>
    <header>soloviy.widgets.custom_classes.jump_slider</header>
+  </customwidget>
+  <customwidget>
+   <class>PTilingWidget</class>
+   <extends>QWidget</extends>
+   <header>soloviy.widgets.ptiling_widget</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

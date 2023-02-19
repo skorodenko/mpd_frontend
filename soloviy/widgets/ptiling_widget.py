@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from collections import deque
 
 
-class PTileWidget(QtWidgets.QWidget):
+class PTilingWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.order = deque()

@@ -138,7 +138,7 @@ class Ui_MainWindow(object):
         self.playlists_view.setObjectName("playlists_view")
         self.verticalLayout.addWidget(self.playlists_view)
         self.verticalLayout.setStretch(1, 10)
-        self.widget = QtWidgets.QWidget(self.splitter)
+        self.widget = PTilingWidget(self.splitter)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(3)
         sizePolicy.setVerticalStretch(0)
@@ -225,6 +225,7 @@ class Ui_MainWindow(object):
         self.label_time.setText(_translate("MainWindow", "Time"))
         self.actionre.setText(_translate("MainWindow", "re"))
 from soloviy.widgets.custom_classes.jump_slider import JumpSlider
+from soloviy.widgets.ptiling_widget import PTilingWidget
 
 
 if __name__ == "__main__":
