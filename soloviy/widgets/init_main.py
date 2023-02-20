@@ -77,9 +77,9 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
             await asyncio.sleep(0.3)
 
     async def _change_playlist(self, index):
-        await self.mpd_client.clear()
-        await self.mpd_client.add(index.data())
-        await self.mpd_client.play(0) #TODO remove this
+        #await self.mpd_client.clear()
+        #await self.mpd_client.add(index.data())
+        await self.ptiling_widget.add_playlist(index.data())
         #TODO Add playlist to playlists
 
     async def _playlists_view_update(self):
@@ -92,6 +92,7 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
         await self.__playlist_control_init(init_status)
         await self._label_song_change()
         await self._playlists_view_update()
+        self.ptiling_widget._init_connection(self)
         self._media_seek_task = asyncio.create_task(self.__media_seek_init())
 
     async def _icon_media_play_pause(self, state):

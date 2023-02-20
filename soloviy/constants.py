@@ -14,4 +14,5 @@ APP_DEFAULT_SETTINGS = {
     "media_repeat": "single", #TODO Should be "no"
     "media_shuffle": "no",
     "playlists_mode":"1",
+    "playlists_margin": "2",
 }

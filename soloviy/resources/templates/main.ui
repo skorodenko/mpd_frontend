@@ -291,7 +291,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="PTilingWidget" name="widget" native="true">
+      <widget class="PTilingWidget" name="ptiling_widget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>3</horstretch>
