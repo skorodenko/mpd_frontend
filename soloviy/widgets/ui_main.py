@@ -126,7 +126,7 @@ class Ui_MainWindow(object):
         self.playlists_view.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.playlists_view.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
         self.playlists_view.setAutoScroll(True)
-        self.playlists_view.setAutoScrollMargin(4)
+        self.playlists_view.setAutoScrollMargin(0)
         self.playlists_view.setProperty("showDropIndicator", False)
         self.playlists_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.playlists_view.setIconSize(QtCore.QSize(32, 32))

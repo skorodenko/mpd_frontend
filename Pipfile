@@ -11,6 +11,7 @@ qtinter = "*"
 pyqt5 = "*"
 pillow = "*"
 aiocache = "*"
+pandas = "*"
 
 [dev-packages]
 black = "*"

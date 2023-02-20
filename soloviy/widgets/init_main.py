@@ -74,13 +74,10 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
             self.media_seek.setMaximum(duration)
             self.media_seek.setSliderPosition(elapsed)
 
-            await asyncio.sleep(0.3)
+            await asyncio.sleep(0.35)
 
     async def _change_playlist(self, index):
-        #await self.mpd_client.clear()
-        #await self.mpd_client.add(index.data())
         await self.ptiling_widget.add_playlist(index.data())
-        #TODO Add playlist to playlists
 
     async def _playlists_view_update(self):
         playlists = await self.mpd_client.listfiles(".")
@@ -121,11 +118,11 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
     async def _label_song_change(self):
         song = await self.mpd_client.currentsong()
         
-        name = song.get("title", "<title>")
-        artist = song.get("artist", "<artist>")
-        album = song.get("album", "<album>")
+        name = song.get("title", "Unknown")
+        artist = song.get("artist", "Unknown")
+        album = song.get("album", "Unknown")
         freq,bitr,_ = song.get("format", "0:0:0").split(":")
-        file = song.get("file", "<name>.<ext>")
+        file = song.get("file", "Unknown.Unknonwn")
         _, ext = pathlib.Path(file).suffix.split(".")
         
         light_font = QApplication.font()

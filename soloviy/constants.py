@@ -11,8 +11,6 @@ MPD_NATIVE_SOCKET = path.join(CONFIG_DIR, "mpd.socket")
 APP_DEFAULT_SETTINGS = {
     #"mpd_socket": None,
     "mpd_socket":"/home/rinkuro/.local/share/cantata/mpd/socket",
-    "media_repeat": "single", #TODO Should be "no"
-    "media_shuffle": "no",
-    "playlists_mode":"1",
+    "tiling_mode":"1",
     "playlists_margin": "2",
 }
