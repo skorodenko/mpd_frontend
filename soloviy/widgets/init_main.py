@@ -3,6 +3,7 @@ import qtinter
 import pathlib
 from .ui_main import Ui_MainWindow
 from .custom_classes.playlists_model import PlaylistsModel
+from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PIL import Image, ImageQt
@@ -89,7 +90,7 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
         await self.__playlist_control_init(init_status)
         await self._label_song_change()
         await self._playlists_view_update()
-        self.ptiling_widget._init_connection(self)
+        await self.ptiling_widget._init_connection(self)
         self._media_seek_task = asyncio.create_task(self.__media_seek_init())
 
     async def _icon_media_play_pause(self, state):
@@ -144,12 +145,18 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
                 art = await self.mpd_client.readpicture(file)
                 art = art.get("binary")
                 if art:
-                    await self.cache.set(file, art)    
+                    await self.cache.set(file, art)  
             if art:
                 art = Image.open(BytesIO(art))
                 art.thumbnail((128,128), resample=Image.NEAREST)
                 cover = self.expand2square(art, (0,0,0))
                 cover = ImageQt.ImageQt(cover)
                 cover = QPixmap.fromImage(cover)
-                
-                self.label_art.setPixmap(cover)
+            else:
+                cover = QIcon.fromTheme("folder-cd") #TODO Add higher res blank cover
+                cover = cover.pixmap(cover.actualSize(QSize(128,128))) 
+        else:
+            cover = QIcon.fromTheme("folder-cd") #TODO Add higher res blank cover
+            cover = cover.pixmap(cover.actualSize(QSize(128,128))) 
+
+        self.label_art.setPixmap(cover)

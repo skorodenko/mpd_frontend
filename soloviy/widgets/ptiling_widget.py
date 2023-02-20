@@ -12,7 +12,7 @@ class PTilingWidget(QtWidgets.QWidget):
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
 
-    def _init_connection(self, main_window):
+    async def _init_connection(self, main_window):
         self.main = main_window
         self.set_tiling(self.main.config.get("tiling_mode"))
 
@@ -39,7 +39,9 @@ class PTilingWidget(QtWidgets.QWidget):
     async def playlist_destroy(self, pt, popped=False):
         if not popped:
             del self.order[self.order.index(pt)]
+        #f active
         await self.main.mpd_client.clear()
+        
         self.layout.removeWidget(pt)
     
     async def playlist_song(self, playlist, song_pos):
