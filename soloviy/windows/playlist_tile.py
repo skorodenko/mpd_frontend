@@ -10,7 +10,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         super().__init__()
         self.setupUi(self)
         self.tiler = tiler
-        #TODO Connect buttons to ptiler
+        self.lock_status = False
         match playlist:
             case [{"directory": title}, *etc]:
                 self.title = title
@@ -23,6 +23,9 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         self.playlist_table.doubleClicked.connect(
             qtinter.asyncslot(self.play_song)
         )
+        self.playlist_lock.clicked.connect(
+            qtinter.asyncslot(self.lock)
+        )
         self.playlist_destroy.clicked.connect(
             qtinter.asyncslot(self.destroy)
         )
@@ -32,6 +35,10 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         playlist = self.playlist_model.playlist
         song_pos = index.row()
         await self.tiler.playlist_song(tile, playlist, song_pos)
+
+    async def lock(self, status):
+        self.lock_status = status
+        await self.tiler.playlist_lock(self, status)
 
     async def destroy(self):
         await self.tiler.playlist_destroy(self)

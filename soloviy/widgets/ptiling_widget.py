@@ -33,9 +33,10 @@ class PTilingWidget(QtWidgets.QWidget):
             await self.main.mpd_client.add(f)    
     
     async def add_playlist(self, playlist_name):
-        if len(self.lock) < self.tmode: 
+        l, o = len(self.lock), len(self.order)
+        if l < self.tmode: 
             playlist = await self.main.mpd_client.listallinfo(playlist_name)
-            if len(self.lock) + len(self.order) == self.tmode:
+            if l + o == self.tmode:
                 pt_old = self.order.pop()
                 await self.playlist_destroy(pt_old, popped=True)
             pt_new = PlaylistTile(self, playlist)
@@ -43,8 +44,18 @@ class PTilingWidget(QtWidgets.QWidget):
             self.layout.addWidget(pt_new)
             self.set_even_stretch()
 
+    async def playlist_lock(self, pt, status):
+        if status:
+            del self.order[self.order.index(pt)]
+            self.lock.append(pt)
+        else:
+            del self.lock[self.lock.index(pt)]
+            self.order.append(pt)
+
     async def playlist_destroy(self, pt, popped=False):
-        if not popped:
+        if pt.lock_status:
+            del self.lock[self.lock.index(pt)]
+        elif not popped:
             del self.order[self.order.index(pt)]
         if self.active_playlist is pt:
             await self.main.mpd_client.clear()
