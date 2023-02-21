@@ -20,6 +20,7 @@ class MpdConnector():
         if self.mpd_client.connected:
             self.mpd_client.clear()
             self.mpd_client.disconnect()
+            self._mpd_idle_task.cancel()
         if socket == MPD_NATIVE_SOCKET:
             self.mpd_server.terminate()
             self.mpd_server.waitForFinished(-1)
