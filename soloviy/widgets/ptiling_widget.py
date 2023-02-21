@@ -64,7 +64,7 @@ class PTilingWidget(QtWidgets.QWidget):
 
     async def song_changed(self):
         if song := await self.main.mpd_client.currentsong():
-            ...
+            self.active_playlist
         #SONGPOSITION
 
     async def playlist_song(self, tile, playlist, song_pos):

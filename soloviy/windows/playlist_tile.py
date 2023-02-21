@@ -19,6 +19,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
         self.playlist_table.setModel(self.playlist_model)
+        self.playlist_table.horizontalHeader().sortIndicatorChanged.connect(self.playlist_model.headerClicked)
         
         self.playlist_table.doubleClicked.connect(
             qtinter.asyncslot(self.play_song)
@@ -32,7 +33,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
 
     async def play_song(self, index):
         tile = self
-        playlist = self.playlist_model.playlist #TODO Change to actual playlist, not data
+        playlist = self.playlist_model.playlist
         song_pos = index.row()
         await self.tiler.playlist_song(tile, playlist, song_pos)
 

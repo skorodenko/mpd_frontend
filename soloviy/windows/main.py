@@ -59,8 +59,6 @@ class MainWindow(InitMainWindow, MpdConnector):
                     await self._label_song_change()
 
     def closeEvent(self, event):
-        self.mpd_client.stop()
-        self.mpd_client.clear()
         self._mpd_disconnect(self.config.get("mpd_socket"))
         super().closeEvent(event)
     

@@ -10,7 +10,11 @@ class PlaylistModel(QtCore.QAbstractTableModel):
         if role == Qt.DisplayRole:
             row = index.row()
             column = index.column()
-            return self.playlist.iloc[row, column]
+            match (row, column):
+                case row, None:
+                    return self.playlist.iloc[[row]]
+                case row, column:
+                    return self.playlist.iloc[row, column]
     
     def rowCount(self, index):
         rows, _ = self.playlist.shape
@@ -24,3 +28,14 @@ class PlaylistModel(QtCore.QAbstractTableModel):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self.playlist.columns[section]
+            
+    def sort(self, section, order):
+        try:
+            self.layoutAboutToBeChanged.emit()
+            self.playlist = self.playlist.sort_values(self.playlist.columns[section], ascending=order)
+            self.layoutChanged.emit()
+        except Exception as e:
+            ...
+    
+    def headerClicked(self, section, order):
+        self.sort(section, bool(order))
