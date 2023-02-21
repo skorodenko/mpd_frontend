@@ -32,7 +32,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
 
     async def play_song(self, index):
         tile = self
-        playlist = self.playlist_model.playlist
+        playlist = self.playlist_model.playlist #TODO Change to actual playlist, not data
         song_pos = index.row()
         await self.tiler.playlist_song(tile, playlist, song_pos)
 

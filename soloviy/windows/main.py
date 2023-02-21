@@ -55,6 +55,7 @@ class MainWindow(InitMainWindow, MpdConnector):
                     shuffle = status["random"]
                     await self._icon_media_shuffle(shuffle)
                 case "song" | "playlist":
+                    await self.ptiling_widget.song_changed()
                     await self._label_song_change()
 
     def closeEvent(self, event):
@@ -68,4 +69,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     with qtinter.using_asyncio_from_qt():
         main_window = MainWindow()
-        sys.exit(app.exec())
+        app.exec()
