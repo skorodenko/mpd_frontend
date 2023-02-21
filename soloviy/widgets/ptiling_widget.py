@@ -11,6 +11,7 @@ class PTilingWidget(QtWidgets.QWidget):
         self.lock = deque()
         self.layout = QtWidgets.QHBoxLayout()
         self.setLayout(self.layout)
+        self.active_playlist = None
 
     async def _init_connection(self, main_window):
         self.main = main_window
@@ -21,6 +22,11 @@ class PTilingWidget(QtWidgets.QWidget):
             self.tmode = int(mode)
         else:
             raise ValueError(f"Bad tiling mode: {mode}")
+    
+    def set_even_stretch(self):
+        l, o = len(self.lock), len(self.order)
+        for i in range(l+o):
+            self.layout.setStretch(i, 1)
         
     async def fill_playlist(self, file_list):
         for f in file_list:
@@ -35,17 +41,19 @@ class PTilingWidget(QtWidgets.QWidget):
             pt_new = PlaylistTile(self, playlist)
             self.order.appendleft(pt_new)
             self.layout.addWidget(pt_new)
+            self.set_even_stretch()
 
     async def playlist_destroy(self, pt, popped=False):
         if not popped:
             del self.order[self.order.index(pt)]
-        #f active
-        await self.main.mpd_client.clear()
-        
+        if self.active_playlist is pt:
+            await self.main.mpd_client.clear()
+            self.active_playlist = None
         self.layout.removeWidget(pt)
     
-    async def playlist_song(self, playlist, song_pos):
+    async def playlist_song(self, tile, playlist, song_pos):
         await self.main.mpd_client.clear()
         await asyncio.create_task(self.fill_playlist(
             playlist["file"].to_list()))
         await self.main.mpd_client.play(song_pos)
+        self.active_playlist = tile

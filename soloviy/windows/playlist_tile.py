@@ -28,11 +28,10 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         )
 
     async def play_song(self, index):
-        #tile = self
+        tile = self
         playlist = self.playlist_model.playlist
         song_pos = index.row()
-
-        await self.tiler.playlist_song(playlist, song_pos)
+        await self.tiler.playlist_song(tile, playlist, song_pos)
 
     async def destroy(self):
         await self.tiler.playlist_destroy(self)
