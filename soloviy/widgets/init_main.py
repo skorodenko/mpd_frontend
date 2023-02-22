@@ -75,7 +75,7 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
             self.media_seek.setMaximum(duration)
             self.media_seek.setSliderPosition(elapsed)
 
-            await asyncio.sleep(0.4)
+            await asyncio.sleep(0.5)
 
     async def _change_playlist(self, index):
         await self.ptiling_widget.add_playlist(index.data())
