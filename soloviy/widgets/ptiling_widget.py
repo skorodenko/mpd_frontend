@@ -29,8 +29,8 @@ class PTilingWidget(QtWidgets.QWidget):
             self.layout.setStretch(i, 1)
         
     async def fill_playlist(self, file_list):
-        for f in file_list:
-            await self.main.mpd_client.add(f)    
+        for i,f in enumerate(file_list):
+            await self.main.mpd_client.add(f,i)    
     
     async def add_playlist(self, playlist_name):
         l, o = len(self.lock), len(self.order)
@@ -67,10 +67,9 @@ class PTilingWidget(QtWidgets.QWidget):
             self.active_playlist.playlist_model.playing_status(int(song["pos"]))
 
     async def playlist_song(self, tile, playlist, song_pos):
-        if self.active_playlist is not None and self.active_playlist is not tile:
-            self.active_playlist.playlist_model.playing_status()
-        await self.main.mpd_client.clear()
-        await asyncio.create_task(self.fill_playlist(
-            playlist["file"].to_list()))
+        if self.active_playlist is not tile:
+            await self.main.mpd_client.clear()
+            await asyncio.create_task(self.fill_playlist(
+                playlist["file"].to_list()))
         await self.main.mpd_client.play(song_pos)
         self.active_playlist = tile
