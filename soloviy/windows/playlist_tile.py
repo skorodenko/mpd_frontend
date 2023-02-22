@@ -17,15 +17,16 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                 self.title = title
                 self.playlist = [d for d in etc if d.get("file") is not None]
                 self.playlist = pd.DataFrame.from_dict(self.playlist)
-                self.playlist.insert(0, "#", range(len(self.playlist)))
-                self.playlist.insert(1, "__playing", False)
+                self.playlist = self.playlist.assign(__playing=False)
                 #TODO Convert "last_modified","disc","track","time","duration"
                 #print(self.playlist)
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
         self.playlist_table.setModel(self.playlist_model)
-        self.playlist_table.horizontalHeader().sortIndicatorChanged.connect(self.playlist_model.headerClicked)
         
+        self.playlist_table.horizontalHeader().sortIndicatorChanged.connect(
+            self.playlist_model.headerClicked
+        )
         self.playlist_table.doubleClicked.connect(
             qtinter.asyncslot(self.play_song)
         )
