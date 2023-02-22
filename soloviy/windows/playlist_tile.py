@@ -1,4 +1,5 @@
 import qtinter
+import asyncio
 from ..widgets.ui_playlist_tile import Ui_Frame
 from PyQt5 import QtWidgets, QtCore
 from ..widgets.custom_classes.playlist_model import PlaylistModel
@@ -16,6 +17,10 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                 self.title = title
                 self.playlist = [d for d in etc if d.get("file") is not None]
                 self.playlist = pd.DataFrame.from_dict(self.playlist)
+                self.playlist.insert(0, "#", range(len(self.playlist)))
+                self.playlist.insert(1, "__playing", False)
+                #TODO Convert "last_modified","disc","track","time","duration"
+                #print(self.playlist)
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
         self.playlist_table.setModel(self.playlist_model)

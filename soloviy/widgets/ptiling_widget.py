@@ -64,10 +64,11 @@ class PTilingWidget(QtWidgets.QWidget):
 
     async def song_changed(self):
         if song := await self.main.mpd_client.currentsong():
-            self.active_playlist
-        #SONGPOSITION
+            self.active_playlist.playlist_model.playing_status(int(song["pos"]))
 
     async def playlist_song(self, tile, playlist, song_pos):
+        if self.active_playlist is not None and self.active_playlist is not tile:
+            self.active_playlist.playlist_model.playing_status()
         await self.main.mpd_client.clear()
         await asyncio.create_task(self.fill_playlist(
             playlist["file"].to_list()))
