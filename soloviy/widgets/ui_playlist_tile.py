@@ -65,7 +65,9 @@ class Ui_Frame(object):
         self.playlist_table.horizontalHeader().setCascadingSectionResizes(True)
         self.playlist_table.horizontalHeader().setStretchLastSection(True)
         self.playlist_table.verticalHeader().setVisible(False)
+        self.playlist_table.verticalHeader().setDefaultSectionSize(24)
         self.playlist_table.verticalHeader().setHighlightSections(False)
+        self.playlist_table.verticalHeader().setMinimumSectionSize(20)
         self.verticalLayout.addWidget(self.playlist_table)
 
         self.retranslateUi(Frame)
