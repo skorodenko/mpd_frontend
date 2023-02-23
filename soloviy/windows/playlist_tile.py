@@ -18,7 +18,8 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                 self.playlist = [d for d in etc if d.get("file") is not None]
                 self.playlist = pd.DataFrame.from_dict(self.playlist)
                 #TODO Convert "last_modified","disc","track","time","duration"
-                #print(self.playlist)
+                #TODO Add hidden columns
+                # print(self.playlist)
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
         self.playlist_table.setModel(self.playlist_model)
@@ -38,8 +39,12 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
     
     async def header_sort(self, section, order):
         self.playlist_model.sort(section, bool(order))
-        await asyncio.create_task(self.tiler.fill_playlist(
-            self.playlist["file"].to_list()))
+        if self.tiler.active_playlist == self:
+            kv = {k:v for k,v in zip(
+                range(len(self.playlist)),
+                self.playlist.index.to_list())}
+            await asyncio.create_task(self.tiler.sort_playlist(kv))
+        self.playlist_model.reset_index()
 
     async def play_song(self, index):
         tile = self

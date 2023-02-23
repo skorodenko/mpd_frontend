@@ -30,8 +30,11 @@ class PlaylistModel(QtCore.QAbstractTableModel):
     def sort(self, section, order):
         try:
             self.layoutAboutToBeChanged.emit()
-            self.playlist = self.playlist.sort_values(self.playlist.columns[section], 
-                                                      ascending=order)
+            self.playlist.sort_values(by=[self.playlist.columns[section]], 
+                                        ascending=order, inplace=True)
             self.layoutChanged.emit()
         except Exception as e:
             raise e
+    
+    def reset_index(self):
+        self.playlist.reset_index(drop=True, inplace=True)
