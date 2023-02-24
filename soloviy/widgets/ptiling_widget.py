@@ -89,7 +89,11 @@ class PTilingWidget(QtWidgets.QWidget):
 
     async def song_changed(self):
         if song := await self.main.mpd_client.currentsong():
-            self.active_playlist.playlist_model.playing_status(int(song["pos"]))
+            pos = int(song["pos"])
+            self.active_playlist.playlist_model.playing_status(pos)
+            index = self.active_playlist.playlist_model.index(pos, 0)
+            self.active_playlist.playlist_table.scrollTo(index,
+                    QtWidgets.QAbstractItemView.ScrollHint.PositionAtCenter)
 
     async def playlist_song(self, tile, playlist, song_pos):
         if self.active_playlist is not tile:
