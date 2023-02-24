@@ -12,6 +12,8 @@ pyqt5 = "*"
 pillow = "*"
 aiocache = "*"
 pandas = "*"
+requirements-parser = "*"
+pyyaml = "*"
 
 [dev-packages]
 black = "*"

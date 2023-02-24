@@ -55,7 +55,7 @@ class MainWindow(InitMainWindow, MpdConnector):
                     shuffle = status["random"]
                     await self._icon_media_shuffle(shuffle)
                 case "song" | "playlist":
-                    #await self.ptiling_widget.song_changed()
+                    await self.ptiling_widget.song_changed()
                     await self._label_song_change()
 
     def closeEvent(self, event):

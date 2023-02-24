@@ -17,6 +17,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                 self.title = title
                 self.playlist = [d for d in etc if d.get("file") is not None]
                 self.playlist = pd.DataFrame.from_dict(self.playlist)
+                self.playlist = self.playlist.assign(__playing=False)
                 #TODO Convert "last_modified","disc","track","time","duration"
                 #TODO Add hidden columns
                 # print(self.playlist)
