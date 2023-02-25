@@ -88,8 +88,8 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
     async def _init_gui(self, init_status):
         await self.__playback_control_init(init_status)
         await self.__playlist_control_init(init_status)
-        await self._label_song_change()
         await self._playlists_view_update()
+        await self._change_cover()
         await self.ptiling_widget._init_connection(self)
         self._media_seek_task = asyncio.create_task(self.__media_seek_init())
 
@@ -116,14 +116,13 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
             case "1":
                 self.media_shuffle.setIcon(QIcon.fromTheme("media-playlist-shuffle"))
 
-    async def _label_song_change(self):
-        song = await self.mpd_client.currentsong()
-        
-        name = song.get("title", "Unknown")
-        artist = song.get("artist", "Unknown")
-        album = song.get("album", "Unknown")
-        freq,bitr,_ = song.get("format", "0:0:0").split(":")
-        file = song.get("file", "Unknown.Unknonwn")
+    async def _label_song_change(self, df):
+        name = df["title"]
+        artist = df["artist"]
+        album = df["album"]
+        freq = df["freq"]
+        bitr = df["bitr"]
+        file = df["file"]
         _, ext = pathlib.Path(file).suffix.split(".")
         
         light_font = QApplication.font()
@@ -134,12 +133,12 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
         self.label_title.setText(name)
         self.label_author.setText(f"{artist} | {album}")
         self.label_author.setFont(light_font)
-        self.label_info.setText(f"{int(freq)/1000}kHz, {bitr} bit, {ext.upper()}")
+        self.label_info.setText(f"{int(freq)/1000}kHz, {bitr} bit, {ext}")
         self.label_info.setFont(light_font)
         
-        await self._change_cover(song.get("file"))
+        await self._change_cover(file)
 
-    async def _change_cover(self, file):
+    async def _change_cover(self, file=None):
         if file:
             if not (art := await self.cache.get(file)):
                 art = await self.mpd_client.readpicture(file)

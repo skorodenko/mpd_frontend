@@ -56,7 +56,6 @@ class MainWindow(InitMainWindow, MpdConnector):
                     await self._icon_media_shuffle(shuffle)
                 case "song" | "playlist":
                     await self.ptiling_widget.song_changed()
-                    await self._label_song_change()
 
     def closeEvent(self, event):
         self._mpd_disconnect(self.config.get("mpd_socket"))

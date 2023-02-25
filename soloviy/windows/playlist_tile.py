@@ -1,3 +1,4 @@
+import os
 import qtinter
 import asyncio
 from ..widgets.ui_playlist_tile import Ui_Frame
@@ -18,9 +19,10 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                 self.playlist = [d for d in etc if d.get("file") is not None]
                 self.playlist = pd.DataFrame.from_dict(self.playlist)
                 self.playlist = self.playlist.assign(__playing=False)
+                self.playlist[["freq","bitr","chanels"]] = self.playlist["format"].str.split(":", expand=True)
+                self.playlist.drop("format", inplace=True, axis=1)
                 #TODO Convert "last_modified","disc","track","time","duration"
                 #TODO Add hidden columns
-                # print(self.playlist)
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
         self.playlist_table.setModel(self.playlist_model)
