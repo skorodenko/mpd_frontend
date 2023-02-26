@@ -13,6 +13,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         self.setupUi(self)
         self.tiler = tiler
         self.lock_status = False
+        self._hidden = ["__playing", "file"]
         match playlist:
             case [{"directory": title}, *etc]:
                 self.title = title
@@ -32,6 +33,8 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
         self.playlist_table.setModel(self.playlist_model)
+
+        self.hide_columns()
         
         self.playlist_table.horizontalHeader().sortIndicatorChanged.connect(
             qtinter.asyncslot(self.header_sort)
@@ -46,6 +49,13 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
             qtinter.asyncslot(self.destroy)
         )
     
+    def hide_columns(self):
+        for c in self._hidden:
+            self.playlist_table.setColumnHidden(
+                self.playlist.columns.to_list().index(c),
+                True
+            )
+
     async def header_sort(self, section, order):
         self.playlist_model.sort(section, bool(order))
         if self.tiler.active_playlist == self:
