@@ -30,6 +30,8 @@ class MainWindow(InitMainWindow, MpdConnector):
         self.timer.singleShot(150, qtinter.asyncslot(self._mpd_connect_dialog))
 
     async def _mpd_idle(self):
+        #FIXME Find a way to cancel this task properly
+        #FIXME Restart on disconnect
         self.mpd_client.update()
         self._idle_cache = await self.mpd_client.status()
         await self._init_gui(self._idle_cache)

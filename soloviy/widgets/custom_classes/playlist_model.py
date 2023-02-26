@@ -1,3 +1,4 @@
+import soloviy.utils.time_utils as tu
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt
 
@@ -12,6 +13,8 @@ class PlaylistModel(QtCore.QAbstractTableModel):
         row = index.row()
         column = index.column()
         if role == Qt.DisplayRole:
+            if self.playlist.columns[column] == "time":
+                return tu.strfdelta(self.playlist.iloc[row, column])
             return str(self.playlist.iloc[row, column])
         if role == Qt.DecorationRole:
             if self.playlist.at[row, "__playing"] and column == 0:

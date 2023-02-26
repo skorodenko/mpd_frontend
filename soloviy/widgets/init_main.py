@@ -1,6 +1,8 @@
 import asyncio
 import qtinter
 import pathlib
+import datetime
+import soloviy.utils.time_utils as tu
 from .ui_main import Ui_MainWindow
 from .custom_classes.playlists_model import PlaylistsModel
 from PyQt5.QtCore import QSize
@@ -70,8 +72,10 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
             status = await self.mpd_client.status()
             duration = int(float(status.get("duration", 100)))
             elapsed = int(float(status.get("elapsed", 0)))
+            dd = datetime.timedelta(seconds=duration)
+            ed = datetime.timedelta(seconds=elapsed)
             
-            self.label_time.setText(f"{elapsed//60}:{elapsed%60:0>2}/{duration//60}:{duration%60:0>2}")
+            self.label_time.setText(f"{tu.strfdelta(ed)}/{tu.strfdelta(dd)}")
             self.media_seek.setMaximum(duration)
             self.media_seek.setSliderPosition(elapsed)
 

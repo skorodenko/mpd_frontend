@@ -21,7 +21,13 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                 self.playlist = self.playlist.assign(__playing=False)
                 self.playlist[["freq","bitr","chanels"]] = self.playlist["format"].str.split(":", expand=True)
                 self.playlist.drop("format", inplace=True, axis=1)
-                #TODO Convert "last_modified","disc","track","time","duration"
+                self.playlist.drop("duration", inplace=True, axis=1)
+                self.playlist["last-modified"] = pd.to_datetime(self.playlist["last-modified"])
+                self.playlist = self.playlist.astype({
+                    "track":"int",
+                    "time":"int",
+                }, errors="ignore")
+                self.playlist["time"] = pd.to_timedelta(self.playlist["time"], unit="S")
                 #TODO Add hidden columns
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
