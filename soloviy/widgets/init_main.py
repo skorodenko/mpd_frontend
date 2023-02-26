@@ -135,8 +135,11 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
         self.label_author.setFont(light_font)
         self.label_info.setText(f"{int(freq)/1000}kHz, {bitr} bit, {ext}")
         self.label_info.setFont(light_font)
-        
-        await self._change_cover(file)
+
+        if file != "Unknown.Unknown":        
+            await self._change_cover(file)
+        else:
+            await self._change_cover()
 
     async def _change_cover(self, file=None):
         if file:

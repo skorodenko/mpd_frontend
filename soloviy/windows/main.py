@@ -33,13 +33,14 @@ class MainWindow(InitMainWindow, MpdConnector):
         self.mpd_client.update()
         self._idle_cache = await self.mpd_client.status()
         await self._init_gui(self._idle_cache)
-        async for _ in self.mpd_client.idle():
-            new = await self.mpd_client.status()
-            await self._route_async_changes(
-                self.status_diff(self._idle_cache, new),
-                new
-            )
-            self._idle_cache = new
+        async for subsys in self.mpd_client.idle():
+            if subsys:
+                new = await self.mpd_client.status()
+                await self._route_async_changes(
+                    self.status_diff(self._idle_cache, new),
+                    new
+                )
+                self._idle_cache = new
 
     async def _route_async_changes(self, diff, status):
         for d in diff:
