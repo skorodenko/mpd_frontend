@@ -154,7 +154,7 @@ class InitMainWindow(QMainWindow, Ui_MainWindow):
                     await self.cache.set(file, art)  
             if art:
                 art = Image.open(BytesIO(art))
-                art.thumbnail((128,128), resample=Image.NEAREST)
+                art.thumbnail((128,128), resample=Image.LANCZOS)
                 cover = self.expand2square(art, (0,0,0))
                 cover = ImageQt.ImageQt(cover)
                 cover = QPixmap.fromImage(cover)

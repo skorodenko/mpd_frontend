@@ -12,7 +12,10 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         self.setupUi(self)
         self.tiler = tiler
         self.lock_status = False
-        hidden = ["__playing", "file", "last-modified", "genre", "date", "freq", "bitr", "chanels"]
+        #TODO Global config here
+        hidden = ["__playing", "file", "last-modified", "genre", 
+                  "date", "freq", "bitr", "chanels", "disc",
+                  "album", "composer"]
         match playlist:
             case [{"directory": title}, *etc]:
                 self.title = title
@@ -22,6 +25,9 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                 self.playlist[["freq","bitr","chanels"]] = self.playlist["format"].str.split(":", expand=True)
                 self.playlist.insert(0, "#", self.playlist["track"])
                 self.playlist.drop("track", inplace=True, axis=1)
+                self.playlist = self.playlist.reindex(
+                    columns = [c for c in self.playlist.columns if c != "time"] + ["time"]
+                )
                 self.playlist.drop("format", inplace=True, axis=1)
                 self.playlist.drop("duration", inplace=True, axis=1)
                 self.playlist["last-modified"] = pd.to_datetime(self.playlist["last-modified"])
@@ -37,6 +43,8 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         self._hidden = {k:False for k in self.playlist.columns}
         self._hidden.update({k:True for k in hidden if k in self.playlist.columns})
         self.hide_columns()
+
+        self._init_resize()
         
         self.playlist_table.horizontalHeader().sortIndicatorChanged.connect(
             qtinter.asyncslot(self.header_sort)
@@ -51,6 +59,12 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
             qtinter.asyncslot(self.destroy)
         )
     
+    def _init_resize(self):
+        head = self.playlist_table.horizontalHeader()
+        visible_count = head.count() - head.hiddenSectionCount()
+        for vi in range(0, visible_count):
+            head.setSectionResizeMode(head.logicalIndex(vi), QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+
     def hide_columns(self):
         for c in self._hidden:
             self.playlist_table.setColumnHidden(
