@@ -17,7 +17,7 @@ class PlaylistModel(QtCore.QAbstractTableModel):
                 return tu.strfdelta(self.playlist.iloc[row, column])
             return str(self.playlist.iloc[row, column])
         if role == Qt.DecorationRole:
-            if self.playlist.at[row, "__playing"] and column == 0:
+            if self.playlist.at[row, "__playing"] and self.playlist.columns[column] == "#":
                 return PLAYING_ICON
     
     def rowCount(self, index):
