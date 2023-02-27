@@ -1,8 +1,7 @@
-import os
 import qtinter
 import asyncio
 from ..widgets.ui_playlist_tile import Ui_Frame
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from ..widgets.custom_classes.playlist_model import PlaylistModel
 import pandas as pd
 
@@ -13,7 +12,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         self.setupUi(self)
         self.tiler = tiler
         self.lock_status = False
-        self._hidden = ["__playing", "file"]
+        hidden = ["__playing", "file", "last-modified", "genre", "date", "freq", "bitr", "chanels"]
         match playlist:
             case [{"directory": title}, *etc]:
                 self.title = title
@@ -29,11 +28,12 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
                     "time":"int",
                 }, errors="ignore")
                 self.playlist["time"] = pd.to_timedelta(self.playlist["time"], unit="S")
-                #TODO Add hidden columns
         self.playlist_title.setText(self.title)
         self.playlist_model = PlaylistModel(self.playlist)
         self.playlist_table.setModel(self.playlist_model)
 
+        self._hidden = {k:False for k in self.playlist.columns}
+        self._hidden.update({k:True for k in hidden if k in self.playlist.columns})
         self.hide_columns()
         
         self.playlist_table.horizontalHeader().sortIndicatorChanged.connect(
@@ -53,7 +53,7 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         for c in self._hidden:
             self.playlist_table.setColumnHidden(
                 self.playlist.columns.to_list().index(c),
-                True
+                self._hidden[c]
             )
 
     async def header_sort(self, section, order):
