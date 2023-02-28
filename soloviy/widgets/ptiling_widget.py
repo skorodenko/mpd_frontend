@@ -48,20 +48,20 @@ class PTilingWidget(QtWidgets.QWidget):
         if self.tiler.free_space:
             playlist = await self.main.mpd_client.listallinfo(playlist_name)
             pt_new = PlaylistTile(self, playlist)
-            self.tiler.add_tile(pt_new)
+            await self.tiler.add_tile(pt_new)
 
     async def playlist_lock(self, pt, status):
         if status:
-            self.tiler.lock_tile(pt)
+            await self.tiler.lock_tile(pt)
         else:
-            self.tiler.unlock_tile(pt)
+            await self.tiler.unlock_tile(pt)
 
-    async def playlist_destroy(self, pt, update=True):
+    async def playlist_destroy(self, pt, update=True, popped=False):
+        await self.tiler.destroy_tile(pt, update, popped)
         if self.active_playlist is pt:
             await self.main.mpd_client.clear()
             await self.song_changed()
             self.active_playlist = None
-        self.tiler.destroy_tile(pt, update)
 
     async def song_changed(self):
         if song := await self.main.mpd_client.currentsong():

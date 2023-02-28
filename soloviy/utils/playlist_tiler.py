@@ -7,15 +7,15 @@ class PlaylistTiler:
     def __init__(self, widget):
         self.widget = widget
         self.order = deque()
-        self.lock = set()
+        self.lock = deque()
 
     @property
     def free(self):
-        return len([i for i in self.order if i not in self.lock])
+        return len(self.order)
     
     @property
     def locked(self):
-        return len([i for i in self.order if i in self.lock])
+        return len(self.lock)
 
     @property    
     def free_space(self):
@@ -27,35 +27,34 @@ class PlaylistTiler:
         else:
             raise ValueError(f"Bad tiling mode: {mode}")
 
-    def add_tile(self, tile):
-        print(self.locked, self.free, self.mode)
+    async def add_tile(self, tile):
         if self.locked + self.free == self.mode:
-            old_tile = self.pop_free_tile()
-            asyncio.create_task(self.widget.playlist_destroy(old_tile, update=False))
-        self.order.append(tile)
-        self.__update_tiling()
+            old_tile = self.order.pop()
+            await self.widget.playlist_destroy(old_tile, update=False, popped=True)
+        self.order.appendleft(tile)
+        await self.__update_tiling()
     
-    def destroy_tile(self, tile, update):
+    async def destroy_tile(self, tile, update, popped):
         if tile in self.lock:
-            self.lock.remove(tile)
-        del self.order[self.order.index(tile)]
+            del self.lock[self.lock.index(tile)]
+        elif not popped:
+            del self.order[self.order.index(tile)]
         if update:
-            self.__update_tiling()
+            await self.__update_tiling()
 
-    def pop_free_tile(self):
-        for t in self.order:
-            if t not in self.lock:
-                return t
+    async def lock_tile(self, tile):
+        del self.order[self.order.index(tile)]
+        self.lock.append(tile)
+        await self.__update_tiling()
     
-    def lock_tile(self, tile):
-        self.lock.add(tile)
-    
-    def unlock_tile(self, tile):
-        self.lock.remove(tile)    
+    async def unlock_tile(self, tile):
+        del self.lock[self.lock.index(tile)]
+        self.order.appendleft(tile)
+        await self.__update_tiling()
 
-    def __update_tiling(self):
+    async def __update_tiling(self):
         layout = QtWidgets.QGridLayout()
-        for w,p in zip(self.order, self.__get_tiling(self.free + self.locked)):
+        for w,p in zip(self.lock + self.order,self.__get_tiling(self.free + self.locked)):
             layout.addWidget(w, *p)
         if (old_layout := self.widget.layout()) is not None:
             self.__delete_layout(old_layout)
