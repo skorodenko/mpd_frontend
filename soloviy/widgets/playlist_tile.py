@@ -1,8 +1,8 @@
 import qtinter
 import asyncio
-from ..widgets.ui_playlist_tile import Ui_Frame
+from ..ui.ui_playlist_tile import Ui_Frame
 from PyQt5 import QtWidgets
-from ..widgets.custom_classes.playlist_model import PlaylistModel
+from .playlist_model import PlaylistModel
 import pandas as pd
 
 

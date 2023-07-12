@@ -3,7 +3,7 @@ import itertools
 import pandas as pd
 from ..utils.playlist_tiler import PlaylistTiler
 from PyQt5 import QtWidgets
-from ..windows.playlist_tile import PlaylistTile
+from .playlist_tile import PlaylistTile
 
 
 class PTilingWidget(QtWidgets.QWidget):
@@ -12,8 +12,8 @@ class PTilingWidget(QtWidgets.QWidget):
         self.active_playlist = None
         self.tiler = PlaylistTiler(self)
 
-    async def _init_connection(self, main_window):
-        self.main = main_window
+    def _init_connection(self, main):
+        self.main = main
         self.tiler.set_tile_mode(self.main.config.get("tiling_mode"))
 
     @staticmethod
@@ -38,15 +38,15 @@ class PTilingWidget(QtWidgets.QWidget):
         lswap = self.swappair2list(kv)
         for l in lswap:
             for s1,s2 in itertools.pairwise(l):
-                await self.main.mpd_client.swap(s1,s2)
+                await self.main.mpd.client.swap(s1,s2)
     
     async def fill_playlist(self, file_list):
         for f in file_list:
-            await self.main.mpd_client.add(f)
+            await self.main.mpd.client.add(f)
 
     async def add_playlist(self, playlist_name):
         if self.tiler.free_space:
-            playlist = await self.main.mpd_client.listallinfo(playlist_name)
+            playlist = await self.main.mpd.client.listallinfo(playlist_name)
             pt_new = PlaylistTile(self, playlist)
             await self.tiler.add_tile(pt_new)
 
@@ -59,12 +59,12 @@ class PTilingWidget(QtWidgets.QWidget):
     async def playlist_destroy(self, pt, update=True, popped=False):
         await self.tiler.destroy_tile(pt, update, popped)
         if self.active_playlist is pt:
-            await self.main.mpd_client.clear()
+            await self.main.mpd.client.clear()
             await self.song_changed()
             self.active_playlist = None
 
     async def song_changed(self):
-        if song := await self.main.mpd_client.currentsong():
+        if song := await self.main.mpd.client.currentsong():
             pos = int(song["pos"])
             self.active_playlist.playlist_model.playing_status(pos)
             index = self.active_playlist.playlist_model.index(pos, 0)
@@ -89,8 +89,8 @@ class PTilingWidget(QtWidgets.QWidget):
         if self.active_playlist is not tile:
             if self.active_playlist is not None:
                 self.active_playlist.playlist_model.playing_status()
-            await self.main.mpd_client.clear()
+            await self.main.mpd.client.clear()
             await asyncio.create_task(self.fill_playlist(
                 playlist["file"].to_list()))
-        await self.main.mpd_client.play(song_pos)
+        await self.main.mpd.client.play(song_pos)
         self.active_playlist = tile

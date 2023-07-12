@@ -224,7 +224,7 @@ class Ui_MainWindow(object):
         self.label_info.setText(_translate("MainWindow", "Format"))
         self.label_time.setText(_translate("MainWindow", "Time"))
         self.actionre.setText(_translate("MainWindow", "re"))
-from soloviy.widgets.custom_classes.jump_slider import JumpSlider
+from soloviy.ui.custom_classes.jump_slider import JumpSlider
 from soloviy.widgets.ptiling_widget import PTilingWidget
 
 

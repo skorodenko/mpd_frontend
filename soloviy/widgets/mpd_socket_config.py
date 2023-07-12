@@ -1,14 +1,14 @@
 from PyQt5 import QtWidgets, QtCore
-from ..widgets.ui_mpd_socket_config import Ui_Dialog
+from ..ui.ui_mpd_socket_config import Ui_Dialog
 from ..constants import MPD_NATIVE_SOCKET
 
 
 
 class MpdSocketConfig(QtWidgets.QDialog, Ui_Dialog):
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, main):
+        super().__init__(main)
         self.setupUi(self)
-        self.main_window = parent
+        self.main = main
         self.logo.load("logo:logo.svg")
 
         self.mpd_socket_type.currentIndexChanged.connect(self.__socket_type_combo_box)
@@ -23,10 +23,10 @@ class MpdSocketConfig(QtWidgets.QDialog, Ui_Dialog):
     def __connect_mpd(self):
         match self.mpd_socket_type.currentText():
             case "Built-in":
-                self.main_window.config.set("mpd_socket", MPD_NATIVE_SOCKET)
+                self.main.config.set("mpd_socket", MPD_NATIVE_SOCKET)
             case "External":
                 new_external_socket = self.mpd_socket.text()
-                self.main_window.config.set("mpd_socket", new_external_socket)
+                self.main.config.set("mpd_socket", new_external_socket)
 
 
 if __name__ == "__main__":
