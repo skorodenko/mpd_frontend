@@ -26,6 +26,12 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+      <property name="opaqueResize">
+       <bool>true</bool>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,10">
         <item>
@@ -226,7 +232,7 @@
          <widget class="QListView" name="playlists_view">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>1</horstretch>
+            <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
@@ -249,7 +255,7 @@
            <bool>true</bool>
           </property>
           <property name="autoScrollMargin">
-           <number>4</number>
+           <number>0</number>
           </property>
           <property name="showDropIndicator" stdset="0">
            <bool>false</bool>
@@ -285,27 +291,12 @@
         </item>
        </layout>
       </widget>
-      <widget class="QMdiArea" name="mdiArea">
+      <widget class="PTilingWidget" name="ptiling_widget" native="true">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>3</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
-       </property>
-       <property name="background">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>37</red>
-          <green>37</green>
-          <blue>45</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="tabsClosable">
-        <bool>false</bool>
        </property>
       </widget>
      </widget>
@@ -479,6 +470,12 @@
    <class>JumpSlider</class>
    <extends>QSlider</extends>
    <header>soloviy.widgets.custom_classes.jump_slider</header>
+  </customwidget>
+  <customwidget>
+   <class>PTilingWidget</class>
+   <extends>QWidget</extends>
+   <header>soloviy.widgets.ptiling_widget</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

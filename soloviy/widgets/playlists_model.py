@@ -8,7 +8,7 @@ class PlaylistsModel(QtCore.QAbstractListModel):
         super().__init__()
         self.playlists = [
             playlist["directory"] for playlist in playlists
-            if not playlist["directory"].startswith(".")
+            if not playlist.get("directory", ".").startswith(".")
         ]
         self.playlists.sort()
 
