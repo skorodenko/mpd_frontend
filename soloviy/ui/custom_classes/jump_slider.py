@@ -1,5 +1,5 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, pyqtSignal
 
 
 class JumpSlider(QtWidgets.QSlider):

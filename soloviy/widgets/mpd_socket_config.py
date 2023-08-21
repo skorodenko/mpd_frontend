@@ -1,7 +1,6 @@
-from PyQt5 import QtWidgets, QtCore
-from ..ui.ui_mpd_socket_config import Ui_Dialog
-from ..constants import MPD_NATIVE_SOCKET
-
+from PyQt6 import QtWidgets, QtCore
+from soloviy.ui.ui_mpd_socket_config import Ui_Dialog
+from soloviy.constants import MPD_NATIVE_SOCKET
 
 
 class MpdSocketConfig(QtWidgets.QDialog, Ui_Dialog):

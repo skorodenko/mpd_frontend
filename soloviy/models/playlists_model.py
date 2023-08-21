@@ -1,5 +1,5 @@
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtCore import Qt
 
 FOLDER_ICON = QtGui.QIcon.fromTheme("folder-music")
 
@@ -13,10 +13,10 @@ class PlaylistsModel(QtCore.QAbstractListModel):
         self.playlists.sort()
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             name = self.playlists[index.row()]
             return name
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             return FOLDER_ICON
     
     def rowCount(self, index):

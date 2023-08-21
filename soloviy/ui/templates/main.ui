@@ -452,7 +452,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>32</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -469,7 +469,7 @@
   <customwidget>
    <class>JumpSlider</class>
    <extends>QSlider</extends>
-   <header>soloviy.widgets.custom_classes.jump_slider</header>
+   <header>soloviy.ui.custom_classes.jump_slider</header>
   </customwidget>
   <customwidget>
    <class>PTilingWidget</class>

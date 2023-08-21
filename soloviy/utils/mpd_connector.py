@@ -1,17 +1,17 @@
 import asyncio
-import socket
+from attr import define, field
 from mpd.asyncio import MPDClient
-from PyQt5.QtCore import QProcess
-from ..widgets.mpd_socket_config import MpdSocketConfig
-from ..constants import MPD_NATIVE_SOCKET, MPD_NATIVE_CONFIG_FILE
+from PyQt6.QtCore import QProcess
+from soloviy.constants import MPD_NATIVE_SOCKET, MPD_NATIVE_CONFIG_FILE
 
 
+@define
 class MpdConnector:
+    main = field()
+    client: MPDClient = field(init=False)
+    server: QProcess = field(init=False)
 
-    def attach_to_main(self, main):
-        self.main = main
-
-    async def _mpd_connect(self, socket):
+    async def mpd_connect(self, socket):
         if socket == MPD_NATIVE_SOCKET:
             self.server = QProcess()
             self.server.start("mpd", [MPD_NATIVE_CONFIG_FILE, "--no-daemon"])
@@ -20,41 +20,24 @@ class MpdConnector:
         self.client = MPDClient()
         await self.client.connect(socket)
     
-    def _mpd_disconnect(self, socket):
+    def mpd_disconnect(self, socket):
         if self.client.connected:
-            self._mpd_idle_task.cancel()
             self.client.clear()
             self.client.disconnect()
         if socket == MPD_NATIVE_SOCKET:
             self.server.terminate()
             self.server.waitForFinished(-1)
     
-    async def mpd_connect_dialog(self):
-        while True:
-            try:
-                task = asyncio.create_task(
-                    self._mpd_connect(self.main.config.get("mpd_socket"))
-                )
-                if not task.done():
-                    await task
-                e = task.exception()
-                self._mpd_idle_task = asyncio.create_task(self.main._mpd_idle())
-                break
-            except (socket.gaierror, ConnectionRefusedError):
-                if not MpdSocketConfig(self.main).exec():
-                    self.main.close()
-                    break
-
-    async def _media_previous(self):
+    async def media_previous(self):
         await self.client.previous()
     
-    async def _media_next(self):
+    async def media_next(self):
         await self.client.next()
     
-    async def _media_seeker(self, value):
+    async def media_seeker(self, value):
         await self.client.seekcur(value)
     
-    async def _media_play_pause(self):
+    async def media_play_pause(self):
         status = await self.client.status()
         match status["state"]:
             case "stop":
@@ -64,7 +47,7 @@ class MpdConnector:
             case "play":
                 await self.client.pause(1)
     
-    async def _media_repeat(self):
+    async def media_repeat(self):
         status = await self.client.status()
         repeat = status["repeat"]
         single = status["single"]
@@ -79,7 +62,7 @@ class MpdConnector:
                 await self.client.repeat(0)
                 await self.client.single(0)
     
-    async def _media_shuffle(self):
+    async def media_shuffle(self):
         status = await self.client.status()
         shuffle = status["random"]
         match shuffle:

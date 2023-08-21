@@ -1,9 +1,9 @@
 import qtinter
 import asyncio
-from ..ui.ui_playlist_tile import Ui_Frame
-from PyQt5 import QtWidgets
-from .playlist_model import PlaylistModel
 import pandas as pd
+from PyQt6 import QtWidgets
+from soloviy.ui.ui_playlist_tile import Ui_Frame
+from soloviy.models.playlist_model import PlaylistModel
 
 
 class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
@@ -19,8 +19,8 @@ class PlaylistTile(QtWidgets.QFrame, Ui_Frame):
         match playlist:
             case [{"directory": title}, *etc]:
                 self.title = title
-                self.playlist = [d for d in etc if d.get("file") is not None]
-                self.playlist = pd.DataFrame.from_dict(self.playlist)
+                playlist = [d for d in etc if d.get("file") is not None]
+                self.playlist = pd.DataFrame.from_dict(playlist)
                 self.playlist = self.playlist.assign(__playing=False)
                 self.playlist[["freq","bitr","chanels"]] = self.playlist["format"].str.split(":", expand=True)
                 self.playlist.insert(0, "#", self.playlist["track"])

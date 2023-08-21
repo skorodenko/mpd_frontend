@@ -1,6 +1,6 @@
 import soloviy.utils.time_utils as tu
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtCore import Qt
 
 PLAYING_ICON = QtGui.QIcon.fromTheme("media-playback-start")
 
@@ -12,11 +12,11 @@ class PlaylistModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         row = index.row()
         column = index.column()
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             if self.playlist.columns[column] == "time":
                 return tu.strfdelta(self.playlist.iloc[row, column])
             return str(self.playlist.iloc[row, column])
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             if self.playlist.at[row, "__playing"] and self.playlist.columns[column] == "#":
                 return PLAYING_ICON
     
@@ -29,8 +29,8 @@ class PlaylistModel(QtCore.QAbstractTableModel):
         return columns
     
     def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal:
                 return self.playlist.columns[section]
     
     def playing_status(self, row=None):

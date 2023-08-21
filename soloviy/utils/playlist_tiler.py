@@ -1,14 +1,16 @@
-import asyncio
+from attr import define, field, Factory
+from typing import Deque
 from collections import deque
-from PyQt5 import QtWidgets, sip
+from PyQt6 import QtWidgets, sip
 
 
+@define
 class PlaylistTiler:
-    def __init__(self, widget):
-        self.widget = widget
-        self.order = deque()
-        self.lock = deque()
-
+    widget: QtWidgets.QMainWindow
+    order: Deque = Factory(deque)
+    lock: Deque = Factory(deque)
+    mode: int = None
+    
     @property
     def free(self):
         return len(self.order)

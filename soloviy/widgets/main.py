@@ -4,15 +4,18 @@ import attr
 import asyncio
 import pathlib
 import datetime
-from aiocache import Cache
+import socket
+from typing import Coroutine
+from aiocache import Cache, cached
 from PIL import Image, ImageQt
 from io import BytesIO
-from PyQt5 import QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt6 import QtCore, QtGui
+from PyQt6.QtWidgets import QApplication, QMainWindow
 from pyqtconfig import ConfigManager
-from .playlists_model import PlaylistsModel
 import soloviy.utils.time_utils as tu
 from soloviy.utils.mpd_connector import MpdConnector
+from soloviy.widgets.mpd_socket_config import MpdSocketConfig
+from soloviy.models.playlists_model import PlaylistsModel
 from soloviy.ui.ui_main import Ui_MainWindow
 from soloviy.constants import APP_CONFIG_FILE, APP_DEFAULT_SETTINGS
 
@@ -23,16 +26,56 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     cache: Cache = attr.Factory(Cache)
     timer: QtCore.QTimer = QtCore.QTimer
     mpd: MpdConnector = attr.field()
- 
-    def __init__(self):
+    mpd_idle_task: Coroutine = None
+    
+    def __attrs_pre_init__(self):
         super().__init__()
-        self.__attrs_init__()
+        QtCore.QDir.addSearchPath("logo", "./soloviy/resources/logo/") 
+        self.setupUi(self)
+    
+    def __attrs_post_init__(self):
+        self.media_previous.clicked.connect(
+            qtinter.asyncslot(self.mpd.media_previous))
+        self.media_play_pause.clicked.connect(
+            qtinter.asyncslot(self.mpd.media_play_pause))
+        self.media_next.clicked.connect(
+            qtinter.asyncslot(self.mpd.media_next))
+        
+        self.media_repeat.clicked.connect(
+            qtinter.asyncslot(self.mpd.media_repeat))
+        self.media_shuffle.clicked.connect(
+            qtinter.asyncslot(self.mpd.media_shuffle))
+        
+        self.media_seek.sliderMoved.connect(
+            qtinter.asyncslot(self.mpd.media_seeker))
+        
+        self.playlists_view.doubleClicked.connect(
+            qtinter.asyncslot(self._change_playlist))
     
     @mpd.default
     def _mpd_factory(self):
-        obj = MpdConnector()
-        obj.attach_to_main(self)
+        obj = MpdConnector(self)
         return obj
+    
+    def serve(self):
+        self.timer.singleShot(0, self.show)
+        self.timer.singleShot(150, qtinter.asyncslot(self.mpd_connect_dialog))
+    
+    async def mpd_connect_dialog(self):
+        while True:
+            try:
+                task = asyncio.create_task(
+                    self.mpd.mpd_connect(self.config.get("mpd_socket"))
+                )
+                if not task.done():
+                    await task
+                task.exception()
+                self.mpd_idle_task = asyncio.create_task(self._mpd_idle())
+                break
+            except (socket.gaierror, ConnectionRefusedError):
+                if not MpdSocketConfig(self).exec():
+                    self.close()
+                    break
 
     @staticmethod
     def status_diff(old, new):
@@ -81,7 +124,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.media_seek.setMaximum(duration)
             self.media_seek.setSliderPosition(elapsed)
 
-            await asyncio.sleep(0.4)
+            await asyncio.sleep(0.2)
 
     async def _change_playlist(self, index):
         await self.ptiling_widget.add_playlist(index.data())
@@ -141,16 +184,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.label_info.setText(f"{int(freq)/1000}kHz, {bitr} bit, {ext}")
         self.label_info.setFont(light_font)
 
-        if file != "Unknown.Unknown":        
-            await self._change_cover(file)
-        else:
-            await self._change_cover()
+        await self._change_cover(file)
+
+    @cached()
+    async def _get_cover(self, file):
+        if not file:
+            return None
+        art = await self.mpd.client.readpicture(file)
+        art = art.get("binary")
+        return art
 
     async def _change_cover(self, file=None):
-        art = await self.cache.get(file)
+        art = await self._get_cover(file)
         
         if art:
-            art = art["binary"]
             art = Image.open(BytesIO(art))
             art.thumbnail((128,128), resample=Image.LANCZOS)
             cover = self.expand2square(art, (0,0,0))
@@ -161,34 +208,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             cover = cover.pixmap(cover.actualSize(QtCore.QSize(128,128))) 
 
         self.label_art.setPixmap(cover)
-
-    def serve(self):
-        self.setupUi(self)
-        QtCore.QDir.addSearchPath("logo", "./soloviy/resources/logo/") 
-
-        self.__bind_to_widget()
-        
-        self.timer.singleShot(0, self.show)
-        self.timer.singleShot(150, qtinter.asyncslot(self.mpd.mpd_connect_dialog))
-    
-    def __bind_to_widget(self):
-        self.media_previous.clicked.connect(
-            qtinter.asyncslot(self.mpd._media_previous))
-        self.media_play_pause.clicked.connect(
-            qtinter.asyncslot(self.mpd._media_play_pause))
-        self.media_next.clicked.connect(
-            qtinter.asyncslot(self.mpd._media_next))
-        
-        self.media_repeat.clicked.connect(
-            qtinter.asyncslot(self.mpd._media_repeat))
-        self.media_shuffle.clicked.connect(
-            qtinter.asyncslot(self.mpd._media_shuffle))
-        
-        self.media_seek.sliderMoved.connect(
-            qtinter.asyncslot(self.mpd._media_seeker))
-        
-        self.playlists_view.doubleClicked.connect(
-            qtinter.asyncslot(self._change_playlist))
 
     async def _mpd_idle(self):
         #FIXME Find a way to cancel this task properly
@@ -224,7 +243,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     await self.ptiling_widget.song_changed()
 
     def closeEvent(self, event):
-        self.mpd._mpd_disconnect(self.config.get("mpd_socket"))
+        if self.mpd_idle_task:
+            self.mpd_idle_task.cancel()
+        self.mpd.mpd_disconnect(self.config.get("mpd_socket"))
         super().closeEvent(event)
     
 

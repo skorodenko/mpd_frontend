@@ -1,8 +1,8 @@
 import asyncio
 import itertools
 import pandas as pd
-from ..utils.playlist_tiler import PlaylistTiler
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
+from soloviy.utils.playlist_tiler import PlaylistTiler
 from .playlist_tile import PlaylistTile
 
 
