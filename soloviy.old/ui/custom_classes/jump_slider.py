@@ -1,11 +1,11 @@
-from PySide6 import QtWidgets
-from PySide6.QtCore import Signal, Qt
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, pyqtSignal
 
 
 class JumpSlider(QtWidgets.QSlider):
-    pressed = Signal(int)
-    dragged = Signal(int)
-    released = Signal(int)
+    pressed = pyqtSignal(int)
+    dragged = pyqtSignal(int)
+    released = pyqtSignal(int)
 
     def __init__(self, parent=None):
         super(JumpSlider, self).__init__(parent)

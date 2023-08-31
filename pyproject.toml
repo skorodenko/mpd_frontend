@@ -6,17 +6,17 @@ authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.12"
 python-mpd2 = "^3.1.0"
-pyqtconfig = "^0.9.2"
-qtinter = "^0.11.0"
 pillow = "^9.5.0"
-aiocache = "^0.12.1"
-pandas = "^2.0.3"
 pyyaml = "^6.0"
 xdg = "^6.0.0"
 attrs = "^23.1.0"
-pyqt6 = "^6.5.1"
+qtinter = "^0.11.0"
+pyside6 = "^6.5.2"
+dynaconf = "^3.2.2"
+cashews = "^6.2.0"
+diskcache = "^5.6.1"
 
 
 [tool.poetry.group.dev.dependencies]

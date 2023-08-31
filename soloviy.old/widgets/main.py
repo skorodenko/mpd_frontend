@@ -1,11 +1,7 @@
-import sys
-import qtinter
-import attr
+import attrs
 import asyncio
 import pathlib
 import datetime
-import socket
-from typing import Coroutine
 from aiocache import Cache, cached
 from PIL import Image, ImageQt
 from io import BytesIO
@@ -14,19 +10,17 @@ from PyQt6.QtWidgets import QApplication, QMainWindow
 from pyqtconfig import ConfigManager
 import soloviy.utils.time_utils as tu
 from soloviy.utils.mpd_connector import MpdConnector
-from soloviy.widgets.mpd_socket_config import MpdSocketConfig
 from soloviy.models.playlists_model import PlaylistsModel
 from soloviy.ui.ui_main import Ui_MainWindow
 from soloviy.constants import APP_CONFIG_FILE, APP_DEFAULT_SETTINGS
 
 
-@attr.define
+@attrs.define
 class MainWindow(QMainWindow, Ui_MainWindow):
     config: ConfigManager = ConfigManager(APP_DEFAULT_SETTINGS, filename=APP_CONFIG_FILE) 
-    cache: Cache = attr.Factory(Cache)
+    cache: Cache = attrs.Factory(Cache)
     timer: QtCore.QTimer = QtCore.QTimer
-    mpd: MpdConnector = attr.field()
-    mpd_idle_task: Coroutine = None
+    mpd: MpdConnector = attrs.Factory(MpdConnector)
     
     def __attrs_pre_init__(self):
         super().__init__()
@@ -34,56 +28,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
     
     def __attrs_post_init__(self):
-        self.media_previous.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_previous))
-        self.media_play_pause.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_play_pause))
-        self.media_next.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_next))
+        self.media_previous.clicked.connect(self.mpd)
+        self.media_play_pause.clicked.connect(MpdConnector.media_play_pause.emit)
+        self.media_next.clicked.connect(MpdConnector.media_next.emit)
         
-        self.media_repeat.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_repeat))
-        self.media_shuffle.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_shuffle))
+        self.media_repeat.clicked.connect(MpdConnector.media_repeat.emit)
+        self.media_shuffle.clicked.connect(MpdConnector.media_shuffle.emit)
         
-        self.media_seek.sliderMoved.connect(
-            qtinter.asyncslot(self.mpd.media_seeker))
+        self.media_seek.sliderMoved.connect(MpdConnector.media_seeker.emit)
         
-        self.playlists_view.doubleClicked.connect(
-            qtinter.asyncslot(self._change_playlist))
-    
-    @mpd.default
-    def _mpd_factory(self):
-        obj = MpdConnector(self)
-        return obj
+        self.playlists_view.doubleClicked.connect(MpdConnector.playlist_change.emit)
     
     def serve(self):
         self.timer.singleShot(0, self.show)
-        self.timer.singleShot(150, qtinter.asyncslot(self.mpd_connect_dialog))
+        self.timer.singleShot(150, MpdConnector.mpd_connect.emit)
     
-    async def mpd_connect_dialog(self):
-        while True:
-            try:
-                task = asyncio.create_task(
-                    self.mpd.mpd_connect(self.config.get("mpd_socket"))
-                )
-                if not task.done():
-                    await task
-                task.exception()
-                self.mpd_idle_task = asyncio.create_task(self._mpd_idle())
-                break
-            except (socket.gaierror, ConnectionRefusedError):
-                if not MpdSocketConfig(self).exec():
-                    self.close()
-                    break
-
-    @staticmethod
-    def status_diff(old, new):
-        return [k for k in old.keys() 
-            if old.get(k) != new.get(k)
-            and old.get(k) is not None
-            and new.get(k) is not None]
-        
     @staticmethod
     def expand2square(pil_img, background_color):
         width, height = pil_img.size
@@ -100,9 +59,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     async def __playback_control_init(self, init_status):
         play_state = init_status["state"]
-        self.media_previous.setIcon(QtGui.QIcon.fromTheme("media-skip-backward"))
         await self._icon_media_play_pause(play_state)
-        self.media_next.setIcon(QtGui.QIcon.fromTheme("media-skip-forward"))
 
     async def __playlist_control_init(self, init_status):
         repeat = init_status["repeat"]
@@ -209,38 +166,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.label_art.setPixmap(cover)
 
-    async def _mpd_idle(self):
-        #FIXME Find a way to cancel this task properly
-        #FIXME Restart on disconnect
-        self.mpd.client.update()
-        idle_cache = await self.mpd.client.status()
-        playlists = await self.mpd.client.listfiles(".")
-        await self.cache.set("idle", idle_cache)
-        await self._init_gui(idle_cache, playlists)
-        async for subsys in self.mpd.client.idle():
-            if subsys:
-                new = await self.mpd.client.status()
-                idle_cache = await self.cache.get("idle")
-                diff = self.status_diff(idle_cache, new)
-                await self._route_async_changes(diff, new)
-                await self.cache.set("idle", new)
-
-
-    async def _route_async_changes(self, diff, status):
-        for d in diff:
-            match d:
-                case "state":
-                    state = status["state"]
-                    await self._icon_media_play_pause(state)
-                case "repeat" | "single":
-                    repeat = status["repeat"]
-                    single = status["single"]
-                    await self._icon_media_repeat(repeat, single)
-                case "random":
-                    shuffle = status["random"]
-                    await self._icon_media_shuffle(shuffle)
-                case "song" | "playlist":
-                    await self.ptiling_widget.song_changed()
 
     def closeEvent(self, event):
         if self.mpd_idle_task:
@@ -248,10 +173,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.mpd.mpd_disconnect(self.config.get("mpd_socket"))
         super().closeEvent(event)
     
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    with qtinter.using_asyncio_from_qt():
-        main_window = MainWindow()
-        main_window.serve()
-        app.exec()

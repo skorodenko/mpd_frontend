@@ -1,5 +1,5 @@
-import qtinter
 import asyncio
+import qtinter
 import pandas as pd
 from PyQt6 import QtWidgets
 from soloviy.ui.ui_playlist_tile import Ui_Frame
