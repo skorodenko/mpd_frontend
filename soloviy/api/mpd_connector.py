@@ -30,8 +30,8 @@ class SignalsMixin:
 
 @attrs.define
 class MpdConnector(QObject, SignalsMixin):
-    client: MPDClient = attrs.field(init=False)
-    server: QProcess = attrs.field(init=False)
+    client: MPDClient = None
+    server: QProcess = None
     
     def __attrs_pre_init__(self):
         super().__init__()
@@ -58,7 +58,7 @@ class MpdConnector(QObject, SignalsMixin):
 
     def graceful_close(self):
         # Add idle task
-        if self.client.connected:
+        if self.client and self.client.connected:
             self.client.clear()
             self.client.disconnect()
         if settings.mpd.socket == settings.mpd.native_socket:

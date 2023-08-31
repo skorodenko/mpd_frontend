@@ -2,11 +2,15 @@ import attrs
 import asyncio
 import pathlib
 import datetime
+#import toml
+from dynaconf.loaders.toml_loader import write
 import qtinter
 from PIL import Image, ImageQt
 from io import BytesIO
 from PySide6.QtCore import QDir, QTimer, Signal, QObject
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+from dynaconf import loaders
+from dynaconf.utils.boxing import DynaBox
 from soloviy.config import settings
 #import soloviy.utils.time_utils as tu
 from soloviy.api.mpd_connector import MpdConnector
@@ -16,7 +20,7 @@ from soloviy.widgets.init_wizard import InitWizard
 
 
 class SingalsMixin(QObject):
-    close_gracefully: Signal = Signal()
+    autoconnect_mpd: Signal = Signal(str)
 
 
 @attrs.define
@@ -41,6 +45,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
         if not settings.mpd.socket:
             if self.init_wizard.exec() == QDialog.DialogCode.Rejected:
                 self.close()
+            else:
+                self.persist_settings()
+        else:
+            self.autoconnect_mpd.emit(settings.mpd.socket)
                 
     def _bind_signals(self):
         self.mpd.mpd_connection_status.connect(
@@ -49,6 +57,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
         self.init_wizard.connect_mpd.connect(
             qtinter.asyncslot(self.mpd.mpd_connect)
         )
+        self.autoconnect_mpd.connect(
+            qtinter.asyncslot(self.mpd.mpd_connect)
+        )
+    
+    @staticmethod
+    def persist_settings():
+        data = settings.as_dict()
+        write(settings.settings_file, data)
         
     def closeEvent(self, event):
         self.mpd.graceful_close()

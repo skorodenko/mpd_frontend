@@ -1,9 +1,9 @@
-[dev.mpd]
+[mpd]
 native_config = "@format {this.xdg_config_dir}/mpd.conf"
 native_socket = "@format {this.xdg_data_dir}/mpd.socket"
 socket = ""
 connection_timeout = 10
 
-[dev.soloviy]
+[soloviy]
 tiling_mode = 2
 playlists_margin = 2

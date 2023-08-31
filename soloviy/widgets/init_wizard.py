@@ -30,7 +30,6 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
     parent: QMainWindow
     socket: str = None
     alert_anim: QPropertyAnimation = attrs.field()
-    connected: bool = False
     
     def __init__(self, parent: QMainWindow):
         super().__init__(parent)
@@ -85,14 +84,13 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
             case ConnectionStatus.CONNECTED:
                 await self.alert_trigger(AlertStyle.SUCCESS, "Connection successful", 
                                          timeout = 1)
-                self.connected = True
-                settings.mpd.socket = self.socket
+                settings.set("mpd.socket", self.socket)
                 self.setCurrentId(self.nextId())
             case ConnectionStatus.CONNECTION_FAILED:
                 await self.alert_trigger(AlertStyle.ERROR, "Failed to connect")
     
     def validateCurrentPage(self) -> bool:
-        if self.currentPage() == self.wizardMPDConfig and not self.connected:
+        if self.currentPage() == self.wizardMPDConfig and not settings.mpd.socket:
             # IF current page is mpd config and connection is not established
             self.__connect_mpd()
             return False
