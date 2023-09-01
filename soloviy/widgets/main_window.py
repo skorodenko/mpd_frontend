@@ -21,7 +21,7 @@ from soloviy.widgets.init_wizard import InitWizard
 
 
 class SingalsMixin(QObject):
-    autoconnect_mpd: Signal = Signal(str)
+    ...
 
 
 @attrs.define
@@ -51,7 +51,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
             else:
                 self.persist_settings()
         else:
-            self.autoconnect_mpd.emit(settings.mpd.socket)
+            self.init_wizard.connect_mpd.emit(settings.mpd.socket)
                 
     def _bind_signals(self):
         self.mpd.mpd_connection_status.connect(
@@ -60,12 +60,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
         self.init_wizard.connect_mpd.connect(
             qtinter.asyncslot(self.mpd.mpd_connect)
         )
-        self.autoconnect_mpd.connect(
-            qtinter.asyncslot(self.mpd.mpd_connect)
-        )
     
     @staticmethod
-    def persist_settings():
+    def persist_settings(): #TODO move to settings widget
         logger.info("Persisted settings")
         data = settings.as_dict()
         write(settings.settings_file, data)
