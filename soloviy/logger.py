@@ -9,10 +9,6 @@ LOGGING_CONFIG = {
             "propagate": False,
             "handlers": ["stream_handler"],
         },
-        "soloviy": {
-            "propagate": False,
-            "handlers": ["stream_handler"],
-        },
     },
     "handlers": {
         "stream_handler": {
@@ -36,5 +32,3 @@ LOGGING_CONFIG = {
 }
 
 logging.config.dictConfig(LOGGING_CONFIG)
-
-logger = logging.getLogger("soloviy")

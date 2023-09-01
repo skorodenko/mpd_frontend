@@ -1,4 +1,5 @@
 import attrs
+import logging
 import asyncio
 import pathlib
 import datetime
@@ -9,15 +10,15 @@ from PIL import Image, ImageQt
 from io import BytesIO
 from PySide6.QtCore import QDir, QTimer, Signal, QObject
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
-from dynaconf import loaders
-from dynaconf.utils.boxing import DynaBox
 from soloviy.config import settings
-from soloviy.logger import logger
 #import soloviy.utils.time_utils as tu
 from soloviy.api.mpd_connector import MpdConnector
 #from soloviy.models.playlists_model import PlaylistsModel
 from soloviy.ui.ui_main_window import Ui_MainWindow
 from soloviy.widgets.init_wizard import InitWizard
+
+
+logger = logging.getLogger(__name__)
 
 
 class SingalsMixin(QObject):
