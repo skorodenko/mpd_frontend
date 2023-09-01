@@ -1,3 +1,6 @@
+[logging]
+level = "DEBUG"
+
 [mpd]
 native_config = "@format {this.xdg_config_dir}/mpd.conf"
 native_socket = "@format {this.xdg_data_dir}/mpd.socket"

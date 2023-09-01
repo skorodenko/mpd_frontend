@@ -12,6 +12,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from dynaconf import loaders
 from dynaconf.utils.boxing import DynaBox
 from soloviy.config import settings
+from soloviy.logger import logger
 #import soloviy.utils.time_utils as tu
 from soloviy.api.mpd_connector import MpdConnector
 #from soloviy.models.playlists_model import PlaylistsModel
@@ -38,10 +39,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
         self._bind_signals()
         
     def serve(self):
+        logger.info("Started main window")
         self.timer.singleShot(0, self.show)
         self.timer.singleShot(100, self._initial_configuration)
  
     def _initial_configuration(self):
+        logger.info("Started initial configuration")
         if not settings.mpd.socket:
             if self.init_wizard.exec() == QDialog.DialogCode.Rejected:
                 self.close()
@@ -63,10 +66,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
     
     @staticmethod
     def persist_settings():
+        logger.info("Persisted settings")
         data = settings.as_dict()
         write(settings.settings_file, data)
         
     def closeEvent(self, event):
+        logger.info("Closing main window")
         self.mpd.graceful_close()
         super().closeEvent(event)
     
