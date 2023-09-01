@@ -18,4 +18,5 @@ settings = Dynaconf(
     xdg_state_dir = str(xdg_state_dir),
     xdg_cache_home = str(xdg_cache_dir),
     preload = default_config,
+    merge_enable = True,
 )
