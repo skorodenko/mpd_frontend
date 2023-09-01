@@ -2,11 +2,14 @@ import qtinter
 import socket
 import attrs
 import asyncio
+import logging
 from enum import Enum
 from soloviy.config import settings
-from typing import Coroutine
 from mpd.asyncio import MPDClient
 from PySide6.QtCore import QProcess, Signal, QObject
+
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionStatus(Enum):
@@ -24,7 +27,7 @@ class SignalsMixin:
     update_status: Signal = Signal(str, dict)
     # Seeker update duration: int, elapsed: int
     update_seeker: Signal = Signal(int, int)
-    
+    # Emit connection status update
     mpd_connection_status: Signal = Signal(ConnectionStatus)
     
 
@@ -44,20 +47,25 @@ class MpdConnector(QObject, SignalsMixin):
             and new.get(k) is not None]
     
     async def mpd_connect(self, _socket):
+        logger.info("Connecting to mpd")
         self.mpd_connection_status.emit(ConnectionStatus.CONNECTING)
         if _socket == settings.mpd.native_socket:
+            logger.info("Starting native mpd server")
             self.server = QProcess()
+            #TODO add check for mpd binary
             self.server.start("mpd", [settings.mpd.native_config, "--no-daemon"])
             await asyncio.sleep(0.5)
         try:
             self.client = MPDClient()
             await self.client.connect(_socket)
+            logger.info("Successfuly connected to mpd")
             self.mpd_connection_status.emit(ConnectionStatus.CONNECTED)
         except (socket.gaierror, ConnectionRefusedError):
+            logger.warning("Failed to connect to mpd")
             self.mpd_connection_status.emit(ConnectionStatus.CONNECTION_FAILED)
 
     def graceful_close(self):
-        # Add idle task
+        # Add idle task cancelation
         if self.client and self.client.connected:
             self.client.clear()
             self.client.disconnect()
