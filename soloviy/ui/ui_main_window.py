@@ -189,15 +189,11 @@ class Ui_MainWindow(object):
         self.playlists_view.setSelectionMode(QAbstractItemView.SingleSelection)
         self.playlists_view.setIconSize(QSize(32, 32))
         self.playlists_view.setHorizontalScrollMode(QAbstractItemView.ScrollPerItem)
-        self.playlists_view.setMovement(QListView.Static)
-        self.playlists_view.setSpacing(8)
-        self.playlists_view.setViewMode(QListView.ListMode)
-        self.playlists_view.setUniformItemSizes(False)
-        self.playlists_view.setSelectionRectVisible(False)
 
         self.verticalLayout.addWidget(self.playlists_view)
 
-        self.verticalLayout.setStretch(1, 10)
+        self.verticalLayout.setStretch(0, 1)
+        self.verticalLayout.setStretch(1, 9)
         self.splitter.addWidget(self.layoutWidget)
         self.ptiling_widget = PTilingWidget(self.splitter)
         self.ptiling_widget.setObjectName(u"ptiling_widget")

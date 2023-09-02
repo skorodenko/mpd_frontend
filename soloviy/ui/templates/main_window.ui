@@ -37,7 +37,7 @@
        <bool>false</bool>
       </property>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,10">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,9">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,10,0">
           <item>
@@ -275,21 +275,6 @@
           </property>
           <property name="horizontalScrollMode">
            <enum>QAbstractItemView::ScrollPerItem</enum>
-          </property>
-          <property name="movement">
-           <enum>QListView::Static</enum>
-          </property>
-          <property name="spacing">
-           <number>8</number>
-          </property>
-          <property name="viewMode">
-           <enum>QListView::ListMode</enum>
-          </property>
-          <property name="uniformItemSizes">
-           <bool>false</bool>
-          </property>
-          <property name="selectionRectVisible">
-           <bool>false</bool>
           </property>
          </widget>
         </item>

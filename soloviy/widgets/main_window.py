@@ -3,7 +3,6 @@ import logging
 import asyncio
 import pathlib
 import datetime
-#import toml
 from dynaconf.loaders.toml_loader import write
 import qtinter
 from PIL import Image, ImageQt
@@ -11,6 +10,7 @@ from io import BytesIO
 from PySide6.QtCore import QDir, QTimer, Signal, QObject
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from soloviy.config import settings
+from soloviy.models.playlists import PlaylistsModel
 #import soloviy.utils.time_utils as tu
 from soloviy.api.mpd_connector import MpdConnector
 #from soloviy.models.playlists_model import PlaylistsModel
@@ -58,9 +58,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
         self.mpd.mpd_connection_status.connect(
             qtinter.asyncslot(self.init_wizard.connect_mpd_tracker)
         )
+        self.mpd.update_playlists_view.connect(
+            self.__update_playlists_view
+        )
         self.init_wizard.connect_mpd.connect(
             qtinter.asyncslot(self.mpd.mpd_connect)
         )
+    
+    def __update_playlists_view(self, playlists: list):
+        playlists_model = PlaylistsModel(playlists)
+        self.playlists_view.setModel(playlists_model)
     
     @staticmethod
     def persist_settings(): #TODO move to settings widget
