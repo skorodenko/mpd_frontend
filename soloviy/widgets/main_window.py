@@ -10,7 +10,7 @@ from io import BytesIO
 from PySide6.QtCore import QDir, QTimer, Signal, QObject
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from soloviy.config import settings
-from soloviy.models.playlists import PlaylistsModel
+from soloviy.models.playlists_qmodel import PlaylistsModel
 #import soloviy.utils.time_utils as tu
 from soloviy.api.mpd_connector import MpdConnector
 #from soloviy.models.playlists_model import PlaylistsModel
@@ -21,12 +21,12 @@ from soloviy.widgets.init_wizard import InitWizard
 logger = logging.getLogger(__name__)
 
 
-class SingalsMixin(QObject):
-    ...
+class SignalsMixin(QObject):
+    playlist_add: Signal = Signal(str)
 
 
 @attrs.define
-class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
+class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
     timer: QTimer = QTimer
     mpd: MpdConnector = attrs.Factory(MpdConnector)
     init_wizard: InitWizard = attrs.Factory(InitWizard, takes_self=True)
@@ -55,6 +55,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
             self.init_wizard.connect_mpd.emit(settings.mpd.socket)
                 
     def _bind_signals(self):
+        self.playlist_add.connect(
+            qtinter.asyncslot(self.mpd.playlist_add_db)   
+        )
+        self.mpd.playlist_added.connect(
+            self.ptiling_widget.tile_add   
+        )
         self.mpd.mpd_connection_status.connect(
             qtinter.asyncslot(self.init_wizard.connect_mpd_tracker)
         )
@@ -63,6 +69,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, SingalsMixin):
         )
         self.init_wizard.connect_mpd.connect(
             qtinter.asyncslot(self.mpd.mpd_connect)
+        )
+        self.playlists_view.doubleClicked.connect(
+            lambda pname: self.playlist_add.emit(pname.data())
         )
     
     def __update_playlists_view(self, playlists: list):

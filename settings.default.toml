@@ -8,5 +8,5 @@ socket = ""
 connection_timeout = 10
 
 [soloviy]
-tiling_mode = 2
+tiling_mode = 1
 playlists_margin = 2

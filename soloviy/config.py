@@ -9,6 +9,7 @@ xdg_cache_dir = pathlib.Path(xdg_cache_home()) / "soloviy"
 settings_file = str(xdg_config_dir / "settings.toml")
 log_file = str(xdg_state_dir / "soloviy.log")
 default_config = str(pathlib.Path("./settings.default.toml"))
+tinydb_file = str(xdg_data_dir / "tinydb.json")
 
 settings = Dynaconf(
     settings_file = settings_file,

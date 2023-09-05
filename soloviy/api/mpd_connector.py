@@ -4,6 +4,7 @@ import attrs
 import asyncio
 import logging
 from enum import Enum
+from soloviy import db
 from soloviy.config import settings
 from mpd.asyncio import MPDClient
 from PySide6.QtCore import QProcess, Signal, QObject
@@ -31,6 +32,8 @@ class SignalsMixin:
     mpd_connection_status: Signal = Signal(ConnectionStatus)
     # Emit updated playlists tree view
     update_playlists_view: Signal = Signal(list)
+    # Emit when fetced playlist to db
+    playlist_added: Signal = Signal(str)
 
 
 @attrs.define
@@ -46,14 +49,7 @@ class MpdConnector(QObject, SignalsMixin):
             qtinter.asyncslot(self.__publish_playlists)
         )
     
-    @staticmethod
-    def status_diff(old, new):
-        return [k for k in old.keys() 
-            if old.get(k) != new.get(k)
-            and old.get(k) is not None
-            and new.get(k) is not None]
-    
-    async def mpd_connect(self, _socket):
+    async def mpd_connect(self, _socket: str):
         logger.info("Connecting to mpd")
         self.mpd_connection_status.emit(ConnectionStatus.CONNECTING)
         if _socket == settings.mpd.native_socket:
@@ -70,6 +66,19 @@ class MpdConnector(QObject, SignalsMixin):
         except (socket.gaierror, ConnectionRefusedError):
             logger.warning("Failed to connect to mpd")
             self.mpd_connection_status.emit(ConnectionStatus.CONNECTION_FAILED)
+    
+    async def playlist_add_db(self, playlist: str):
+        await self.client.update()
+        data = await self.client.listallinfo(playlist)
+        data = [i for i in data if i.get("file")] # Keep files (music) only
+        for i, d in enumerate(data, start=0): # Add ids to music 
+            d.update({"#": i})
+            
+        table = db.table(playlist)
+        if len(table) > 0:
+            db.drop_table(playlist)
+        table.insert_multiple(data)
+        self.playlist_added.emit(playlist)
 
     def graceful_close(self):
         # Add idle task cancelation
@@ -83,26 +92,9 @@ class MpdConnector(QObject, SignalsMixin):
     async def __publish_playlists(self, status: ConnectionStatus):
         if status == ConnectionStatus.CONNECTED:
             await self.client.update() # TODO Move to another button to update manually
-            plsts = await self.client.listfiles(".")            
+            plsts = await self.client.listfiles(".")           
             self.update_playlists_view.emit(plsts)
             
-    
-#    async def __mpd_connect_dialog(self):
-#        while True:
-#            try:
-#                task = asyncio.create_task(
-#                    self.__mpd_connect(MPD_NATIVE_SOCKET)
-#                )
-#                if not task.done():
-#                    await task
-#                task.exception()
-#                self.mpd_idle_task = asyncio.create_task(self.__mpd_idle())
-#                break
-#            except (socket.gaierror, ConnectionRefusedError):
-#                if not MpdSocketConfig(self).exec():
-#                    self.close()
-#                    break
-#    
 #    async def __mpd_idle(self):
 #        #FIXME Find a way to cancel this task properly
 #        #FIXME Restart on disconnect
