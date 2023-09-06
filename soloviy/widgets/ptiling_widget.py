@@ -1,6 +1,7 @@
 import attrs
 import asyncio
 import itertools
+from typing import Optional
 from soloviy.config import settings
 from collections import deque
 from PySide6.QtCore import QEvent, Signal
@@ -10,38 +11,48 @@ from soloviy.widgets.playlist_tile import PlaylistTile
 
 
 class SignalsMixin:
-    tile_mode_updated: Signal = Signal()    
+    tile_mode_updated: Signal = Signal()
+    tile_layout_update: Signal = Signal()
 
 @attrs.define
 class PTilingWidget(QWidget, SignalsMixin):
     order: deque = attrs.Factory(deque)
     lock: deque = attrs.Factory(deque)
+    mode: int = None
  
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__attrs_init__()
     
     def __attrs_post_init__(self):
+        self.tile_layout_update.connect(
+            self.tiles_update
+        )
+        layout = QGridLayout(self)
+        layout.setColumnStretch(0,1)
+        layout.setColumnStretch(1,1)
+        layout.setRowStretch(0,1)
+        layout.setRowStretch(1,1)
+        self.setLayout(layout)
         self.set_tile_mode(settings.soloviy.tiling_mode)
     
     @property
-    def free(self):
+    def free(self) -> int:
         return len(self.order)
     
     @property
-    def locked(self):
+    def locked(self) -> int:
         return len(self.lock)
 
     @property    
-    def free_space(self):
+    def free_space(self) -> bool:
         return self.locked < self.mode
 
-    def event(self, event: QEvent) -> bool:
-        if event.type() == QEvent.Type.LayoutRequest:
-            ... #?TODO? Add animation on tiling change
-        if event.type() == QEvent.Type.Resize:
-            ... #?TODO? Resize playlists on size change
-        return super().event(event)
+    def tile_placed(self, playlist: str) -> Optional[PlaylistTile]:
+        for pt in self.order + self.lock:
+            if pt.playlist == playlist:
+                return pt
+        return None
 
     def set_tile_mode(self, mode: int):
         if mode in [1, 2, 3, 4]:
@@ -50,11 +61,40 @@ class PTilingWidget(QWidget, SignalsMixin):
             raise ValueError(f"Bad tiling mode: {mode}")
         
     def tile_add(self, playlist: str):
-        if self.free_space:
-            self.layout = QGridLayout()
+        if self.tile_placed(playlist):
+            return
+        elif self.free_space:
+            if self.locked + self.free == self.mode: #TODO Move this to tiles_update
+                pt_old = self.order.pop()
+                self.tile_destroy(pt_old)
             pt_new = PlaylistTile(playlist)
-            self.layout.addWidget(pt_new, *(0,0,2,2))
-            self.setLayout(self.layout)
+            self.order.appendleft(pt_new)
+        self.tile_layout_update.emit() # Update tiling
+    
+    def tile_destroy(self, tile: PlaylistTile):
+        layout = self.layout()
+        layout.removeWidget(tile)
+        tile.deleteLater()
+        if tile in self.lock:
+            del self.lock[self.lock.index(tile)]
+        if tile in self.order:
+            del self.order[self.order.index(tile)]
+    
+    def tiles_update(self):
+        layout = self.layout()
+        for w,p in zip(self.lock + self.order,self.__get_tiling(self.free + self.locked)):
+            layout.addWidget(w, *p)
+
+    def __get_tiling(self, count) -> list[tuple]:
+        match count:
+            case 1:
+                return [(0,0,2,2)]
+            case 2:
+                return [(0,0,2,1),(0,1,2,1)]
+            case 3:
+                return [(0,0,2,1),(0,1,1,1),(1,1,1,1)]
+            case 4:
+                return [(0,0,1,1),(0,1,1,1),(1,0,1,1),(1,1,1,1)]
 
 #    async def add_tile(self, tile):
 #        if self.locked + self.free == self.mode:
