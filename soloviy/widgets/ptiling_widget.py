@@ -36,6 +36,14 @@ class PTilingWidget(QWidget, SignalsMixin):
         self.setLayout(layout)
         self.set_tile_mode(settings.soloviy.tiling_mode)
     
+    def _bind_tile_signals(self, tile: PlaylistTile):
+        tile.lock.connect(
+            self.__manage_tile_lock
+        )
+        tile.destroy.connect(
+            self.__manage_tile_destruction
+        )
+    
     @property
     def free(self) -> int:
         return len(self.order)
@@ -68,6 +76,7 @@ class PTilingWidget(QWidget, SignalsMixin):
                 pt_old = self.order.pop()
                 self.tile_destroy(pt_old)
             pt_new = PlaylistTile(playlist)
+            self._bind_tile_signals(pt_new)
             self.order.appendleft(pt_new)
         self.tile_layout_update.emit() # Update tiling
     
@@ -95,75 +104,22 @@ class PTilingWidget(QWidget, SignalsMixin):
                 return [(0,0,2,1),(0,1,1,1),(1,1,1,1)]
             case 4:
                 return [(0,0,1,1),(0,1,1,1),(1,0,1,1),(1,1,1,1)]
+            case _:
+                return []
+    
+    def __manage_tile_lock(self, tile: PlaylistTile, locked: bool):
+        if locked: #-> unlock
+            del self.order[self.order.index(tile)]
+            self.lock.append(tile)
+        else: #-> lock
+            del self.lock[self.lock.index(tile)]
+            self.order.appendleft(tile)
+        self.tile_layout_update.emit()
+    
+    def __manage_tile_destruction(self, tile: PlaylistTile):
+        self.tile_destroy(tile)
+        self.tile_layout_update.emit()
 
-#    async def add_tile(self, tile):
-#        if self.locked + self.free == self.mode:
-#            old_tile = self.order.pop()
-#            await self.widget.playlist_destroy(old_tile, update=False, popped=True)
-#        self.order.appendleft(tile)
-#        await self.__update_tiling()
-#    
-#    async def destroy_tile(self, tile, update, popped):
-#        if tile in self.lock:
-#            del self.lock[self.lock.index(tile)]
-#        elif not popped:
-#            del self.order[self.order.index(tile)]
-#        if update:
-#            await self.__update_tiling()
-#
-#    async def lock_tile(self, tile):
-#        del self.order[self.order.index(tile)]
-#        self.lock.append(tile)
-#        await self.__update_tiling()
-#    
-#    async def unlock_tile(self, tile):
-#        del self.lock[self.lock.index(tile)]
-#        self.order.appendleft(tile)
-#        await self.__update_tiling()
-#
-#    async def __update_tiling(self):
-#        layout = QGridLayout()
-#        for w,p in zip(self.lock + self.order,self.__get_tiling(self.free + self.locked)):
-#            layout.addWidget(w, *p)
-#        if (old_layout := self.widget.layout()) is not None:
-#            self.__delete_layout(old_layout)
-#        self.widget.setLayout(layout)
-#        self.__even_stretch(layout)
-#
-#    def __delete_layout(self, cur_lay):
-#        if cur_lay is not None:
-#            while cur_lay.count():
-#                item = cur_lay.takeAt(0)
-#                widget = item.widget()
-#                if widget is not None:
-#                    widget.deleteLater()
-#                else:
-#                    self.deleteLayout(item.layout())
-#            sip.delete(cur_lay)
-#    
-#    def __get_tiling(self, count):
-#        match count:
-#            case 1:
-#                return [(0,0,2,2)]
-#            case 2:
-#                return [(0,0,2,1),(0,1,2,1)]
-#            case 3:
-#                return [(0,0,2,1),(0,1,1,1),(1,1,1,1)]
-#            case 4:
-#                return [(0,0,1,1),(0,1,1,1),(1,0,1,1),(1,1,1,1)]
-#            case _:
-#                return ()
-#    
-#    def __even_stretch(self,layout):
-#        layout.setColumnStretch(0,1)
-#        layout.setColumnStretch(1,1)
-#        layout.setRowStretch(0,1)
-#        layout.setRowStretch(1,1)
-#
-#    def _init_connection(self, main):
-#        self.main = main
-#        self.tiler.set_tile_mode(self.main.config.get("tiling_mode"))
-#
 #    @staticmethod
 #    def swappair2list(kv):
 #        res = []
@@ -197,19 +153,6 @@ class PTilingWidget(QWidget, SignalsMixin):
 #            playlist = await self.main.mpd.client.listallinfo(playlist_name)
 #            pt_new = PlaylistTile(self, playlist)
 #            await self.tiler.add_tile(pt_new)
-#
-#    async def playlist_lock(self, pt, status):
-#        if status:
-#            await self.tiler.lock_tile(pt)
-#        else:
-#            await self.tiler.unlock_tile(pt)
-#
-#    async def playlist_destroy(self, pt, update=True, popped=False):
-#        await self.tiler.destroy_tile(pt, update, popped)
-#        if self.active_playlist is pt:
-#            await self.main.mpd.client.clear()
-#            await self.song_changed()
-#            self.active_playlist = None
 #
 #    async def song_changed(self):
 #        if song := await self.main.mpd.client.currentsong():
