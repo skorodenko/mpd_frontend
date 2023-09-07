@@ -11,7 +11,6 @@ from soloviy.widgets.playlist_tile import PlaylistTile
 
 
 class SignalsMixin:
-    tile_mode_updated: Signal = Signal()
     tile_layout_update: Signal = Signal()
 
 @attrs.define
