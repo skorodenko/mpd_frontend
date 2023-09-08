@@ -7,7 +7,6 @@ from soloviy.config import settings
 from collections import deque
 from PySide6.QtCore import QEvent, Signal
 from PySide6.QtWidgets import QWidget, QGridLayout
-#from soloviy.utils.playlist_tiler import PlaylistTiler
 from soloviy.widgets.playlist_tile import PlaylistTile
 
 
@@ -61,24 +60,24 @@ class PTilingWidget(QWidget, SignalsMixin):
     def free_space(self) -> bool:
         return self.locked < self.mode
 
-    def tile_placed(self, playlist: str) -> Optional[PlaylistTile]:
-        for pt in self.order + self.lock:
-            if pt.playlist == playlist:
-                return pt
-        return None
-
     def set_tile_mode(self, mode: int):
         logger.info(f"Updating tile mode: {self.mode} -> {mode}")
         if mode in [1, 2, 3, 4]:
             self.mode = mode
         else:
             raise ValueError(f"Bad tiling mode: {mode}")
+    
+    def tile_placed(self, playlist: str) -> Optional[PlaylistTile]:
+        for pt in self.order + self.lock:
+            if pt.playlist == playlist:
+                return pt
+        return None
         
     def tile_add(self, playlist: str):
         if self.tile_placed(playlist):
             return
         elif self.free_space:
-            if self.locked + self.free == self.mode: #TODO Move this to tiles_update
+            if self.locked + self.free == self.mode:
                 pt_old = self.order.pop()
                 self.tile_destroy(pt_old)
             pt_new = PlaylistTile(playlist)
@@ -116,10 +115,10 @@ class PTilingWidget(QWidget, SignalsMixin):
                 return []
     
     def __manage_tile_lock(self, tile: PlaylistTile, locked: bool):
-        if locked: #-> unlock
+        if locked:
             del self.order[self.order.index(tile)]
             self.lock.append(tile)
-        else: #-> lock
+        else:
             del self.lock[self.lock.index(tile)]
             self.order.appendleft(tile)
         self.tile_layout_update.emit()
