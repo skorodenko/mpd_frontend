@@ -1,4 +1,5 @@
 import attrs
+import logging
 import asyncio
 import itertools
 from typing import Optional
@@ -10,8 +11,12 @@ from PySide6.QtWidgets import QWidget, QGridLayout
 from soloviy.widgets.playlist_tile import PlaylistTile
 
 
+logger = logging.getLogger(__name__)
+
+
 class SignalsMixin:
     tile_layout_update: Signal = Signal()
+
 
 @attrs.define
 class PTilingWidget(QWidget, SignalsMixin):
@@ -34,6 +39,7 @@ class PTilingWidget(QWidget, SignalsMixin):
         layout.setRowStretch(1,1)
         self.setLayout(layout)
         self.set_tile_mode(settings.soloviy.tiling_mode)
+        logger.info("Created widget")
     
     def _bind_tile_signals(self, tile: PlaylistTile):
         tile.lock.connect(
@@ -62,6 +68,7 @@ class PTilingWidget(QWidget, SignalsMixin):
         return None
 
     def set_tile_mode(self, mode: int):
+        logger.info(f"Updating tile mode: {self.mode} -> {mode}")
         if mode in [1, 2, 3, 4]:
             self.mode = mode
         else:
@@ -87,8 +94,10 @@ class PTilingWidget(QWidget, SignalsMixin):
             del self.lock[self.lock.index(tile)]
         if tile in self.order:
             del self.order[self.order.index(tile)]
+        logger.info(f"Destroyed tile {tile.playlist}")
     
     def tiles_update(self):
+        logger.info("Updated tiles")
         layout = self.layout()
         for w,p in zip(self.lock + self.order,self.__get_tiling(self.free + self.locked)):
             layout.addWidget(w, *p)

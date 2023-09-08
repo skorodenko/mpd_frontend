@@ -1,17 +1,17 @@
-from soloviy import db
+from soloviy.db import tdb
 from tinydb import Query
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import Qt, QAbstractTableModel
+from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
 
+FOLDER_ICON = QIcon.fromTheme("folder-music")
 PLAYING_ICON = QIcon.fromTheme("media-playback-start")
-VISIBLE_COLUMNS = ["#", "file"]
+VISIBLE_COLUMNS = ["#", "file"] # Move to config
 
 class PlaylistModel(QAbstractTableModel):
     def __init__(self, playlist: str):
         super().__init__()
         self.playlist = playlist
-        self.table = db.table(playlist)
-        self.playing_id: int = None
+        self.table = tdb.table(playlist)
         self.columns = VISIBLE_COLUMNS
 
     @staticmethod
@@ -64,3 +64,23 @@ class PlaylistModel(QAbstractTableModel):
 #    
 #    def reset_index(self):
 #        self.playlist.reset_index(drop=True, inplace=True)
+
+
+class PlaylistsModel(QAbstractListModel):
+    def __init__(self, playlists):
+        super().__init__()
+        self.playlists = [
+            playlist["directory"] for playlist in playlists
+            if not playlist.get("directory", ".").startswith(".")
+        ]
+        self.playlists.sort()
+
+    def data(self, index, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            name = self.playlists[index.row()]
+            return name
+        if role == Qt.ItemDataRole.DecorationRole:
+            return FOLDER_ICON
+    
+    def rowCount(self, index):
+        return len(self.playlists)

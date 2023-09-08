@@ -4,7 +4,7 @@ import attrs
 import asyncio
 import logging
 from enum import Enum
-from soloviy import db
+from soloviy.db import tdb
 from soloviy.config import settings
 from mpd.asyncio import MPDClient
 from PySide6.QtCore import QProcess, Signal, QObject
@@ -74,9 +74,9 @@ class MpdConnector(QObject, SignalsMixin):
         for i, d in enumerate(data, start=0): # Add ids to music 
             d.update({"#": i})
             
-        table = db.table(playlist)
+        table = tdb.table(playlist)
         if len(table) > 0:
-            db.drop_table(playlist)
+            tdb.drop_table(playlist)
         table.insert_multiple(data)
         self.playlist_added.emit(playlist)
 

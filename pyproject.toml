@@ -16,8 +16,8 @@ qtinter = "^0.11.0"
 pyside6 = "^6.5.2"
 dynaconf = "^3.2.2"
 cashews = "^6.2.0"
-diskcache = "^5.6.1"
-toml = "^0.10.2"
+diskcache = "^5.6.3"
+peewee = "^3.16.3"
 tinydb = "^4.8.0"
 
 

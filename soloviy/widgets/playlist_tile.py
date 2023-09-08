@@ -1,11 +1,14 @@
 import attrs
 import asyncio
 import qtinter
-import tinydb
+import logging
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QFrame, QHeaderView
 from soloviy.ui.ui_playlist_tile import Ui_Frame
-from soloviy.models.playlist_qmodel import PlaylistModel
+from soloviy.models.qmodels import PlaylistModel
+
+
+logger = logging.getLogger(__name__)
 
 
 class SignalsMixin:
@@ -25,6 +28,7 @@ class PlaylistTile(QFrame, Ui_Frame, SignalsMixin):
         pmodel = PlaylistModel(self.playlist)
         self.playlist_table.setModel(pmodel)
         self._bind_signals()
+        logger.info(f"Added tile {self.playlist}")
     
     def _bind_signals(self):
         self.playlist_lock.toggled.connect(

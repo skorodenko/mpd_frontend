@@ -10,10 +10,8 @@ from io import BytesIO
 from PySide6.QtCore import QDir, QTimer, Signal, QObject
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from soloviy.config import settings
-from soloviy.models.playlists_qmodel import PlaylistsModel
-#import soloviy.utils.time_utils as tu
+from soloviy.models.qmodels import PlaylistsModel
 from soloviy.api.mpd_connector import MpdConnector
-#from soloviy.models.playlists_model import PlaylistsModel
 from soloviy.ui.ui_main_window import Ui_MainWindow
 from soloviy.widgets.init_wizard import InitWizard
 
