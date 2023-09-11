@@ -19,6 +19,7 @@ cashews = "^6.2.0"
 diskcache = "^5.6.3"
 peewee = "^3.16.3"
 tinydb = "^4.8.0"
+pydantic = "^2.3.0"
 
 
 [tool.poetry.group.dev.dependencies]

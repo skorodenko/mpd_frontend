@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class SignalsMixin(QObject):
-    playlist_add: Signal = Signal(str)
+    ...
 
 
 @attrs.define
@@ -53,11 +53,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
             self.init_wizard.connect_mpd.emit(settings.mpd.socket)
                 
     def _bind_signals(self):
-        self.playlist_add.connect(
+        self.ptiling_widget.playlist_created.connect(
             qtinter.asyncslot(self.mpd.playlist_add_db)   
         )
-        self.mpd.playlist_added.connect(
-            self.ptiling_widget.tile_add   
+        self.mpd.playlist_populated.connect(
+            lambda: self.ptiling_widget.tile_layout_update.emit()  
         )
         self.mpd.mpd_connection_status.connect(
             qtinter.asyncslot(self.init_wizard.connect_mpd_tracker)
@@ -69,7 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
             qtinter.asyncslot(self.mpd.mpd_connect)
         )
         self.playlists_view.doubleClicked.connect(
-            lambda pname: self.playlist_add.emit(pname.data())
+            lambda pname: self.ptiling_widget.tile_add(pname.data())
         )
     
     def __update_playlists_view(self, playlists: list):

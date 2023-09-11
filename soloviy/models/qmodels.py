@@ -1,18 +1,21 @@
-from soloviy.db import tdb
-from tinydb import Query
+from soloviy.models.dbmodels import PlaylistTile, Playlist
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
 
 FOLDER_ICON = QIcon.fromTheme("folder-music")
 PLAYING_ICON = QIcon.fromTheme("media-playback-start")
-VISIBLE_COLUMNS = ["#", "file"] # Move to config
+VISIBLE_COLUMNS = ["track", "file"] # Move to config
 
 class PlaylistModel(QAbstractTableModel):
     def __init__(self, playlist: str):
         super().__init__()
         self.playlist = playlist
-        self.table = tdb.table(playlist)
         self.columns = VISIBLE_COLUMNS
+        self._query = Playlist.select().where(Playlist.playlist_name == self.playlist)
+        
+    @property
+    def query(self):
+        return self._query
 
     @staticmethod
     def strfdelta(tdelta):
@@ -25,21 +28,19 @@ class PlaylistModel(QAbstractTableModel):
                 return f"{m:0>2}:{s:0>2}"
     
     def data(self, index, role):
-        Song = Query()
         row = index.row()
         column = index.column()
         if role == Qt.ItemDataRole.DisplayRole:
-            entry = self.table.get(Song["#"] == row)
             column_name = self.columns[column]
-            if column_name == "time":
-                return self.strfdelta(entry.get(column_name))
-            return str(entry.get(column_name))
+            #if column_name == "time":
+            #    return self.strfdelta(entry.get(column_name))
+            return str(getattr(self.query[row], column_name))
 #        if role == Qt.ItemDataRole.DecorationRole:
 #            if self.playlist.at[row, "__playing"] and self.playlist.columns[column] == "#":
 #                return PLAYING_ICON
     
     def rowCount(self, index):
-        return len(self.table)
+        return Playlist.select().where(Playlist.playlist_name == self.playlist).count()
     
     def columnCount(self, index):
         return len(self.columns)
@@ -47,6 +48,8 @@ class PlaylistModel(QAbstractTableModel):
     def headerData(self, section, orientation, role):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
+                if section == self.columns.index("track"):
+                    return "#"
                 return self.columns[section]
     
 #    def playing_status(self, row=None):

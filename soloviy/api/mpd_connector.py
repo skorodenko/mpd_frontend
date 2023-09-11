@@ -4,7 +4,9 @@ import attrs
 import asyncio
 import logging
 from enum import Enum
-from soloviy.db import tdb
+from typing import List
+from pydantic import TypeAdapter
+from soloviy.models import dbmodels, pydanticmodels
 from soloviy.config import settings
 from mpd.asyncio import MPDClient
 from PySide6.QtCore import QProcess, Signal, QObject
@@ -33,7 +35,7 @@ class SignalsMixin:
     # Emit updated playlists tree view
     update_playlists_view: Signal = Signal(list)
     # Emit when fetced playlist to db
-    playlist_added: Signal = Signal(str)
+    playlist_populated: Signal = Signal(str)
 
 
 @attrs.define
@@ -68,17 +70,18 @@ class MpdConnector(QObject, SignalsMixin):
             self.mpd_connection_status.emit(ConnectionStatus.CONNECTION_FAILED)
     
     async def playlist_add_db(self, playlist: str):
-        await self.client.update()
+        logger.debug(f"Started population of playlist: {playlist}")
         data = await self.client.listallinfo(playlist)
         data = [i for i in data if i.get("file")] # Keep files (music) only
-        for i, d in enumerate(data, start=0): # Add ids to music 
-            d.update({"#": i})
-            
-        table = tdb.table(playlist)
-        if len(table) > 0:
-            tdb.drop_table(playlist)
-        table.insert_multiple(data)
-        self.playlist_added.emit(playlist)
+        data = [dict(i, playlist_name = playlist) for i in data] # Add foreign key to data
+        logger.debug(f"Recieved playlist: {playlist}")
+        ta = TypeAdapter(List[pydanticmodels.Playlist])
+        data = ta.validate_python(data)
+        logger.debug(f"Validated playlist: {playlist}")
+        data = ta.dump_python(data)
+        dbmodels.Playlist.insert_many(data).execute()
+        self.playlist_populated.emit(playlist)
+        logger.debug(f"Ended population of playlist: {playlist}")
 
     def graceful_close(self):
         # Add idle task cancelation

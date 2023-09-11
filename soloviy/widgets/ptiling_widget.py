@@ -1,11 +1,11 @@
 import attrs
 import logging
-import asyncio
-import itertools
+from weakref import WeakValueDictionary
+from peewee import fn
 from typing import Optional
+from soloviy.models import dbmodels
 from soloviy.config import settings
-from collections import deque
-from PySide6.QtCore import QEvent, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QGridLayout
 from soloviy.widgets.playlist_tile import PlaylistTile
 
@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 class SignalsMixin:
+    # Emmited when playlist metadata inserted into db
+    playlist_created: Signal = Signal(str)
     tile_layout_update: Signal = Signal()
 
 
 @attrs.define
 class PTilingWidget(QWidget, SignalsMixin):
-    order: deque = attrs.Factory(deque)
-    lock: deque = attrs.Factory(deque)
-    mode: int = None
+    tiles: WeakValueDictionary = WeakValueDictionary()
  
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,7 +37,6 @@ class PTilingWidget(QWidget, SignalsMixin):
         layout.setRowStretch(0,1)
         layout.setRowStretch(1,1)
         self.setLayout(layout)
-        self.set_tile_mode(settings.soloviy.tiling_mode)
         logger.info("Created widget")
     
     def _bind_tile_signals(self, tile: PlaylistTile):
@@ -50,56 +49,63 @@ class PTilingWidget(QWidget, SignalsMixin):
     
     @property
     def free(self) -> int:
-        return len(self.order)
+        m = dbmodels.PlaylistTile
+        return m.select().where(m.locked == False).count()
     
     @property
     def locked(self) -> int:
-        return len(self.lock)
+        m = dbmodels.PlaylistTile
+        return m.select().where(m.locked == True).count()
 
     @property    
     def free_space(self) -> bool:
-        return self.locked < self.mode
-
-    def set_tile_mode(self, mode: int):
-        logger.info(f"Updating tile mode: {self.mode} -> {mode}")
-        if mode in [1, 2, 3, 4]:
-            self.mode = mode
-        else:
-            raise ValueError(f"Bad tiling mode: {mode}")
+        return self.locked < settings.soloviy.tiling_mode
+    
+    @property
+    def overflow_space(self) -> bool:
+        return self.locked + self.free == settings.soloviy.tiling_mode
     
     def tile_placed(self, playlist: str) -> Optional[PlaylistTile]:
-        for pt in self.order + self.lock:
-            if pt.playlist == playlist:
-                return pt
-        return None
+        m = dbmodels.PlaylistTile
+        return m.select().where(m.name == playlist).first()
         
     def tile_add(self, playlist: str):
+        logger.debug(f"Adding tile {playlist}")
         if self.tile_placed(playlist):
+            logger.debug(f"Tile already added {playlist}")
             return
         elif self.free_space:
-            if self.locked + self.free == self.mode:
-                pt_old = self.order.pop()
-                self.tile_destroy(pt_old)
-            pt_new = PlaylistTile(playlist)
-            self._bind_tile_signals(pt_new)
-            self.order.appendleft(pt_new)
-        self.tile_layout_update.emit() # Update tiling
+            if self.overflow_space:
+                inst = dbmodels.PlaylistTile \
+                    .select() \
+                    .where(dbmodels.PlaylistTile.locked == False) \
+                    .order_by(dbmodels.PlaylistTile.tile_order, 
+                              dbmodels.PlaylistTile.locked) \
+                    .first()
+                logger.debug(f"Removing last tile {inst.name}")
+                self.tile_destroy(inst.name)
+            self.tiles[playlist] = PlaylistTile(playlist)
+            self.playlist_created.emit(playlist)
+            logger.debug(f"Added tile {playlist}")
     
-    def tile_destroy(self, tile: PlaylistTile):
+    def tile_destroy(self, playlist: str):
         layout = self.layout()
+        tile = self.tiles[playlist]
         layout.removeWidget(tile)
-        tile.deleteLater()
-        if tile in self.lock:
-            del self.lock[self.lock.index(tile)]
-        if tile in self.order:
-            del self.order[self.order.index(tile)]
-        logger.info(f"Destroyed tile {tile.playlist}")
+        tile.delete()
+        del tile
+        logger.debug(f"Destroyed tile {playlist}")
     
     def tiles_update(self):
-        logger.info("Updated tiles")
+        logger.debug("Updating tiles")
         layout = self.layout()
-        for w,p in zip(self.lock + self.order,self.__get_tiling(self.free + self.locked)):
-            layout.addWidget(w, *p)
+        m = dbmodels.PlaylistTile
+        query = m.select().order_by(m.tile_order.desc(), m.locked)
+        for plst, pos in zip(query,self.__get_tiling(self.free + self.locked)):
+            tile = self.tiles.get(plst.name)
+            tile.populated()
+            layout.addWidget(tile, *pos)
+        logger.debug("Updated tiles")
 
     def __get_tiling(self, count) -> list[tuple]:
         match count:
@@ -126,69 +132,3 @@ class PTilingWidget(QWidget, SignalsMixin):
     def __manage_tile_destruction(self, tile: PlaylistTile):
         self.tile_destroy(tile)
         self.tile_layout_update.emit()
-
-#    @staticmethod
-#    def swappair2list(kv):
-#        res = []
-#        while kv:
-#            chain = []
-#            start,k = kv.popitem()
-#            chain.append(start)
-#            if start == k:
-#                continue
-#            while True:
-#                v = kv.pop(k)
-#                chain.append(k)
-#                if v == start:
-#                    break
-#                k = v
-#            res.append(chain)
-#        return res
-#
-#    async def sort_playlist(self, kv):
-#        lswap = self.swappair2list(kv)
-#        for l in lswap:
-#            for s1,s2 in itertools.pairwise(l):
-#                await self.main.mpd.client.swap(s1,s2)
-#    
-#    async def fill_playlist(self, file_list):
-#        for f in file_list:
-#            await self.main.mpd.client.add(f)
-#
-#    async def add_playlist(self, playlist_name):
-#        if self.tiler.free_space:
-#            playlist = await self.main.mpd.client.listallinfo(playlist_name)
-#            pt_new = PlaylistTile(self, playlist)
-#            await self.tiler.add_tile(pt_new)
-#
-#    async def song_changed(self):
-#        if song := await self.main.mpd.client.currentsong():
-#            pos = int(song["pos"])
-#            self.active_playlist.playlist_model.playing_status(pos)
-#            index = self.active_playlist.playlist_model.index(pos, 0)
-#            self.active_playlist.playlist_table.scrollTo(index,
-#                    QtWidgets.QAbstractItemView.ScrollHint.PositionAtCenter)
-#            song_row = self.active_playlist.playlist.iloc[pos]
-#        else:
-#            data = {
-#                "title":"Unknown",
-#                "artist":"Unknown",
-#                "album":"Unknown",
-#                "freq":"0",
-#                "bitr":"0",
-#                "chanels":"0",
-#                "file": "Unknown.Unknown",
-#            } 
-#            song_row = pd.Series(data=data)
-#        
-#        asyncio.create_task(self.main._label_song_change(song_row))
-#
-#    async def playlist_song(self, tile, playlist, song_pos):
-#        if self.active_playlist is not tile:
-#            if self.active_playlist is not None:
-#                self.active_playlist.playlist_model.playing_status()
-#            await self.main.mpd.client.clear()
-#            await asyncio.create_task(self.fill_playlist(
-#                playlist["file"].to_list()))
-#        await self.main.mpd.client.play(song_pos)
-#        self.active_playlist = tile
