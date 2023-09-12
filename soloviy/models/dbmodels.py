@@ -1,22 +1,19 @@
-import datetime
-from soloviy.db import memory_db, db, BaseModel, BaseMemoryModel
-from peewee import CharField, IntegerField, BooleanField, ForeignKeyField, FloatField, TimestampField, DateTimeField
+from soloviy.db import db, BaseModel
+from peewee import CharField, IntegerField, FloatField, DateTimeField, AutoField
 
+class PlaylistTile:
+    ...
 
-class PlaylistTile(BaseModel):
-    name = CharField(primary_key=True)
-    sort_by = CharField(null = True)
-    tile_order = TimestampField(default = datetime.datetime.now)
-    active = BooleanField(default = False)
-    locked = BooleanField(default = False)
-    
+class Playlist:
+    ...
 
-class Playlist(BaseMemoryModel):
-    playlist_name = CharField()
+class Library(BaseModel):
+    id = AutoField()
+    folder = CharField()
     file = CharField()
     time = IntegerField()
     duration = FloatField()  
-    last_modified = DateTimeField(null = True)
+    lastmodified = DateTimeField(null = True)
     format = CharField(null = True)
     artist = CharField(null = True)
     albumartist = CharField(null = True)
@@ -29,5 +26,4 @@ class Playlist(BaseMemoryModel):
     disc = IntegerField(null = True)
     
 
-db.create_tables([PlaylistTile])
-memory_db.create_tables([Playlist])
+db.create_tables([Library])

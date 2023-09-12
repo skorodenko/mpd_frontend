@@ -1,9 +1,11 @@
 import attrs
 import asyncio
+import qtinter
 from enum import Enum
-from PySide6.QtCore import QObject, Signal, QDir, QPropertyAnimation, QSize
-from PySide6.QtWidgets import QWizard, QMainWindow
+from PySide6.QtCore import Signal, QDir, QPropertyAnimation, Slot
+from PySide6.QtWidgets import QWizard, QMainWindow, QWidget, QLabel, QFileDialog
 from soloviy.ui.ui_init_wizard import Ui_Wizard
+from soloviy.db import state
 from soloviy.config import settings
 from soloviy.api.mpd_connector import ConnectionStatus
 
@@ -16,20 +18,36 @@ class AlertStyle(Enum):
     
 
 class AlertSize(Enum):
-    OPEN = QSize(100500, 50)
-    CLOSED = QSize(100500, 0)
+    OPEN = 50
+    CLOSED = 0
+    
+    
+class AlertPage(Enum):
+    wizardStart = 1
+    wizardServerConfig = 2
+    wizardLocalConfig = 3
+    wizardFinish = 4
     
 
 class SignalsMixin:
     # Connect to mpd with chosen socket
     connect_mpd: Signal = Signal(str)
+    # Create db for current music library
+    update_db: Signal = Signal()
+    # Trigger alert
+    alert: Signal = Signal(AlertPage, AlertStyle, str)
 
 
 @attrs.define
 class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
     parent: QMainWindow
     socket: str = None
-    alert_anim: QPropertyAnimation = attrs.field()
+    mpd_binary: bool = attrs.field(init = False)
+    
+    @mpd_binary.default
+    def _factory_mpd_binary(self) -> bool:
+        from shutil import which
+        return which("mpd") is not None
     
     def __init__(self, parent: QMainWindow):
         super().__init__(parent)
@@ -38,60 +56,152 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
     def __attrs_pre_init__(self):
         QDir.addSearchPath("icons", "./soloviy/ui/icons/") 
         self.setupUi(self)
-    
+        
     def __attrs_post_init__(self):
-        self.mpd_socket_type.currentIndexChanged.connect(self.__socket_type_combo_box)
-
-    @alert_anim.default
-    def _alert_anim_init(self):
-        anim = QPropertyAnimation(self.alert, b"maximumSize")
-        return anim
+        self.alert.connect(
+            qtinter.asyncslot(self.alert_manager)   
+        )
+        self.wizardLocalConfig_filedialog.clicked.connect(
+            self.music_collection_select
+        )
     
-    def __socket_type_combo_box(self):
-        match self.mpd_socket_type.currentText():
-            case "Built-in":
-                self.mpd_socket.setEnabled(False)
-            case "External":
-                self.mpd_socket.setEnabled(True)
+    @Slot(AlertPage, AlertStyle, str)
+    async def alert_manager(self, page: AlertPage, style: AlertStyle, text: str):
+        """Alert manager which routes alert to respective wizard pages
 
-    def __connect_mpd(self):
-        match self.mpd_socket_type.currentText():
-            case "Built-in":
-                self.socket = settings.mpd.native_socket
-            case "External":
-                self.socket = self.mpd_socket.text()
-        self.connect_mpd.emit(self.socket)
+        :param page: Wizard page
+        :type page: AlertPage
+        :param style: Stylesheet for alert
+        :type style: AlertStyle
+        :param text: Alert text
+        :type text: str
+        """
+        match page:
+            case AlertPage.wizardStart:
+                await self.alert_trigger(self.wizardStart_alert, 
+                                         self.wizardStart_alert_text,
+                                         style, text)
+            case AlertPage.wizardServerConfig:
+                await self.alert_trigger(self.wizardServerConfig_alert, 
+                                         self.wizardServerConfig_alert_text,
+                                         style, text)
+            case AlertPage.wizardLocalConfig:
+                await self.alert_trigger(self.wizardLocalConfig_alert, 
+                                         self.wizardLocalConfig_alert_text,
+                                         style, text)
     
-    async def alert_trigger(self, style: AlertStyle = AlertStyle.NO_STYLE, 
+    async def alert_trigger(self, alert: QWidget, alert_text: QLabel, 
+                            style: AlertStyle = AlertStyle.NO_STYLE, 
                             text: str = "", timeout: float = 2):
-        if self.alert_anim.endValue != AlertSize.CLOSED.value:
-            self.alert_anim.setEndValue(AlertSize.CLOSED.value)
-            self.alert_anim.setDuration(0)
-            self.alert_anim.start()
-        self.alert.setStyleSheet(style.value)
-        self.alert_text.setText(text)
-        self.alert_anim.setDuration(250)
-        self.alert_anim.setEndValue(AlertSize.OPEN.value)
-        self.alert_anim.start()
-        await asyncio.sleep(timeout)
-        self.alert_anim.setEndValue(AlertSize.CLOSED.value)
-        self.alert_anim.start()        
+        """Controls animation process
 
-    async def connect_mpd_tracker(self, status):
+        :param alert: Alert widget 
+        :type alert: QWidget
+        :param alert_text: Alert widget label
+        :type alert_text: QLabel
+        :param style: Alert stylesheet enum, defaults to AlertStyle.NO_STYLE
+        :type style: AlertStyle, optional
+        :param text: Alert text, defaults to ""
+        :type text: str, optional
+        :param timeout: Time after alert closes, defaults to 2
+        :type timeout: float, optional
+        """
+        self.anim = QPropertyAnimation(alert, b"maximumHeight")
+        if alert.maximumHeight() != AlertSize.CLOSED.value:
+            alert.setMaximumHeight(AlertSize.CLOSED.value)
+        alert.setStyleSheet(style.value)
+        alert_text.setText(text)
+        self.anim.setDuration(250)
+        self.anim.setEndValue(AlertSize.OPEN.value)
+        self.anim.start()
+        await asyncio.sleep(timeout)
+        self.anim.setEndValue(AlertSize.CLOSED.value)
+        self.anim.start()        
+
+    @Slot(ConnectionStatus)
+    def connect_mpd_tracker(self, status: ConnectionStatus):
+        """Slot to track the status of mpd connection
+
+        :param status: Connection status enum
+        :type status: ConnectionStatus
+        """
+        if self.currentPage() == self.wizardLocalConfig:
+            page = AlertPage.wizardLocalConfig
+        elif self.currentPage() == self.wizardServerConfig:
+            page = AlertPage.wizardServerConfig
         match status:
             case ConnectionStatus.CONNECTING:
-                await self.alert_trigger(AlertStyle.WARNING, "Connecting to mpd ...")
+                self.alert.emit(page, AlertStyle.WARNING, "Connecting to mpd ...")
             case ConnectionStatus.CONNECTED:
-                await self.alert_trigger(AlertStyle.SUCCESS, "Connection successful", 
-                                         timeout = 1)
+                self.alert.emit(page, AlertStyle.SUCCESS, "Connection successful")
                 settings.set("mpd.socket", self.socket)
                 self.setCurrentId(self.nextId())
             case ConnectionStatus.CONNECTION_FAILED:
-                await self.alert_trigger(AlertStyle.ERROR, "Failed to connect")
+                self.alert.emit(page, AlertStyle.ERROR, "Failed to connect")
+    
+    @Slot()
+    def music_collection_select(self):
+        """Slot to select music collection root folder"""
+        self.file_dialog = QFileDialog(self)
+        d = self.file_dialog.getExistingDirectory(self, 
+                                                  "Select music collection root")   
+        self.wizardLocalConfig_musicfolder_text.setText(d)
+        state["music_folder"] = d
+    
+    def initializePage(self, id: int) -> None:
+        if self.page(id) == self.wizardStart:
+            self.radio_local.setEnabled(True)
+            self.radio_local_text.setEnabled(True)
+        return super().initializePage(id)
+    
+    def nextId(self) -> int:
+        """Return id of next wizard page based on current page
+
+        :return: id of next page
+        :rtype: int
+        """
+        pages = [self.page(i) for i in self.pageIds()]
+        match self.currentPage():
+            case self.wizardStart:
+                if self.radio_server.isChecked():
+                    return pages.index(self.wizardServerConfig) + 1
+                if self.radio_local.isChecked():
+                    return pages.index(self.wizardLocalConfig) + 1
+            case self.wizardLocalConfig | self.wizardServerConfig:
+                return pages.index(self.wizardFinish) + 1       
+        return super().nextId()
     
     def validateCurrentPage(self) -> bool:
-        if self.currentPage() == self.wizardMPDConfig and not settings.mpd.socket:
-            # IF current page is mpd config and connection is not established
-            self.__connect_mpd()
+        """Validate current page before going to next one
+
+        :return: True if page valid, False otherwise
+        :rtype: bool
+        """
+        cpage = self.currentPage()
+        if cpage == self.wizardStart:
+            rlocal = self.radio_local.isChecked()
+            rserver = self.radio_server.isChecked()
+            if not (rlocal or rserver):
+                self.alert.emit(AlertPage.wizardStart, 
+                                AlertStyle.ERROR, 
+                                "Please select setup type")
+                return False
+        if cpage == self.wizardServerConfig and not settings.mpd.socket:
+            host = self.wizardServerConfig_host.text()
+            port = self.wizardServerConfig_port.text()
+            password = self.wizardServerConfig_password.text()
+            socket = f"{host}:{port}"
+            self.socket = socket
+            self.connect_mpd.emit(self.socket)
+            return False
+        if cpage == self.wizardLocalConfig and not settings.mpd.socket:
+            if not self.wizardLocalConfig_musicfolder_text.text():
+                self.alert.emit(AlertPage.wizardLocalConfig, 
+                                AlertStyle.ERROR, 
+                                "Please select music collection")
+            else:
+                socket = settings.mpd.native_socket
+                self.socket = socket
+                self.connect_mpd.emit(self.socket)
             return False
         return True

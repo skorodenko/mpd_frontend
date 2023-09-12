@@ -57,7 +57,6 @@ class MpdConnector(QObject, SignalsMixin):
         if _socket == settings.mpd.native_socket:
             logger.info("Starting native mpd server")
             self.server = QProcess()
-            #TODO add check for mpd binary
             self.server.start("mpd", [settings.mpd.native_config, "--no-daemon"])
             await asyncio.sleep(0.5)
         try:

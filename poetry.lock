@@ -468,6 +468,45 @@ packaging = ["packaging (>=21.3,<22.0)"]
 yaml = ["pyyaml (>=6.0,<7.0)"]
 
 [[package]]
+name = "rocksdict"
+version = "0.3.13"
+description = "Rocksdb Python Binding"
+optional = false
+python-versions = "*"
+files = [
+    {file = "rocksdict-0.3.13-cp310-cp310-macosx_10_14_x86_64.macosx_11_0_arm64.macosx_10_14_universal2.whl", hash = "sha256:d1eedb5e6e0389e10fa792902ec170ed00ce83585f1c557cf69df9e977caa73e"},
+    {file = "rocksdict-0.3.13-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4c2e43e696602adfa73644e3f57499ad68e550ba1ac87960fbf28329d6e8d1dc"},
+    {file = "rocksdict-0.3.13-cp310-cp310-manylinux_2_28_aarch64.whl", hash = "sha256:1f4e68895d9639ea28bb2422848538988e36e73bdac5b17f223ab5b2d000f976"},
+    {file = "rocksdict-0.3.13-cp310-cp310-manylinux_2_28_x86_64.whl", hash = "sha256:65992a4118d0e9fc1bf7b76cbe48e866896410a909316e544f378b280d974069"},
+    {file = "rocksdict-0.3.13-cp310-none-win32.whl", hash = "sha256:9f1db7cc24d90d90b2d7d482812f3c1deed39b170de10d616b6c5bf2e36451a7"},
+    {file = "rocksdict-0.3.13-cp310-none-win_amd64.whl", hash = "sha256:6f12901867a2d69ad597fe6ff7b653f7db75d96d6c28d3b0f87ebc4d79946e4b"},
+    {file = "rocksdict-0.3.13-cp311-cp311-macosx_10_14_x86_64.macosx_11_0_arm64.macosx_10_14_universal2.whl", hash = "sha256:083e814918b8af22eee8bd732e7d1cdb738aefdb765b3496aa00cd2fb655f096"},
+    {file = "rocksdict-0.3.13-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:df1858b4c2a0105a2bf10a69cad9e8d3d43241c8e455deaf6063d24e5f2ffb2e"},
+    {file = "rocksdict-0.3.13-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:be0ed772a672b86dd19469ebf6e3afd05e5d88eba7512729aaceeccba9e6dd4e"},
+    {file = "rocksdict-0.3.13-cp311-cp311-manylinux_2_28_x86_64.whl", hash = "sha256:d9e05a5b3e2a732d22657bd6c132ec1e824194f98373fed2ddaa3e8456f37e43"},
+    {file = "rocksdict-0.3.13-cp311-none-win32.whl", hash = "sha256:bdfeb5a9a4d6a9fe501e3b7c5702616495403ff7c6e080564aa53df6b73d97a6"},
+    {file = "rocksdict-0.3.13-cp311-none-win_amd64.whl", hash = "sha256:073800e606568ed7449034c7348456e8701904100b63fe43bbf63706275c47e2"},
+    {file = "rocksdict-0.3.13-cp37-cp37m-macosx_10_14_x86_64.macosx_11_0_arm64.macosx_10_14_universal2.whl", hash = "sha256:b0e3942f56115130345037ae9e8d36bd06ab014920b1e8be31724576d54cb4d5"},
+    {file = "rocksdict-0.3.13-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:20e0d371d4f1824519dda6c46582ac58871bf83e4079ed37c90ae7960e5e8cab"},
+    {file = "rocksdict-0.3.13-cp37-cp37m-manylinux_2_28_aarch64.whl", hash = "sha256:242a7e35fa94e3cff7ed394d795218f87e44ef096056dac043008829c4449d58"},
+    {file = "rocksdict-0.3.13-cp37-cp37m-manylinux_2_28_x86_64.whl", hash = "sha256:360bb83103dc1a23e740ca43a693b75f42a9e70f9abc11fde9dc73b2702a652b"},
+    {file = "rocksdict-0.3.13-cp37-none-win32.whl", hash = "sha256:79c14f09742afcc87a0c645c53a13e6eca406b900a168aaca1373afed1877e68"},
+    {file = "rocksdict-0.3.13-cp37-none-win_amd64.whl", hash = "sha256:0ff75d05fe2df501131ecb793aabf19cc58cdc4ea06f1586db7eabe694d0f47d"},
+    {file = "rocksdict-0.3.13-cp38-cp38-macosx_10_14_x86_64.macosx_11_0_arm64.macosx_10_14_universal2.whl", hash = "sha256:43f6d2984fcbe8c0abe01be58d729ca12553ef452915605dc4eb5b32cedbafb9"},
+    {file = "rocksdict-0.3.13-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4ebd9db91ab23a642e3d21ec5d9a921c42c00c62080b56a14193c1257a6f8ab7"},
+    {file = "rocksdict-0.3.13-cp38-cp38-manylinux_2_28_aarch64.whl", hash = "sha256:64b633cd85123a999b62ef24d10bdb203e84985fedd9029bd903ad6b3bf60658"},
+    {file = "rocksdict-0.3.13-cp38-cp38-manylinux_2_28_x86_64.whl", hash = "sha256:27279a6726ca4a630daca75ee1e3280fca39b803acc96e87bdd5fa7646b09e72"},
+    {file = "rocksdict-0.3.13-cp38-none-win32.whl", hash = "sha256:00b0ecefb6d222ba150c248437f1966a8eb9d21056a306776dce161bc42c0f25"},
+    {file = "rocksdict-0.3.13-cp38-none-win_amd64.whl", hash = "sha256:d55e0b2b4a50e23d57d20884300d3541d4b9456aa0f41a4207fe94927f7247c5"},
+    {file = "rocksdict-0.3.13-cp39-cp39-macosx_10_14_x86_64.macosx_11_0_arm64.macosx_10_14_universal2.whl", hash = "sha256:2e035fb54beb31584d9a4ebf1fa2769b89458e3f7456d9af8e98c42589c8bbc8"},
+    {file = "rocksdict-0.3.13-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7cd225013c1c6164dec7f8148a0dea241244ce9d64f50b19083c2970cb3cdec4"},
+    {file = "rocksdict-0.3.13-cp39-cp39-manylinux_2_28_aarch64.whl", hash = "sha256:1c95a7cb85fa92dfd668709c89c9071011e3490d37f997a088265015f0217592"},
+    {file = "rocksdict-0.3.13-cp39-cp39-manylinux_2_28_x86_64.whl", hash = "sha256:9ec26df280c1e106e01ca20cb52d048e948d126b060550408cf37946b93265b8"},
+    {file = "rocksdict-0.3.13-cp39-none-win32.whl", hash = "sha256:b8dc022928ba56d3e9fe82abca497bdb61e94737af4dc336b464501112367d37"},
+    {file = "rocksdict-0.3.13-cp39-none-win_amd64.whl", hash = "sha256:285a02c7f76bccceb4466a625f0ba7b0795c5b8ef25e4058abcbd29345e77122"},
+]
+
+[[package]]
 name = "shiboken6"
 version = "6.5.2"
 description = "Python/C++ bindings helper module"
@@ -480,17 +519,6 @@ files = [
     {file = "shiboken6-6.5.2-pp39-pypy39_pp73-macosx_10_9_universal2.whl", hash = "sha256:4e073b40734a7f9cc6ac289c735362967bb45c34f591f7c0fab7cef1d62e6a66"},
     {file = "shiboken6-6.5.2-pp39-pypy39_pp73-manylinux_2_28_x86_64.whl", hash = "sha256:cc89759aabafce49b629b189ed7c81986fedaac695714a4eed1aaeb16783c6a9"},
     {file = "shiboken6-6.5.2-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:e60d8dd3292e3f87662b9e37ae5c558c519f8250da627c473b68bd8d24ed3243"},
-]
-
-[[package]]
-name = "tinydb"
-version = "4.8.0"
-description = "TinyDB is a tiny, document oriented database optimized for your happiness :)"
-optional = false
-python-versions = ">=3.7,<4.0"
-files = [
-    {file = "tinydb-4.8.0-py3-none-any.whl", hash = "sha256:30c06d12383d7c332e404ca6a6103fb2b32cbf25712689648c39d9a6bd34bd3d"},
-    {file = "tinydb-4.8.0.tar.gz", hash = "sha256:6dd686a9c5a75dfa9280088fd79a419aefe19cd7f4bd85eba203540ef856d564"},
 ]
 
 [[package]]
@@ -518,4 +546,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "2620d413ad6e56352dd75b8eea0789f601c87c42a23a360e73d17b80891f8037"
+content-hash = "6f2cbf11cf4a31e5dd2ba0012a55647e0e2dbee94a8ba0ab1e57ed6a63e92663"

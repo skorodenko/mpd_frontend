@@ -1,14 +1,11 @@
 import attrs
 import logging
-import asyncio
-import pathlib
-import datetime
-from dynaconf.loaders.toml_loader import write
 import qtinter
 from PIL import Image, ImageQt
 from io import BytesIO
+from dynaconf.loaders.toml_loader import write
 from PySide6.QtCore import QDir, QTimer, Signal, QObject
-from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
+from PySide6.QtWidgets import QMainWindow, QDialog
 from soloviy.config import settings
 from soloviy.models.qmodels import PlaylistsModel
 from soloviy.api.mpd_connector import MpdConnector
@@ -40,7 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
     def serve(self):
         logger.info("Started main window")
         self.timer.singleShot(0, self.show)
-        self.timer.singleShot(100, self._initial_configuration)
+        self.timer.singleShot(150, self._initial_configuration)
  
     def _initial_configuration(self):
         logger.info("Started initial configuration")
@@ -53,14 +50,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
             self.init_wizard.connect_mpd.emit(settings.mpd.socket)
                 
     def _bind_signals(self):
-        self.ptiling_widget.playlist_created.connect(
+        self.playlists_view.doubleClicked.connect(
             qtinter.asyncslot(self.mpd.playlist_add_db)   
         )
         self.mpd.playlist_populated.connect(
             lambda: self.ptiling_widget.tile_layout_update.emit()  
         )
         self.mpd.mpd_connection_status.connect(
-            qtinter.asyncslot(self.init_wizard.connect_mpd_tracker)
+            self.init_wizard.connect_mpd_tracker
         )
         self.mpd.update_playlists_view.connect(
             self.__update_playlists_view

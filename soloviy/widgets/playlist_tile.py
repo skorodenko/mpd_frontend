@@ -16,10 +16,10 @@ class PlaylistTile(QFrame, Ui_Frame, SignalsMixin):
     
     def __attrs_pre_init__(self):
         super().__init__()
-        self.setupUi(self)
-        self._bind_signals()
     
     def __attrs_post_init__(self):
+        self.setupUi(self)
+        self._bind_signals()
         dbmodels.PlaylistTile.create(name = self.playlist)
     
     def populated(self):
