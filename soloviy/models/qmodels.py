@@ -72,11 +72,7 @@ class PlaylistModel(QAbstractTableModel):
 class PlaylistsModel(QAbstractListModel):
     def __init__(self, playlists):
         super().__init__()
-        self.playlists = [
-            playlist["directory"] for playlist in playlists
-            if not playlist.get("directory", ".").startswith(".")
-        ]
-        self.playlists.sort()
+        self.playlists = playlists
 
     def data(self, index, role):
         if role == Qt.ItemDataRole.DisplayRole:

@@ -33,8 +33,6 @@ class SignalsMixin:
     update_seeker: Signal = Signal(int, int)
     # Emit connection status update
     mpd_connection_status: Signal = Signal(ConnectionStatus)
-    # Emit updated playlists tree view
-    update_playlists_view: Signal = Signal(list) # DEPRECETAED
     # Emit when fetced playlist to db
     playlist_populated: Signal = Signal(str) # DEPRECETAED
     # Emit when db updated finished
@@ -50,9 +48,7 @@ class MpdConnector(QObject, SignalsMixin):
         super().__init__()
         
     def __attrs_post_init__(self):
-        self.mpd_connection_status.connect(
-            qtinter.asyncslot(self.__publish_playlists)
-        )
+        ...
     
     async def mpd_connect(self, _socket: str):
         logger.info("Connecting to mpd")
@@ -106,10 +102,4 @@ class MpdConnector(QObject, SignalsMixin):
         if settings.mpd.socket == settings.mpd.native_socket:
             self.server.terminate()
             self.server.waitForFinished(-1)
-            
-    async def __publish_playlists(self, status: ConnectionStatus):
-        if status == ConnectionStatus.CONNECTED:
-            await self.client.update() # TODO Move to another button to update manually
-            plsts = await self.client.listfiles(".")           
-            self.update_playlists_view.emit(plsts)
             

@@ -4,9 +4,10 @@ import qtinter
 from PIL import Image, ImageQt
 from io import BytesIO
 from dynaconf.loaders.toml_loader import write
-from PySide6.QtCore import QDir, QTimer, Signal, QObject
+from PySide6.QtCore import QDir, QTimer, Signal, QObject, Slot
 from PySide6.QtWidgets import QMainWindow, QDialog
 from soloviy.config import settings
+from soloviy.models import dbmodels as db
 from soloviy.models.qmodels import PlaylistsModel
 from soloviy.api.mpd_connector import MpdConnector
 from soloviy.ui.ui_main_window import Ui_MainWindow
@@ -16,7 +17,7 @@ from soloviy.widgets.init_wizard import InitWizard
 logger = logging.getLogger(__name__)
 
 
-class SignalsMixin(QObject):
+class SignalsMixin:
     update_db: Signal = Signal()
 
 
@@ -64,9 +65,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
         self.mpd.playlist_populated.connect(
             lambda: self.ptiling_widget.tile_layout_update.emit()  
         )
-        #self.mpd.update_playlists_view.connect(
-        #    self.__update_playlists_view
-        #)
+        self.mpd.db_updated.connect(
+            self.__update_playlists_view
+        )
         self.init_wizard.connect_mpd.connect(
             qtinter.asyncslot(self.mpd.mpd_connect)
         )
@@ -74,7 +75,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
             lambda pname: self.ptiling_widget.tile_add(pname.data())
         )
     
-    def __update_playlists_view(self, playlists: list):
+    @Slot()
+    def __update_playlists_view(self):
+        #TODO Add various groupping options
+        query = (db.Library
+                    .select(db.Library.directory)
+                    .order_by(db.Library.directory)
+                    .distinct())
+        playlists = [i.directory for i in query]
         playlists_model = PlaylistsModel(playlists)
         self.playlists_view.setModel(playlists_model)
     
