@@ -9,7 +9,7 @@ class Playlist:
 
 class Library(BaseModel):
     id = AutoField()
-    folder = CharField()
+    directory = CharField()
     file = CharField()
     time = IntegerField()
     duration = FloatField()  

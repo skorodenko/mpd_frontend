@@ -3,7 +3,7 @@ from peewee import Model, SqliteDatabase
 from soloviy.config import sqlite_db, state_db
 
 
-db = SqliteDatabase(sqlite_db, 
+db = SqliteDatabase(":memory:", 
                     pragmas={
                         "journal_mode": "wal",
                     })

@@ -6,10 +6,11 @@ import logging
 from enum import Enum
 from typing import List
 from pydantic import TypeAdapter
-from soloviy.models import dbmodels, pydanticmodels
-from soloviy.config import settings
 from mpd.asyncio import MPDClient
-from PySide6.QtCore import QProcess, Signal, QObject
+from soloviy.config import settings
+from soloviy.models import dbmodels as db
+from soloviy.models import pydanticmodels as pmodels
+from PySide6.QtCore import QProcess, Signal, QObject, Slot
 
 
 logger = logging.getLogger(__name__)
@@ -26,16 +27,18 @@ class ConnectionStatus(Enum):
 
 
 class SignalsMixin:
-    # Status update is for publishing subsystem: str, status: dict - to update ui components
+    # Status update is for publishing subsystem, status - to update ui components
     update_status: Signal = Signal(str, dict)
     # Seeker update duration: int, elapsed: int
     update_seeker: Signal = Signal(int, int)
     # Emit connection status update
     mpd_connection_status: Signal = Signal(ConnectionStatus)
     # Emit updated playlists tree view
-    update_playlists_view: Signal = Signal(list)
+    update_playlists_view: Signal = Signal(list) # DEPRECETAED
     # Emit when fetced playlist to db
-    playlist_populated: Signal = Signal(str)
+    playlist_populated: Signal = Signal(str) # DEPRECETAED
+    # Emit when db updated finished
+    db_updated: Signal = Signal()
 
 
 @attrs.define
@@ -67,20 +70,33 @@ class MpdConnector(QObject, SignalsMixin):
         except (socket.gaierror, ConnectionRefusedError):
             logger.warning("Failed to connect to mpd")
             self.mpd_connection_status.emit(ConnectionStatus.CONNECTION_FAILED)
+            
+    @staticmethod
+    def group_by_folders(data: list[dict]) -> dict[list[dict]]:
+        res = dict()
+        for item in data:
+            if directory := item.get("directory"):
+                res[directory] = []
+                partial_res = res[directory]
+                continue
+            partial_res.append(item)
+        return res
     
-    async def playlist_add_db(self, playlist: str):
-        logger.debug(f"Started population of playlist: {playlist}")
-        data = await self.client.listallinfo(playlist)
-        data = [i for i in data if i.get("file")] # Keep files (music) only
-        data = [dict(i, playlist_name = playlist) for i in data] # Add foreign key to data
-        logger.debug(f"Recieved playlist: {playlist}")
-        ta = TypeAdapter(List[pydanticmodels.Playlist])
-        data = ta.validate_python(data)
-        logger.debug(f"Validated playlist: {playlist}")
-        data = ta.dump_python(data)
-        dbmodels.Playlist.insert_many(data).execute()
-        self.playlist_populated.emit(playlist)
-        logger.debug(f"Ended population of playlist: {playlist}")
+    @Slot()
+    async def update_db(self):
+        logger.debug("Started db update")
+        await self.client.update()
+        data = await self.client.listallinfo()
+        data = self.group_by_folders(data)
+        for directory in data:
+            ta = TypeAdapter(List[pmodels.Library])
+            sdata = data[directory]
+            sdata = [i for i in sdata if i.get("file")]
+            sdata = ta.validate_python(sdata, context={"directory": directory})
+            sdata = ta.dump_python(sdata)
+            db.Library.insert_many(sdata).execute()
+        logger.debug("Ended db update")
+        self.db_updated.emit()
 
     def graceful_close(self):
         # Add idle task cancelation
@@ -97,67 +113,3 @@ class MpdConnector(QObject, SignalsMixin):
             plsts = await self.client.listfiles(".")           
             self.update_playlists_view.emit(plsts)
             
-#    async def __mpd_idle(self):
-#        #FIXME Find a way to cancel this task properly
-#        #FIXME Restart on disconnect
-#        self.client.update()
-#        idle_cache = await self.client.status()
-#        playlists = await self.client.listfiles(".")
-#        await self.cache.set("idle", idle_cache)
-#        await self._init_gui(idle_cache, playlists)
-#        async for subsys in self.mpd.client.idle():
-#            if subsys:
-#                new = await self.client.status()
-#                idle_cache = await self.cache.get("idle")
-#                diff = self.status_diff(idle_cache, new)
-#                for d in diff:
-#                    self.status_update.emit(d, new)
-#                await self.cache.set("idle", new)
-#
-#    async def __playlist_change(self, index):
-#        playlist_name = index.data()
-#        playlist = await self.client.listallinfo(playlist_name)
-#        self.playlist_publish.emit(playlist)
-#    
-#    async def __media_previous(self):
-#        await self.client.previous()
-#    
-#    async def __media_next(self):
-#        await self.client.next()
-#    
-#    async def __media_seeker(self, value):
-#        await self.client.seekcur(value)
-#    
-#    async def __media_play_pause(self):
-#        status = await self.client.status()
-#        match status["state"]:
-#            case "stop":
-#                await self.client.play(status["song"])
-#            case "pause":
-#                await self.client.pause(0)
-#            case "play":
-#                await self.client.pause(1)
-#    
-#    async def __media_repeat(self):
-#        status = await self.client.status()
-#        repeat = status["repeat"]
-#        single = status["single"]
-#        match (repeat,single):
-#            case ("0","0") | ("0","1"):
-#                await self.client.repeat(1)
-#                await self.client.single(0)
-#            case ("1","0"):
-#                await self.client.repeat(1)
-#                await self.client.single(1)
-#            case ("1","1"):
-#                await self.client.repeat(0)
-#                await self.client.single(0)
-#    
-#    async def __media_shuffle(self):
-#        status = await self.client.status()
-#        shuffle = status["random"]
-#        match shuffle:
-#            case "0":
-#                await self.client.random(1)
-#            case "1":
-#                await self.client.random(0)
