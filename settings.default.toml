@@ -10,3 +10,6 @@ connection_timeout = 10
 [soloviy]
 tiling_mode = 1
 playlists_margin = 2
+
+[default]
+group_by = "directory"

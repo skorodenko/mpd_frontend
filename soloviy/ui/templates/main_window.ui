@@ -447,10 +447,113 @@
    <property name="defaultUp">
     <bool>false</bool>
    </property>
+   <widget class="QMenu" name="menu_Music">
+    <property name="title">
+     <string>&amp;Music</string>
+    </property>
+    <widget class="QMenu" name="menuGroup_by">
+     <property name="title">
+      <string>Group by</string>
+     </property>
+     <addaction name="actionDirectory"/>
+     <addaction name="actionFormat"/>
+     <addaction name="actionArtist"/>
+     <addaction name="actionAlbumartist"/>
+     <addaction name="actionAlbum"/>
+     <addaction name="actionDate"/>
+     <addaction name="actionGenre"/>
+     <addaction name="actionComposer"/>
+    </widget>
+    <addaction name="menuGroup_by"/>
+   </widget>
+   <addaction name="menu_Music"/>
   </widget>
   <action name="actionre">
    <property name="text">
     <string>re</string>
+   </property>
+  </action>
+  <action name="actiontest1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Directory</string>
+   </property>
+  </action>
+  <action name="actiontest2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>test2</string>
+   </property>
+  </action>
+  <action name="actionDirectory">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Directory</string>
+   </property>
+  </action>
+  <action name="actionFormat">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Format</string>
+   </property>
+  </action>
+  <action name="actionArtist">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Artist</string>
+   </property>
+  </action>
+  <action name="actionAlbumartist">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Albumartist</string>
+   </property>
+  </action>
+  <action name="actionAlbum">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Album</string>
+   </property>
+  </action>
+  <action name="actionDate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Date</string>
+   </property>
+  </action>
+  <action name="actionGenre">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Genre</string>
+   </property>
+  </action>
+  <action name="actionComposer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Composer</string>
    </property>
   </action>
  </widget>

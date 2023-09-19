@@ -18,8 +18,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QFrame,
     QGridLayout, QHBoxLayout, QLabel, QListView,
-    QMainWindow, QMenuBar, QPushButton, QSizePolicy,
-    QSpacerItem, QSplitter, QVBoxLayout, QWidget)
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QSizePolicy, QSpacerItem, QSplitter, QVBoxLayout,
+    QWidget)
 
 from soloviy.ui.custom_classes.jump_slider import JumpSlider
 from soloviy.widgets.ptiling_widget import PTilingWidget
@@ -40,6 +41,37 @@ class Ui_MainWindow(object):
         MainWindow.setWindowIcon(icon)
         self.actionre = QAction(MainWindow)
         self.actionre.setObjectName(u"actionre")
+        self.actiontest1 = QAction(MainWindow)
+        self.actiontest1.setObjectName(u"actiontest1")
+        self.actiontest1.setCheckable(True)
+        self.actiontest1.setChecked(False)
+        self.actiontest2 = QAction(MainWindow)
+        self.actiontest2.setObjectName(u"actiontest2")
+        self.actiontest2.setCheckable(True)
+        self.actionDirectory = QAction(MainWindow)
+        self.actionDirectory.setObjectName(u"actionDirectory")
+        self.actionDirectory.setCheckable(True)
+        self.actionFormat = QAction(MainWindow)
+        self.actionFormat.setObjectName(u"actionFormat")
+        self.actionFormat.setCheckable(True)
+        self.actionArtist = QAction(MainWindow)
+        self.actionArtist.setObjectName(u"actionArtist")
+        self.actionArtist.setCheckable(True)
+        self.actionAlbumartist = QAction(MainWindow)
+        self.actionAlbumartist.setObjectName(u"actionAlbumartist")
+        self.actionAlbumartist.setCheckable(True)
+        self.actionAlbum = QAction(MainWindow)
+        self.actionAlbum.setObjectName(u"actionAlbum")
+        self.actionAlbum.setCheckable(True)
+        self.actionDate = QAction(MainWindow)
+        self.actionDate.setObjectName(u"actionDate")
+        self.actionDate.setCheckable(True)
+        self.actionGenre = QAction(MainWindow)
+        self.actionGenre.setObjectName(u"actionGenre")
+        self.actionGenre.setCheckable(True)
+        self.actionComposer = QAction(MainWindow)
+        self.actionComposer.setObjectName(u"actionComposer")
+        self.actionComposer.setCheckable(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
@@ -291,7 +323,22 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName(u"menubar")
         self.menubar.setGeometry(QRect(0, 0, 800, 22))
         self.menubar.setDefaultUp(False)
+        self.menu_Music = QMenu(self.menubar)
+        self.menu_Music.setObjectName(u"menu_Music")
+        self.menuGroup_by = QMenu(self.menu_Music)
+        self.menuGroup_by.setObjectName(u"menuGroup_by")
         MainWindow.setMenuBar(self.menubar)
+
+        self.menubar.addAction(self.menu_Music.menuAction())
+        self.menu_Music.addAction(self.menuGroup_by.menuAction())
+        self.menuGroup_by.addAction(self.actionDirectory)
+        self.menuGroup_by.addAction(self.actionFormat)
+        self.menuGroup_by.addAction(self.actionArtist)
+        self.menuGroup_by.addAction(self.actionAlbumartist)
+        self.menuGroup_by.addAction(self.actionAlbum)
+        self.menuGroup_by.addAction(self.actionDate)
+        self.menuGroup_by.addAction(self.actionGenre)
+        self.menuGroup_by.addAction(self.actionComposer)
 
         self.retranslateUi(MainWindow)
 
@@ -306,6 +353,16 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.actionre.setText(QCoreApplication.translate("MainWindow", u"re", None))
+        self.actiontest1.setText(QCoreApplication.translate("MainWindow", u"Directory", None))
+        self.actiontest2.setText(QCoreApplication.translate("MainWindow", u"test2", None))
+        self.actionDirectory.setText(QCoreApplication.translate("MainWindow", u"Directory", None))
+        self.actionFormat.setText(QCoreApplication.translate("MainWindow", u"Format", None))
+        self.actionArtist.setText(QCoreApplication.translate("MainWindow", u"Artist", None))
+        self.actionAlbumartist.setText(QCoreApplication.translate("MainWindow", u"Albumartist", None))
+        self.actionAlbum.setText(QCoreApplication.translate("MainWindow", u"Album", None))
+        self.actionDate.setText(QCoreApplication.translate("MainWindow", u"Date", None))
+        self.actionGenre.setText(QCoreApplication.translate("MainWindow", u"Genre", None))
+        self.actionComposer.setText(QCoreApplication.translate("MainWindow", u"Composer", None))
         self.media_previous.setText("")
         self.media_play_pause.setText("")
         self.media_next.setText("")
@@ -316,5 +373,7 @@ class Ui_MainWindow(object):
         self.label_author.setText(QCoreApplication.translate("MainWindow", u"Author", None))
         self.label_info.setText(QCoreApplication.translate("MainWindow", u"Format", None))
         self.label_time.setText(QCoreApplication.translate("MainWindow", u"Time", None))
+        self.menu_Music.setTitle(QCoreApplication.translate("MainWindow", u"&Music", None))
+        self.menuGroup_by.setTitle(QCoreApplication.translate("MainWindow", u"Group by", None))
     # retranslateUi
 
