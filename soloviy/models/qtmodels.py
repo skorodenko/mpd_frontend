@@ -1,4 +1,7 @@
-from soloviy.models.dbmodels import PlaylistTile, Playlist
+from soloviy.models.dbmodels import Library
+from soloviy.api.tiling import MetaTile
+from soloviy.db import state
+from soloviy.config import settings
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
 
@@ -7,11 +10,12 @@ PLAYING_ICON = QIcon.fromTheme("media-playback-start")
 VISIBLE_COLUMNS = ["track", "file"] # Move to config
 
 class PlaylistModel(QAbstractTableModel):
-    def __init__(self, playlist: str):
+    def __init__(self, meta: MetaTile):
         super().__init__()
-        self.playlist = playlist
+        self.meta = meta
         self.columns = VISIBLE_COLUMNS
-        self._query = Playlist.select().where(Playlist.playlist_name == self.playlist)
+        self.group_by = state["group_by"]
+        self._query = Library.select().where(getattr(Library, self.group_by) == self.meta.name)
         
     @property
     def query(self):
@@ -32,15 +36,16 @@ class PlaylistModel(QAbstractTableModel):
         column = index.column()
         if role == Qt.ItemDataRole.DisplayRole:
             column_name = self.columns[column]
-            #if column_name == "time":
-            #    return self.strfdelta(entry.get(column_name))
-            return str(getattr(self.query[row], column_name))
+            val = getattr(self.query[row], column_name)
+            if column_name == "time":
+                return self.strfdelta(val)
+            return str(val)
 #        if role == Qt.ItemDataRole.DecorationRole:
 #            if self.playlist.at[row, "__playing"] and self.playlist.columns[column] == "#":
 #                return PLAYING_ICON
     
     def rowCount(self, index):
-        return Playlist.select().where(Playlist.playlist_name == self.playlist).count()
+        return self._query.count()
     
     def columnCount(self, index):
         return len(self.columns)

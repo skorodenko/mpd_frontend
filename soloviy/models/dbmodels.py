@@ -1,12 +1,6 @@
 from soloviy.db import db, BaseModel
 from peewee import CharField, IntegerField, FloatField, DateTimeField, AutoField
 
-class PlaylistTile:
-    ...
-
-class Playlist:
-    ...
-
 class Library(BaseModel):
     id = AutoField()
     directory = CharField()

@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QMainWindow, QDialog
 from soloviy.db import state
 from soloviy.config import settings
 from soloviy.models import dbmodels as db
-from soloviy.models.qmodels import PlaylistsModel
+from soloviy.models.qtmodels import PlaylistsModel
 from soloviy.api.mpd_connector import MpdConnector
 from soloviy.ui.ui_main_window import Ui_MainWindow
 from soloviy.widgets.init_wizard import InitWizard
@@ -38,6 +38,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
     
     def __attrs_post_init__(self):
         self._bind_signals()
+        self._init_state()
         self._ui_post_init()
         
     def serve(self):
@@ -59,9 +60,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
         else:
             self.init_wizard.connect_mpd.emit(settings.mpd.socket)
     
+    def _init_state(self):
+        if state.get("group_by", None):
+            state["group_by"] = settings.default.group_by
+    
     def _ui_post_init(self):
         # Init menubar actions [Group by]
-        group = state.get("group_by", settings.default.group_by)
+        group = state["group_by"]
         self.group_by_actions = QActionGroup(self)
         self.group_by_actions.setExclusive(True)
         self.group_by_actions.triggered.connect(self.__group_by_changed)
@@ -74,9 +79,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
             self.group_by_actions.addAction(a)
     
     def _bind_signals(self):
-        #self.playlists_view.doubleClicked.connect(
-        #    qtinter.asyncslot(self.mpd.playlist_add_db)   
-        #)
         self.update_db.connect(
             qtinter.asyncslot(self.mpd.update_db)
         )
@@ -84,16 +86,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
             lambda: self.ptiling_widget.tile_layout_update.emit()  
         )
         self.mpd.db_updated.connect(
-            self.__update_playlists_view
+            lambda: self.update_ui.emit()
         )
         self.update_ui.connect(
             self.__update_playlists_view
+        )
+        self.update_ui.connect(
+            lambda: self.ptiling_widget.tile_layout_update.emit()
         )
         self.init_wizard.connect_mpd.connect(
             qtinter.asyncslot(self.mpd.mpd_connect)
         )
         self.playlists_view.doubleClicked.connect(
-            lambda pname: self.ptiling_widget.tile_add(pname.data())
+            lambda pname: self.ptiling_widget.add_tile(pname.data())
         )
     
     @Slot(QAction)
