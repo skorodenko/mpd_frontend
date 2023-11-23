@@ -1,9 +1,8 @@
-from soloviy.models.dbmodels import Library
-from soloviy.api.tiling import MetaTile
 from soloviy.db import state
-from soloviy.config import settings
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
+from soloviy.models.dbmodels import Library
+from soloviy.api.tiling import MetaTile
 
 FOLDER_ICON = QIcon.fromTheme("folder-music")
 PLAYING_ICON = QIcon.fromTheme("media-playback-start")
@@ -12,10 +11,14 @@ VISIBLE_COLUMNS = ["track", "file"] # Move to config
 class PlaylistModel(QAbstractTableModel):
     def __init__(self, meta: MetaTile):
         super().__init__()
-        self.meta = meta
-        self.columns = VISIBLE_COLUMNS
-        self.group_by = state["group_by"]
+        self.meta: MetaTile = meta
+        self.columns: list[str] = VISIBLE_COLUMNS
+        self.group_by: str = state["group_by"]
         self._query = Library.select().where(getattr(Library, self.group_by) == self.meta.name)
+        self.sort(
+            self.columns.index(meta.order_by[0]),
+            meta.order_by[1]
+        )
         
     @property
     def query(self):
@@ -40,9 +43,9 @@ class PlaylistModel(QAbstractTableModel):
             if column_name == "time":
                 return self.strfdelta(val)
             return str(val)
-#        if role == Qt.ItemDataRole.DecorationRole:
-#            if self.playlist.at[row, "__playing"] and self.playlist.columns[column] == "#":
-#                return PLAYING_ICON
+        #if role == Qt.ItemDataRole.DecorationRole:
+        #    if column == 0 and row == self.meta.playing_pos:
+        #        return PLAYING_ICON
     
     def rowCount(self, index):
         return self._query.count()
@@ -57,21 +60,19 @@ class PlaylistModel(QAbstractTableModel):
                     return "#"
                 return self.columns[section]
     
-#    def playing_status(self, row=None):
-#        self.layoutAboutToBeChanged.emit()
-#        self.playlist["__playing"] = False
-#        if row is not None:
-#            self.playlist.at[row, "__playing"] = True
-#        self.layoutChanged.emit()
-#
-#    def sort(self, section, order):
-#        self.layoutAboutToBeChanged.emit()
-#        self.playlist.sort_values(by=[self.playlist.columns[section]], 
-#                                    ascending=order, inplace=True)
-#        self.layoutChanged.emit()
-#    
-#    def reset_index(self):
-#        self.playlist.reset_index(drop=True, inplace=True)
+    def sort(self, section, order):
+        # Updated meta tile object
+        col_str = self.columns[section]
+        self.meta.order_by = (col_str, order)
+        
+        # Update ui with new query
+        self.layoutAboutToBeChanged.emit()
+        col = getattr(Library, col_str)
+        if order is Qt.SortOrder.DescendingOrder:
+            self._query = self._query.order_by(col)
+        else:
+            self._query = self._query.order_by(-col)
+        self.layoutChanged.emit()
 
 
 class PlaylistsModel(QAbstractListModel):

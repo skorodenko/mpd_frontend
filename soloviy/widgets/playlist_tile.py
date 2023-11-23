@@ -1,9 +1,10 @@
 import attrs
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QFrame, QHeaderView
+from PySide6.QtWidgets import QFrame
 from soloviy.ui.ui_playlist_tile import Ui_Frame
-from soloviy.models import dbmodels, qtmodels
+from soloviy.models import qtmodels
 from soloviy.api.tiling import MetaTile
+from soloviy.api.mpd_connector import MPDAction
 
 
 class SignalsMixin:
@@ -11,8 +12,8 @@ class SignalsMixin:
     lock: Signal = Signal(MetaTile)
     # Emit signal when destroying tile
     destroy: Signal = Signal(MetaTile)
-    # Emit on change in metadata
-    update_metadata: Signal = Signal()
+    # Emit on change of meta
+    metatile_updated: Signal = Signal(MetaTile, MPDAction)
 
 
 @attrs.define
@@ -26,9 +27,10 @@ class PlaylistTile(QFrame, Ui_Frame, SignalsMixin):
         self.setupUi(self)
         self.playlist_lock.setChecked(self.meta.locked)
         self.playlist_title.setText(self.meta.name)
-        self._bind_signals()
         pmodel = qtmodels.PlaylistModel(self.meta)
+        #self.playlist_table.horizontalHeader().setSortIndicator
         self.playlist_table.setModel(pmodel)
+        self._bind_signals()
     
     def _bind_signals(self):
         self.playlist_lock.toggled.connect(
@@ -37,3 +39,14 @@ class PlaylistTile(QFrame, Ui_Frame, SignalsMixin):
         self.playlist_destroy.clicked.connect(
             lambda: self.destroy.emit(self.meta)
         )
+        self.playlist_table.horizontalHeader().sectionClicked.connect(
+            lambda _: self.metatile_updated.emit(self.meta, MPDAction.SORT)
+        )
+        self.playlist_table.doubleClicked.connect(
+            self._song_changed
+        )
+        
+    def _song_changed(self, index):
+        pos = index.row()
+        self.meta.playing_pos = pos
+        self.metatile_updated.emit(self.meta, MPDAction.SONG_CHANGE)

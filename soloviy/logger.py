@@ -9,6 +9,9 @@ LOGGING_CONFIG = {
             "propagate": False,
             "handlers": ["stream_handler"],
         },
+        "peewee": {
+            "level": "WARNING",
+        },
     },
     "handlers": {
         "stream_handler": {

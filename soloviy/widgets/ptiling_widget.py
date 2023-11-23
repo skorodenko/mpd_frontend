@@ -1,12 +1,10 @@
 import attrs
 import logging
-from typing import Optional
-from soloviy.models import dbmodels
-from soloviy.config import settings
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QWidget, QGridLayout
 from soloviy.widgets.playlist_tile import PlaylistTile
 from soloviy.api.tiling import TilingAPI, MetaTile
+from soloviy.api.mpd_connector import MPDAction
 
 
 logger = logging.getLogger(__name__)
@@ -15,6 +13,8 @@ logger = logging.getLogger(__name__)
 class SignalsMixin:
     # Emitted when tile layout should be updated
     tile_layout_update: Signal = Signal()
+    # Emitted when tile metadata is updated
+    tile_mpd_gate: Signal = Signal(MetaTile, MPDAction)
 
 
 @attrs.define
@@ -26,7 +26,7 @@ class PTilingWidget(QWidget, SignalsMixin):
         self.__attrs_init__()
     
     def __attrs_post_init__(self):
-        self._bind_sgnals()
+        self._bind_signals()
         layout = QGridLayout(self)
         layout.setColumnStretch(0,1)
         layout.setColumnStretch(1,1)
@@ -35,7 +35,7 @@ class PTilingWidget(QWidget, SignalsMixin):
         self.setLayout(layout)
         logger.debug("Created tiling widget")
         
-    def _bind_sgnals(self):
+    def _bind_signals(self):
         self.tile_layout_update.connect(
             self.tiles_update
         )
@@ -53,6 +53,22 @@ class PTilingWidget(QWidget, SignalsMixin):
         tile.destroy.connect(
             lambda: self.tile_layout_update.emit()
         )
+        tile.metatile_updated.connect(
+            self._tile_mpd_gate
+        )
+        self.tiling_api.sender.meta_updated.connect(
+            lambda: tile.playlist_table.model().layoutChanged.emit()
+        )
+    
+    @Slot(MetaTile, MPDAction)
+    def _tile_mpd_gate(self, tile: MetaTile, action: MPDAction):
+        match action:
+            case MPDAction.SONG_CHANGE:
+                self.tiling_api.change_playing_tile(tile)
+            case MPDAction.SORT:
+                self.tiling_api.update_metadata()
+                
+        self.tile_mpd_gate.emit(tile, action)
     
     def _clear_layout(self):
         if layout := self.layout():

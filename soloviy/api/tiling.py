@@ -1,8 +1,9 @@
 import attrs
 from functools import wraps
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from soloviy.db import state
 from soloviy.config import settings
+from PySide6.QtCore import Qt, QObject, Signal
 
 
 class Exceptions:
@@ -13,17 +14,24 @@ class Exceptions:
         ...
 
 
+class SignalSender(QObject):
+    # Emit on setattr in metatile
+    meta_updated: Signal = Signal()
+
+
 @attrs.define
 class MetaTile:
     name: str
     locked: bool = False
-    order_by: str = "track"
+    order_by: Tuple[str, Qt.SortOrder] = ("track", Qt.SortOrder.AscendingOrder) # ADD SETTINGS ENTRY
+    #group_by: Optional[str] = attrs.Factory(lambda: state["group_by"])
     playing_pos: Optional[int] = None
     
 
 @attrs.define
 class TilingAPI:
     tiles: List[MetaTile] = attrs.field(init=False)
+    sender: SignalSender = attrs.Factory(SignalSender)
     
     @tiles.default
     def _preload_tiles(self):
@@ -72,6 +80,7 @@ class TilingAPI:
             self.tiles.insert(index, tile)
         else: # Just append tile
             self.tiles.append(tile)
+        self.sender.meta_updated.emit()
     
     #Slot
     @persist_changes
@@ -89,7 +98,15 @@ class TilingAPI:
         if tile not in self.tiles:
             raise Exceptions.TileDoesNotExist(f"{tile.name}")
         self.tiles.remove(tile)
-      
+    
+    #Slot
+    @persist_changes
+    def change_playing_tile(self, tile: MetaTile):
+        for _tile in self.tiles:
+            if _tile is not tile:
+                _tile.playing_pos = None
+        #self.sender.meta_updated.emit()
+    
     @persist_changes  
     def clear(self):
         self.tiles.clear()
