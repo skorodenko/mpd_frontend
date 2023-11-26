@@ -190,7 +190,13 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
             host = self.wizardServerConfig_host.text()
             port = self.wizardServerConfig_port.text()
             password = self.wizardServerConfig_password.text()
-            socket = f"{host}:{port}"
+            
+            match host, port, password:
+                case _, "0", "":
+                    socket = host
+                case _, _, "" if port != "0":
+                    socket = f"{host}:{port}"
+                
             self.socket = socket
             self.connect_mpd.emit(self.socket)
             return False

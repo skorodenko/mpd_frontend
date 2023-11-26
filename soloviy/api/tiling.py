@@ -105,7 +105,9 @@ class TilingAPI:
         for _tile in self.tiles:
             if _tile is not tile:
                 _tile.playing_pos = None
-        #self.sender.meta_updated.emit()
+    
+    def change_song(self, field: str, status: dict):
+        ...
     
     @persist_changes  
     def clear(self):

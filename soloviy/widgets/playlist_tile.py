@@ -28,7 +28,10 @@ class PlaylistTile(QFrame, Ui_Frame, SignalsMixin):
         self.playlist_lock.setChecked(self.meta.locked)
         self.playlist_title.setText(self.meta.name)
         pmodel = qtmodels.PlaylistModel(self.meta)
-        #self.playlist_table.horizontalHeader().setSortIndicator
+        self.playlist_table.horizontalHeader().setSortIndicator(
+            pmodel.columns.index(self.meta.order_by[0]),
+            self.meta.order_by[1],
+        )
         self.playlist_table.setModel(pmodel)
         self._bind_signals()
     

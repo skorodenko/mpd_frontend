@@ -69,9 +69,9 @@ class PlaylistModel(QAbstractTableModel):
         self.layoutAboutToBeChanged.emit()
         col = getattr(Library, col_str)
         if order is Qt.SortOrder.DescendingOrder:
-            self._query = self._query.order_by(col)
-        else:
             self._query = self._query.order_by(-col)
+        else:
+            self._query = self._query.order_by(col)
         self.layoutChanged.emit()
 
 

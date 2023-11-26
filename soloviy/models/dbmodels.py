@@ -13,7 +13,7 @@ class Library(BaseModel):
     albumartist = CharField(null = True)
     title = CharField(null = True)
     album = CharField(null = True)
-    track = CharField(null = True)
+    track = IntegerField(null = True)
     date = IntegerField(null = True)
     genre = CharField(null = True)
     composer = CharField(null = True)

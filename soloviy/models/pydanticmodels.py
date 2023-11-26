@@ -32,3 +32,17 @@ class Library(BaseModel):
     def _directory_from_context(cls, val: str, info: FieldValidationInfo):
         context = info.context
         return context["directory"]
+    
+    
+#class Status(BaseModel):
+#    partition: str
+#    volume: float
+#    repeat: int
+#    random: int
+#    single: int
+#    consume: int
+#    playlist: int
+#    playlistlength: int
+#    state: str
+#    song: int
+#    songid: int
