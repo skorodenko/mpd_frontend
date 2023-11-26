@@ -12,6 +12,9 @@ LOGGING_CONFIG = {
         "peewee": {
             "level": "WARNING",
         },
+        "mpd.base": {
+            "level": "WARNING",
+        },
     },
     "handlers": {
         "stream_handler": {

@@ -1,5 +1,6 @@
 import attrs
 import logging
+from typing import Optional
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QWidget, QGridLayout
 from soloviy.widgets.playlist_tile import PlaylistTile
@@ -59,6 +60,12 @@ class PTilingWidget(QWidget, SignalsMixin):
         self.tiling_api.sender.meta_updated.connect(
             lambda: tile.playlist_table.model().layoutChanged.emit()
         )
+
+    @Slot(str, dict)
+    def _mpd_idle_update(self, field: str, status: dict):
+        if field in ["song", "playlist"]:
+            pos: Optional[int] = status.get("song")
+            self.tiling_api.change_song(pos)
     
     @Slot(MetaTile, MPDAction)
     def _tile_mpd_gate(self, tile: MetaTile, action: MPDAction):

@@ -142,6 +142,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
         self.mpd.update_seeker.connect(
             self.__update_seeker
         )
+        self.mpd.mpd_idle_update.connect(
+            self.ptiling_widget._mpd_idle_update
+        )
         
     @Slot(str, dict)
     def __mpd_idle_update(self, field: str, status: dict):

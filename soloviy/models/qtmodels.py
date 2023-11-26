@@ -43,9 +43,9 @@ class PlaylistModel(QAbstractTableModel):
             if column_name == "time":
                 return self.strfdelta(val)
             return str(val)
-        #if role == Qt.ItemDataRole.DecorationRole:
-        #    if column == 0 and row == self.meta.playing_pos:
-        #        return PLAYING_ICON
+        if role == Qt.ItemDataRole.DecorationRole:
+            if column == 0 and row == self.meta.playing_pos:
+                return PLAYING_ICON
     
     def rowCount(self, index):
         return self._query.count()
