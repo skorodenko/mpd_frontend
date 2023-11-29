@@ -3,47 +3,47 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QFrame
 from soloviy.ui.ui_playlist_tile import Ui_Frame
 from soloviy.models import qtmodels
-from soloviy.api.tiling import MetaTile
+from soloviy.api.tiling import QMetaTile
 from soloviy.api.mpd_connector import MPDAction
 
 
 class SignalsMixin:
     # Emit signal when toggling lock
-    lock: Signal = Signal(MetaTile)
+    lock: Signal = Signal(QMetaTile)
     # Emit signal when destroying tile
-    destroy: Signal = Signal(MetaTile)
+    destroy: Signal = Signal(QMetaTile)
     # Emit on change of meta
-    metatile_updated: Signal = Signal(MetaTile, MPDAction)
+    metatile_updated: Signal = Signal(QMetaTile, MPDAction)
 
 
 @attrs.define
 class PlaylistTile(QFrame, Ui_Frame, SignalsMixin):
-    meta: MetaTile
+    qmeta: QMetaTile
     
     def __attrs_pre_init__(self):
         super().__init__()
     
     def __attrs_post_init__(self):
         self.setupUi(self)
-        self.playlist_lock.setChecked(self.meta.locked)
-        self.playlist_title.setText(self.meta.name)
-        pmodel = qtmodels.PlaylistModel(self.meta)
+        self.playlist_lock.setChecked(self.qmeta.locked)
+        self.playlist_title.setText(self.qmeta.name)
+        pmodel = qtmodels.PlaylistModel(self.qmeta)
         self.playlist_table.horizontalHeader().setSortIndicator(
-            pmodel.columns.index(self.meta.order_by[0]),
-            self.meta.order_by[1],
+            pmodel.columns.index(self.qmeta.order_by[0]),
+            self.qmeta.order_by[1],
         )
         self.playlist_table.setModel(pmodel)
         self._bind_signals()
     
     def _bind_signals(self):
         self.playlist_lock.toggled.connect(
-            lambda: self.lock.emit(self.meta)
+            lambda: self.lock.emit(self.qmeta)
         )
         self.playlist_destroy.clicked.connect(
-            lambda: self.destroy.emit(self.meta)
+            lambda: self.destroy.emit(self.qmeta)
         )
         self.playlist_table.horizontalHeader().sectionClicked.connect(
-            lambda _: self.metatile_updated.emit(self.meta, MPDAction.SORT)
+            lambda _: self.qmetatile_updated.emit(self.qmeta, MPDAction.SORT)
         )
         self.playlist_table.doubleClicked.connect(
             self._song_changed
@@ -51,5 +51,5 @@ class PlaylistTile(QFrame, Ui_Frame, SignalsMixin):
         
     def _song_changed(self, index):
         pos = index.row()
-        self.meta.playing_pos = pos
-        self.metatile_updated.emit(self.meta, MPDAction.SONG_CHANGE)
+        self.qmeta.playing_pos = pos
+        self.qmetatile_updated.emit(self.qmeta, MPDAction.SONG_CHANGE)

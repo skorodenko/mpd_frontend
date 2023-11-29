@@ -2,22 +2,22 @@ from soloviy.db import state
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
 from soloviy.models.dbmodels import Library
-from soloviy.api.tiling import MetaTile
+from soloviy.api.tiling import QMetaTile
 
 FOLDER_ICON = QIcon.fromTheme("folder-music")
 PLAYING_ICON = QIcon.fromTheme("media-playback-start")
 VISIBLE_COLUMNS = ["track", "file"] # Move to config
 
 class PlaylistModel(QAbstractTableModel):
-    def __init__(self, meta: MetaTile):
+    def __init__(self, qmeta: QMetaTile):
         super().__init__()
-        self.meta: MetaTile = meta
+        self.qmeta: QMetaTile = qmeta
         self.columns: list[str] = VISIBLE_COLUMNS
         self.group_by: str = state["group_by"]
-        self._query = Library.select().where(getattr(Library, self.group_by) == self.meta.name)
+        self._query = Library.select().where(getattr(Library, self.group_by) == self.qmeta.name)
         self.sort(
-            self.columns.index(meta.order_by[0]),
-            meta.order_by[1]
+            self.columns.index(qmeta.order_by[0]),
+            qmeta.order_by[1]
         )
         
     @property
@@ -44,7 +44,7 @@ class PlaylistModel(QAbstractTableModel):
                 return self.strfdelta(val)
             return str(val)
         if role == Qt.ItemDataRole.DecorationRole:
-            if column == 0 and row == self.meta.playing_pos:
+            if column == 0 and row == self.qmeta.playing_pos:
                 return PLAYING_ICON
     
     def rowCount(self, index):
@@ -63,7 +63,7 @@ class PlaylistModel(QAbstractTableModel):
     def sort(self, section, order):
         # Updated meta tile object
         col_str = self.columns[section]
-        self.meta.order_by = (col_str, order)
+        self.qmeta.order_by = (col_str, order)
         
         # Update ui with new query
         self.layoutAboutToBeChanged.emit()

@@ -27,23 +27,75 @@ class MetaTile:
     #group_by: Optional[str] = attrs.Factory(lambda: state["group_by"])
     playing_pos: Optional[int] = None
     
+    
+class QMetaTile(QObject):
+    meta_changed: Signal = Signal(str)
+    
+    def __init__(self, tile: MetaTile):
+        self._tile: MetaTile = tile
+    
+    @property
+    def meta(self):
+        return self._tile
+    
+    @property  
+    def name(self):
+        return self._tile.name
+    
+    @name.setter
+    def _name_set(self, val: str):
+        self._tile.name = val
+        self.meta_changed.emit("name")
+    
+    @property
+    def locked(self):
+        return self._tile.locked
+    
+    @locked.setter
+    def _locked_set(self, val: bool):
+        self._tile.locked = val
+        self.meta_changed.emit("locked")
+
+    @property
+    def order_by(self):
+        return self._tile.order_by
+    
+    @order_by.setter
+    def _order_by_set(self, val: Tuple[str, Qt.SortOrder]):
+        self._tile.order_by = val
+        self.meta_changed.emit("order_by")
+    
+    @property
+    def playing_pos(self):
+        return self._tile.playing_pos
+    
+    @playing_pos.setter
+    def _playing_pos_set(self, val):
+        self._tile.playing_pos = val
+        self.meta_changed.emit("playing_pos")
+    
 
 @attrs.define
 class TilingAPI:
-    tiles: List[MetaTile] = attrs.field(init=False)
+    tiles: List[QMetaTile] = attrs.field(init=False)
     sender: SignalSender = attrs.Factory(SignalSender)
     
     @tiles.default
     def _preload_tiles(self):
         if not state.get("tiles", False):
-            state["tiles"] = list()
-        return state["tiles"]
+            tiles = list()
+            state["tiles"] = tiles
+        else:
+            meta_tiles = state["tiles"]
+            tiles = [QMetaTile(t) for t in meta_tiles]
+        return tiles
         
     def persist_changes(fun):
         @wraps(fun)
         def wrapper(self, *args, **kwargs):
             res = fun(self, *args, **kwargs)
-            state["tiles"] = self.tiles
+            meta_tiles = list(map(lambda t: t.meta, self.tiles))
+            state["tiles"] = meta_tiles
             return res
         return wrapper
 
@@ -74,6 +126,7 @@ class TilingAPI:
             return
         if tile in self.tiles:
             return 
+        tile = QMetaTile(tile)
         if len(self.tiles) + 1 > self.tmode: # Rotate free tiles
             index = self.first_unlocked
             self.tiles.pop()
