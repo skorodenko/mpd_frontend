@@ -1,5 +1,7 @@
+import uuid
 import datetime
 from typing import Optional
+from soloviy.backend.db import state
 from pydantic import BaseModel, Field, FieldValidationInfo, field_validator
 
 
@@ -32,6 +34,16 @@ class Library(BaseModel):
     def _directory_from_context(cls, val: str, info: FieldValidationInfo):
         context = info.context
         return context["directory"]
+ 
+ 
+class MetaTile(BaseModel):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    name: str
+    locked: bool = False
+    group_by: str = Field(default_factory=lambda: state["group_by"])
+    order_by_col: str = "track"
+    order_by_asc: bool = True
+    playing_pos: Optional[int] = None
     
     
 #class Status(BaseModel):

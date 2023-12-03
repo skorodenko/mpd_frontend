@@ -5,7 +5,7 @@ import logging
 import qtinter
 from PIL import Image, ImageQt
 from io import BytesIO
-from soloviy.db import state
+from soloviy.backend.db import state
 from enum import Enum, auto
 from typing import List
 from pydantic import TypeAdapter

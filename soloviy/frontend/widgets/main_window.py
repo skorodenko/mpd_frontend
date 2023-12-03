@@ -3,7 +3,7 @@ import logging
 import qtinter
 import pathlib
 import datetime
-from soloviy.db import state
+from soloviy.backend.db import state
 from soloviy.config import settings
 from soloviy.models import dbmodels as db
 from soloviy.models.qtmodels import PlaylistsModel

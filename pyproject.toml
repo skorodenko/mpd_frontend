@@ -24,6 +24,7 @@ rocksdict = "^0.3.13"
 
 [tool.poetry.group.dev.dependencies]
 req2flatpak = "^0.2.0"
+grpcio-tools = "^1.59.3"
 
 [build-system]
 requires = ["poetry-core"]

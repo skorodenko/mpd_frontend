@@ -1,4 +1,4 @@
-from soloviy.db import state
+from soloviy.backend.db import state
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
 from soloviy.models.dbmodels import Library

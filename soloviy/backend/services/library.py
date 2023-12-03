@@ -1,5 +1,5 @@
 import logging
-from soloviy.db import state
+from soloviy.backend.db import state
 from soloviy.api.tiling import MetaTile
 from soloviy.models.dbmodels import Library
 from PySide6.QtCore import Qt

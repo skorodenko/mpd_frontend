@@ -1,4 +1,4 @@
-from soloviy.db import db, BaseModel
+from soloviy.backend.db import db, BaseModel
 from peewee import CharField, IntegerField, FloatField, DateTimeField, AutoField
 
 class Library(BaseModel):
