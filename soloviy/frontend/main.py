@@ -1,7 +1,7 @@
 import sys
 import qtinter
 from PySide6.QtWidgets import QApplication
-from soloviy.widgets.main_window import MainWindow
+from soloviy.frontend.widgets.main_window import MainWindow
 from soloviy.config import settings
 
 

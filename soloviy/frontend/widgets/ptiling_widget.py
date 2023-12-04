@@ -3,9 +3,9 @@ import logging
 from typing import Optional
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QWidget, QGridLayout
-from soloviy.widgets.playlist_tile import PlaylistTile
-from soloviy.api.tiling import TilingAPI, MetaTile
-from soloviy.api.mpd_connector import MPDAction
+from soloviy.frontend.widgets.playlist_tile import PlaylistTile
+#from soloviy.api.tiling import TilingAPI, MetaTile
+#from soloviy.api.mpd_connector import MPDAction
 
 
 logger = logging.getLogger(__name__)
@@ -15,12 +15,12 @@ class SignalsMixin:
     # Emitted when tile layout should be updated
     tile_layout_update: Signal = Signal()
     # Emitted when tile metadata is updated
-    tile_mpd_gate: Signal = Signal(MetaTile, MPDAction)
+    #tile_mpd_gate: Signal = Signal(MetaTile, MPDAction)
 
 
 @attrs.define
 class PTilingWidget(QWidget, SignalsMixin):
-    tiling_api: TilingAPI = attrs.Factory(TilingAPI)
+    #tiling_api: TilingAPI = attrs.Factory(TilingAPI)
  
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,15 +67,15 @@ class PTilingWidget(QWidget, SignalsMixin):
             pos: Optional[int] = status.get("song")
             self.tiling_api.change_song(pos)
     
-    @Slot(MetaTile, MPDAction)
-    def _tile_mpd_gate(self, tile: MetaTile, action: MPDAction):
-        match action:
-            case MPDAction.SONG_CHANGE:
-                self.tiling_api.change_playing_tile(tile)
-            case MPDAction.SORT:
-                self.tiling_api.update_metadata()
-                
-        self.tile_mpd_gate.emit(tile, action)
+#    @Slot(MetaTile, MPDAction)
+#    def _tile_mpd_gate(self, tile: MetaTile, action: MPDAction):
+#        match action:
+#            case MPDAction.SONG_CHANGE:
+#                self.tiling_api.change_playing_tile(tile)
+#            case MPDAction.SORT:
+#                self.tiling_api.update_metadata()
+#                
+#        self.tile_mpd_gate.emit(tile, action)
     
     def _clear_layout(self):
         if layout := self.layout():
@@ -84,8 +84,8 @@ class PTilingWidget(QWidget, SignalsMixin):
     
     def add_tile(self, playlist: str):
         logger.debug(f"Adding tile: {playlist}")
-        meta = MetaTile(playlist)
-        self.tiling_api.add_tile(meta)
+        #meta = MetaTile(playlist)
+        #self.tiling_api.add_tile(meta)
         self.tile_layout_update.emit()
     
     def tiles_update(self):

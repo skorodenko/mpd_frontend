@@ -3,13 +3,12 @@ import logging
 from weakref import WeakValueDictionary
 from peewee import fn
 from typing import Optional
-from soloviy.models import dbmodels
+#from soloviy.models import dbmodels
 from soloviy.config import settings
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QMainWindow, QDialog
 from dynaconf.loaders.toml_loader import write
-from soloviy.ui.ui_settings import Ui_Form 
-from soloviy.widgets.playlist_tile import PlaylistTile
+from soloviy.frontend.ui.ui_settings import Ui_Form 
 
 
 logger = logging.getLogger(__name__)

@@ -3,16 +3,14 @@ import logging
 import qtinter
 import pathlib
 import datetime
-from soloviy.backend.db import state
+import asyncio
 from soloviy.config import settings
-from soloviy.models import dbmodels as db
-from soloviy.models.qtmodels import PlaylistsModel
-from soloviy.api.mpd_connector import MpdConnector
-from soloviy.ui.ui_main_window import Ui_MainWindow
-from soloviy.widgets.init_wizard import InitWizard
-from soloviy.widgets.settings import Settings
+from soloviy.frontend.qmodels import PlaylistsModel
+from soloviy.frontend.ui.ui_main_window import Ui_MainWindow
+from soloviy.frontend.widgets.init_wizard import InitWizard
+from soloviy.frontend.widgets.settings import Settings
 from PySide6.QtGui import QActionGroup, QAction, QIcon, QPixmap, QFont
-from PySide6.QtCore import QDir, QTimer, Signal, Slot
+from PySide6.QtCore import QDir, QTimer, Signal, Slot, QProcess
 from PySide6.QtWidgets import QMainWindow, QDialog, QApplication
 
 
@@ -29,7 +27,7 @@ class SignalsMixin:
 @attrs.define
 class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
     timer: QTimer = QTimer
-    mpd: MpdConnector = attrs.Factory(MpdConnector)
+    backend: QProcess = attrs.field(init=False)
     init_wizard: InitWizard = attrs.Factory(InitWizard, takes_self=True)
     settings: Settings = attrs.Factory(Settings, takes_self=True)
     
@@ -39,10 +37,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
         self.setupUi(self)
     
     def __attrs_post_init__(self):
-        self._bind_signals()
-        self._init_state()
-        self._ui_post_init()
-        self._bind_buttons()
+        ...
+        #asyncio.create_task(self.backend.serve())
+        #self._bind_signals()
+        #self._init_state()
+        #self._ui_post_init()
+        #self._bind_buttons()
         
     def serve(self):
         logger.info("Started main window")
@@ -60,91 +60,45 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
         else:
             self.init_wizard.connect_mpd.emit(settings.mpd.socket)
     
-    def _init_state(self):
-        logger.debug("Initializing state variables")
-        if not state.get("group_by", None):
-            state["group_by"] = settings.default.group_by
-        if state.get("prev_tile"):
-            state["prev_tile"] = None
-            
-    def _ui_post_init(self):
-        # Init menubar actions [Group by]
-        group = state["group_by"]
-        self.group_by_actions = QActionGroup(self)
-        self.group_by_actions.setExclusive(True)
-        self.group_by_actions.triggered.connect(self.__group_by_changed)
-        actions = [self.actionDirectory, self.actionAlbum, self.actionAlbumartist,
-                   self.actionArtist, self.actionComposer, self.actionDate,
-                   self.actionFormat, self.actionGenre]
-        for a in actions:
-            if group == a.text().lower():
-                a.setChecked(True)
-            self.group_by_actions.addAction(a)
-        
-        # Font setup
-        light_font = QApplication.font()
-        light_font.setWeight(QFont.Weight.Light)
-        self.label_time.setFont(light_font)
-        self.label_author.setFont(light_font)
-        self.label_info.setFont(light_font)
+    @backend.default
+    def _start_backend(self):
+        backend = QProcess()
+        backend.setProcessChannelMode(
+            QProcess.ProcessChannelMode.ForwardedChannels
+        )
+        backend.start(
+            "python", ["-m", "soloviy.backend.main"]
+        )
+        return backend
     
-    def _bind_buttons(self):
-        self.media_play_pause.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_play_pause)
-        )
-        self.media_next.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_next)
-        )
-        self.media_previous.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_previous)
-        )
-        self.media_repeat.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_repeat)
-        )
-        self.media_shuffle.clicked.connect(
-            qtinter.asyncslot(self.mpd.media_shuffle)
-        )
-        self.media_seek.sliderMoved.connect(
-            qtinter.asyncslot(self.mpd.media_seeker)
-        )
+#    def _init_state(self):
+#        logger.debug("Initializing state variables")
+#        if not state.get("group_by", None):
+#            state["group_by"] = settings.default.group_by
+#        if state.get("prev_tile"):
+#            state["prev_tile"] = None
+#            
+#    def _ui_post_init(self):
+#        # Init menubar actions [Group by]
+#        group = state["group_by"]
+#        self.group_by_actions = QActionGroup(self)
+#        self.group_by_actions.setExclusive(True)
+#        self.group_by_actions.triggered.connect(self.__group_by_changed)
+#        actions = [self.actionDirectory, self.actionAlbum, self.actionAlbumartist,
+#                   self.actionArtist, self.actionComposer, self.actionDate,
+#                   self.actionFormat, self.actionGenre]
+#        for a in actions:
+#            if group == a.text().lower():
+#                a.setChecked(True)
+#            self.group_by_actions.addAction(a)
+#        
+#        # Font setup
+#        light_font = QApplication.font()
+#        light_font.setWeight(QFont.Weight.Light)
+#        self.label_time.setFont(light_font)
+#        self.label_author.setFont(light_font)
+#        self.label_info.setFont(light_font)
     
-    def _bind_signals(self):
-        self.mpd.mpd_connection_status.connect(
-            self.init_wizard.connect_mpd_tracker
-        )
-        self.update_db.connect(
-            qtinter.asyncslot(self.mpd.update_db)
-        )
-        self.ptiling_widget.tile_mpd_gate.connect(
-            qtinter.asyncslot(self.mpd._handle_tile_gateway)
-        )
-        self.mpd.db_updated.connect(
-            lambda: self.update_ui.emit()
-        )
-        self.update_ui.connect(
-            self.__update_playlists_view
-        )
-        self.update_ui.connect(
-            lambda: self.ptiling_widget.tile_layout_update.emit()
-        )
-        self.init_wizard.connect_mpd.connect(
-            qtinter.asyncslot(self.mpd.mpd_connect)
-        )
-        self.playlists_view.doubleClicked.connect(
-            lambda pname: self.ptiling_widget.add_tile(pname.data())
-        )
-        self.mpd.mpd_idle_update.connect(
-            self.__mpd_idle_update
-        )
-        self.mpd.song_changed.connect(
-            self.__song_changed
-        )
-        self.mpd.update_seeker.connect(
-            self.__update_seeker
-        )
-        self.mpd.mpd_idle_update.connect(
-            self.ptiling_widget._mpd_idle_update
-        )
         
     @Slot(str, dict)
     def __mpd_idle_update(self, field: str, status: dict):
@@ -223,27 +177,28 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
         self.label_info.setText(f"{int(freq)/1000} kHz, {bitr} bit, {ext}")
         self.label_art.setPixmap(cover)
     
-    @Slot(QAction)
-    def __group_by_changed(self, action: QAction):
-        group = action.text().lower()
-        state["group_by"] = group
-        self.update_ui.emit()
+#    @Slot(QAction)
+#    def __group_by_changed(self, action: QAction):
+#        group = action.text().lower()
+#        state["group_by"] = group
+#        self.update_ui.emit()
     
-    @Slot()
-    def __update_playlists_view(self):
-        logger.debug("Updating playlists view")
-        group = state.get("group_by", settings.default.group_by)
-        sql_group = getattr(db.Library, group)
-        query = (db.Library
-                    .select(sql_group)
-                    .order_by(sql_group)
-                    .distinct())
-        playlists = [getattr(i, group) for i in query]
-        playlists_model = PlaylistsModel(playlists)
-        self.playlists_view.setModel(playlists_model)
+#    @Slot()
+#    def __update_playlists_view(self):
+#        logger.debug("Updating playlists view")
+#        group = state.get("group_by", settings.default.group_by)
+#        sql_group = getattr(db.Library, group)
+#        query = (db.Library
+#                    .select(sql_group)
+#                    .order_by(sql_group)
+#                    .distinct())
+#        playlists = [getattr(i, group) for i in query]
+#        playlists_model = PlaylistsModel(playlists)
+#        self.playlists_view.setModel(playlists_model)
     
     def closeEvent(self, event):
         logger.info("Closing main window")
-        self.mpd.graceful_close()
+        self.backend.terminate()
+        self.backend.waitForFinished(-1)
         super().closeEvent(event)
     

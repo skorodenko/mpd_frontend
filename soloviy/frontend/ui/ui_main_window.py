@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.6.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -22,8 +22,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplicat
     QSizePolicy, QSpacerItem, QSplitter, QVBoxLayout,
     QWidget)
 
-from soloviy.ui.custom_classes.jump_slider import JumpSlider
-from soloviy.widgets.ptiling_widget import PTilingWidget
+from soloviy.frontend.ui.custom_classes.jump_slider import JumpSlider
+from soloviy.frontend.widgets.ptiling_widget import PTilingWidget
 from . import icons_rc
 
 class Ui_MainWindow(object):
@@ -321,7 +321,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 800, 22))
+        self.menubar.setGeometry(QRect(0, 0, 800, 29))
         self.menubar.setDefaultUp(False)
         self.menu_Music = QMenu(self.menubar)
         self.menu_Music.setObjectName(u"menu_Music")

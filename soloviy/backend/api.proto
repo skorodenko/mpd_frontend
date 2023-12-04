@@ -13,9 +13,24 @@ service TilingAPI {
 }
 
 service MpdAPI {
-    //rpc Connect()
+    rpc Connect(ConnectCredentials) returns (ConnectionDetails);
     rpc GetActiveGroup(google.protobuf.Empty) returns (PlaylistGroup);
     rpc GetPlaylists(PlaylistGroup) returns (ListPlaylistName);
+}
+
+message ConnectCredentials {
+    string socket = 1;
+    string password = 2;
+}
+
+message ConnectionDetails {
+    ConnectionStatus status = 1;
+}
+
+enum ConnectionStatus {
+    Connected = 0;
+    FailedToConnect = 1;
+    NoMpdBinary = 2;
 }
 
 message UUID {

@@ -20,7 +20,7 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icons.qrc">
+   <iconset>
     <normaloff>:/icons/logo.svg</normaloff>:/icons/logo.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -441,7 +441,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>29</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -561,17 +561,17 @@
   <customwidget>
    <class>JumpSlider</class>
    <extends>QSlider</extends>
-   <header>soloviy.ui.custom_classes.jump_slider</header>
+   <header>soloviy.frontend.ui.custom_classes.jump_slider</header>
   </customwidget>
   <customwidget>
    <class>PTilingWidget</class>
    <extends>QWidget</extends>
-   <header>soloviy.widgets.ptiling_widget</header>
+   <header>soloviy.frontend.widgets.ptiling_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="icons.qrc"/>
  </resources>
  <connections/>
 </ui>

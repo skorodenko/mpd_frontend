@@ -1,5 +1,5 @@
-SRC="../soloviy/frontend/ui/templates"
-DST="../soloviy/frontend/ui"
+SRC="./soloviy/frontend/ui/templates"
+DST="./soloviy/frontend/ui"
 
 pyside6-rcc $SRC/icons.qrc -o $DST/icons_rc.py
 pyside6-uic --from-imports -o $DST/ui_init_wizard.py $SRC/init_wizard.ui

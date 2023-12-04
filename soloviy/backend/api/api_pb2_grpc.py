@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import api_pb2 as api__pb2
+from . import api_pb2 as api__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
@@ -175,6 +175,11 @@ class MpdAPIStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.Connect = channel.unary_unary(
+                '/backend.api.MpdAPI/Connect',
+                request_serializer=api__pb2.ConnectCredentials.SerializeToString,
+                response_deserializer=api__pb2.ConnectionDetails.FromString,
+                )
         self.GetActiveGroup = channel.unary_unary(
                 '/backend.api.MpdAPI/GetActiveGroup',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
@@ -183,12 +188,18 @@ class MpdAPIStub(object):
         self.GetPlaylists = channel.unary_unary(
                 '/backend.api.MpdAPI/GetPlaylists',
                 request_serializer=api__pb2.PlaylistGroup.SerializeToString,
-                response_deserializer=api__pb2.ListPlaylist.FromString,
+                response_deserializer=api__pb2.ListPlaylistName.FromString,
                 )
 
 
 class MpdAPIServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def Connect(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetActiveGroup(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -197,8 +208,7 @@ class MpdAPIServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetPlaylists(self, request, context):
-        """rpc GetPlaylist(MetaTile) returns (Playlist)
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -206,6 +216,11 @@ class MpdAPIServicer(object):
 
 def add_MpdAPIServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'Connect': grpc.unary_unary_rpc_method_handler(
+                    servicer.Connect,
+                    request_deserializer=api__pb2.ConnectCredentials.FromString,
+                    response_serializer=api__pb2.ConnectionDetails.SerializeToString,
+            ),
             'GetActiveGroup': grpc.unary_unary_rpc_method_handler(
                     servicer.GetActiveGroup,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
@@ -214,7 +229,7 @@ def add_MpdAPIServicer_to_server(servicer, server):
             'GetPlaylists': grpc.unary_unary_rpc_method_handler(
                     servicer.GetPlaylists,
                     request_deserializer=api__pb2.PlaylistGroup.FromString,
-                    response_serializer=api__pb2.ListPlaylist.SerializeToString,
+                    response_serializer=api__pb2.ListPlaylistName.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -225,6 +240,23 @@ def add_MpdAPIServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class MpdAPI(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def Connect(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/backend.api.MpdAPI/Connect',
+            api__pb2.ConnectCredentials.SerializeToString,
+            api__pb2.ConnectionDetails.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetActiveGroup(request,
@@ -256,6 +288,6 @@ class MpdAPI(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/backend.api.MpdAPI/GetPlaylists',
             api__pb2.PlaylistGroup.SerializeToString,
-            api__pb2.ListPlaylist.FromString,
+            api__pb2.ListPlaylistName.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -4,10 +4,10 @@ import qtinter
 from enum import Enum
 from PySide6.QtCore import Signal, QDir, QPropertyAnimation, Slot
 from PySide6.QtWidgets import QWizard, QMainWindow, QWidget, QLabel, QFileDialog
-from soloviy.ui.ui_init_wizard import Ui_Wizard
-from soloviy.backend.db import state
+from soloviy.frontend.ui.ui_init_wizard import Ui_Wizard
+#from soloviy.backend.db import state
 from soloviy.config import settings
-from soloviy.api.mpd_connector import ConnectionStatus
+#from soloviy.api.mpd_connector import ConnectionStatus
 
 
 class AlertStyle(Enum):
@@ -42,12 +42,6 @@ class SignalsMixin:
 class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
     parent: QMainWindow
     socket: str = None
-    mpd_binary: bool = attrs.field(init = False)
-    
-    @mpd_binary.default
-    def _factory_mpd_binary(self) -> bool:
-        from shutil import which
-        return which("mpd") is not None
     
     def __init__(self, parent: QMainWindow):
         super().__init__(parent)
@@ -118,26 +112,26 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
         self.anim.setEndValue(AlertSize.CLOSED.value)
         self.anim.start()        
 
-    @Slot(ConnectionStatus)
-    def connect_mpd_tracker(self, status: ConnectionStatus):
-        """Slot to track the status of mpd connection
-
-        :param status: Connection status enum
-        :type status: ConnectionStatus
-        """
-        if self.currentPage() == self.wizardLocalConfig:
-            page = AlertPage.wizardLocalConfig
-        elif self.currentPage() == self.wizardServerConfig:
-            page = AlertPage.wizardServerConfig
-        match status:
-            case ConnectionStatus.CONNECTING:
-                self.alert.emit(page, AlertStyle.WARNING, "Connecting to mpd ...")
-            case ConnectionStatus.CONNECTED:
-                self.alert.emit(page, AlertStyle.SUCCESS, "Connection successful")
-                settings.set("mpd.socket", self.socket)
-                self.setCurrentId(self.nextId())
-            case ConnectionStatus.CONNECTION_FAILED:
-                self.alert.emit(page, AlertStyle.ERROR, "Failed to connect")
+#    @Slot(ConnectionStatus)
+#    def connect_mpd_tracker(self, status: ConnectionStatus):
+#        """Slot to track the status of mpd connection
+#
+#        :param status: Connection status enum
+#        :type status: ConnectionStatus
+#        """
+#        if self.currentPage() == self.wizardLocalConfig:
+#            page = AlertPage.wizardLocalConfig
+#        elif self.currentPage() == self.wizardServerConfig:
+#            page = AlertPage.wizardServerConfig
+#        match status:
+#            case ConnectionStatus.CONNECTING:
+#                self.alert.emit(page, AlertStyle.WARNING, "Connecting to mpd ...")
+#            case ConnectionStatus.CONNECTED:
+#                self.alert.emit(page, AlertStyle.SUCCESS, "Connection successful")
+#                settings.set("mpd.socket", self.socket)
+#                self.setCurrentId(self.nextId())
+#            case ConnectionStatus.CONNECTION_FAILED:
+#                self.alert.emit(page, AlertStyle.ERROR, "Failed to connect")
     
     @Slot()
     def music_collection_select(self):
@@ -146,7 +140,7 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
         d = self.file_dialog.getExistingDirectory(self, 
                                                   "Select music collection root")   
         self.wizardLocalConfig_musicfolder_text.setText(d)
-        state["music_folder"] = d
+        #state["music_folder"] = d
     
     def initializePage(self, id: int) -> None:
         if self.page(id) == self.wizardStart:

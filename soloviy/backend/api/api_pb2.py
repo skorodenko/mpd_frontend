@@ -12,29 +12,40 @@ _sym_db = _symbol_database.Default()
 
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tapi.proto\x12\x0b\x62\x61\x63kend.api\x1a\x1bgoogle/protobuf/empty.proto\"\x15\n\x04UUID\x12\r\n\x05value\x18\x01 \x01(\x0c\"7\n\x0cListMetaTile\x12\'\n\x08metatile\x18\x01 \x03(\x0b\x32\x15.backend.api.MetaTile\"\x1c\n\x0cPlaylistName\x12\x0c\n\x04name\x18\x01 \x01(\t\";\n\x0cListPlaylist\x12+\n\x08playlist\x18\x01 \x03(\x0b\x32\x19.backend.api.PlaylistName\"\x1d\n\rPlaylistGroup\x12\x0c\n\x04name\x18\x01 \x01(\t\"T\n\x08MetaTile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06locked\x18\x02 \x01(\x08\x12\x14\n\x0corder_by_col\x18\x03 \x01(\t\x12\x14\n\x0corder_by_asc\x18\x04 \x01(\t2\xfa\x01\n\tTilingAPI\x12=\n\x08GetTiles\x12\x16.google.protobuf.Empty\x1a\x19.backend.api.ListMetaTile\x12;\n\x07\x41\x64\x64Tile\x12\x19.backend.api.PlaylistName\x1a\x15.backend.api.MetaTile\x12\x38\n\x07\x44\x65lTile\x12\x15.backend.api.MetaTile\x1a\x16.google.protobuf.Empty\x12\x37\n\x07UpdTile\x12\x15.backend.api.MetaTile\x1a\x15.backend.api.MetaTile2\x95\x01\n\x06MpdAPI\x12\x44\n\x0eGetActiveGroup\x12\x16.google.protobuf.Empty\x1a\x1a.backend.api.PlaylistGroup\x12\x45\n\x0cGetPlaylists\x12\x1a.backend.api.PlaylistGroup\x1a\x19.backend.api.ListPlaylistb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tapi.proto\x12\x0b\x62\x61\x63kend.api\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"6\n\x12\x43onnectCredentials\x12\x0e\n\x06socket\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"B\n\x11\x43onnectionDetails\x12-\n\x06status\x18\x01 \x01(\x0e\x32\x1d.backend.api.ConnectionStatus\"\x15\n\x04UUID\x12\r\n\x05value\x18\x01 \x01(\x0c\"7\n\x0cListMetaTile\x12\'\n\x08metatile\x18\x01 \x03(\x0b\x32\x15.backend.api.MetaTile\"\x1c\n\x0cPlaylistName\x12\x0c\n\x04name\x18\x01 \x01(\t\"?\n\x10ListPlaylistName\x12+\n\x08playlist\x18\x01 \x03(\x0b\x32\x19.backend.api.PlaylistName\"\x1d\n\rPlaylistGroup\x12\x0c\n\x04name\x18\x01 \x01(\t\"+\n\x08Playlist\x12\x1f\n\x04song\x18\x01 \x03(\x0b\x32\x11.backend.api.Song\"\xa4\x02\n\x04Song\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x11\n\tdirectory\x18\x02 \x01(\t\x12\x0c\n\x04\x66ile\x18\x03 \x01(\t\x12\x0c\n\x04time\x18\x04 \x01(\x03\x12\x10\n\x08\x64uration\x18\x05 \x01(\x02\x12\x30\n\x0clastmodified\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06\x66ormat\x18\x07 \x01(\t\x12\x0e\n\x06\x61rtist\x18\x08 \x01(\t\x12\x13\n\x0b\x61lbumartist\x18\t \x01(\t\x12\r\n\x05title\x18\n \x01(\t\x12\r\n\x05\x61lbum\x18\x0b \x01(\t\x12\r\n\x05track\x18\x0c \x01(\x03\x12\x0c\n\x04\x64\x61te\x18\r \x01(\t\x12\r\n\x05genre\x18\x0e \x01(\t\x12\x10\n\x08\x63omposer\x18\x0f \x01(\t\x12\x0c\n\x04\x64isc\x18\x10 \x01(\x03\"T\n\x08MetaTile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06locked\x18\x02 \x01(\x08\x12\x14\n\x0corder_by_col\x18\x03 \x01(\t\x12\x14\n\x0corder_by_asc\x18\x04 \x01(\t*G\n\x10\x43onnectionStatus\x12\r\n\tConnected\x10\x00\x12\x13\n\x0f\x46\x61iledToConnect\x10\x01\x12\x0f\n\x0bNoMpdBinary\x10\x02\x32\xfa\x01\n\tTilingAPI\x12=\n\x08GetTiles\x12\x16.google.protobuf.Empty\x1a\x19.backend.api.ListMetaTile\x12;\n\x07\x41\x64\x64Tile\x12\x19.backend.api.PlaylistName\x1a\x15.backend.api.MetaTile\x12\x38\n\x07\x44\x65lTile\x12\x15.backend.api.MetaTile\x1a\x16.google.protobuf.Empty\x12\x37\n\x07UpdTile\x12\x15.backend.api.MetaTile\x1a\x15.backend.api.MetaTile2\xe5\x01\n\x06MpdAPI\x12J\n\x07\x43onnect\x12\x1f.backend.api.ConnectCredentials\x1a\x1e.backend.api.ConnectionDetails\x12\x44\n\x0eGetActiveGroup\x12\x16.google.protobuf.Empty\x1a\x1a.backend.api.PlaylistGroup\x12I\n\x0cGetPlaylists\x12\x1a.backend.api.PlaylistGroup\x1a\x1d.backend.api.ListPlaylistNameb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'api_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_UUID']._serialized_start=55
-  _globals['_UUID']._serialized_end=76
-  _globals['_LISTMETATILE']._serialized_start=78
-  _globals['_LISTMETATILE']._serialized_end=133
-  _globals['_PLAYLISTNAME']._serialized_start=135
-  _globals['_PLAYLISTNAME']._serialized_end=163
-  _globals['_LISTPLAYLIST']._serialized_start=165
-  _globals['_LISTPLAYLIST']._serialized_end=224
-  _globals['_PLAYLISTGROUP']._serialized_start=226
-  _globals['_PLAYLISTGROUP']._serialized_end=255
-  _globals['_METATILE']._serialized_start=257
-  _globals['_METATILE']._serialized_end=341
-  _globals['_TILINGAPI']._serialized_start=344
-  _globals['_TILINGAPI']._serialized_end=594
-  _globals['_MPDAPI']._serialized_start=597
-  _globals['_MPDAPI']._serialized_end=746
+  _globals['_CONNECTIONSTATUS']._serialized_start=844
+  _globals['_CONNECTIONSTATUS']._serialized_end=915
+  _globals['_CONNECTCREDENTIALS']._serialized_start=88
+  _globals['_CONNECTCREDENTIALS']._serialized_end=142
+  _globals['_CONNECTIONDETAILS']._serialized_start=144
+  _globals['_CONNECTIONDETAILS']._serialized_end=210
+  _globals['_UUID']._serialized_start=212
+  _globals['_UUID']._serialized_end=233
+  _globals['_LISTMETATILE']._serialized_start=235
+  _globals['_LISTMETATILE']._serialized_end=290
+  _globals['_PLAYLISTNAME']._serialized_start=292
+  _globals['_PLAYLISTNAME']._serialized_end=320
+  _globals['_LISTPLAYLISTNAME']._serialized_start=322
+  _globals['_LISTPLAYLISTNAME']._serialized_end=385
+  _globals['_PLAYLISTGROUP']._serialized_start=387
+  _globals['_PLAYLISTGROUP']._serialized_end=416
+  _globals['_PLAYLIST']._serialized_start=418
+  _globals['_PLAYLIST']._serialized_end=461
+  _globals['_SONG']._serialized_start=464
+  _globals['_SONG']._serialized_end=756
+  _globals['_METATILE']._serialized_start=758
+  _globals['_METATILE']._serialized_end=842
+  _globals['_TILINGAPI']._serialized_start=918
+  _globals['_TILINGAPI']._serialized_end=1168
+  _globals['_MPDAPI']._serialized_start=1171
+  _globals['_MPDAPI']._serialized_end=1400
 # @@protoc_insertion_point(module_scope)
