@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+
+service MpdAPI {
+    rpc Connect(ConnectionCredentials) returns (ConnectionDetails);
+}
+
+message ConnectionCredentials {
+    string socket = 1;
+    string password = 2;
+}
+
+message ConnectionDetails {
+    ConnectionStatus status = 1;
+}
+
+enum ConnectionStatus {
+    Connected = 0;
+    FailedToConnect = 1;
+    NoMpdBinary = 2;
+}
+
+message Song {
+    int64 id = 1;
+    string directory = 2;
+    string file = 3;
+    int64 time = 4;
+    float duration = 5;
+    google.protobuf.Timestamp lastmodified = 6;
+    string format = 7;
+    string artist = 8;
+    string albumartist = 9;
+    string title = 10;
+    string album = 11;
+    int64 track = 12;
+    string date = 13;
+    string genre = 14;
+    string composer = 15;
+    int64 disc = 16;
+}

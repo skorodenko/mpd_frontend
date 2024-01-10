@@ -14,6 +14,7 @@ service TilingAPI {
 
 service MpdAPI {
     rpc Connect(ConnectCredentials) returns (ConnectionDetails);
+    rpc Connected(google.protobuf.Empty) returns (ConnectionDetails);
     rpc GetActiveGroup(google.protobuf.Empty) returns (PlaylistGroup);
     rpc GetPlaylists(PlaylistGroup) returns (ListPlaylistName);
 }

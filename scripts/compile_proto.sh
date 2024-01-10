@@ -1,4 +1,4 @@
 #!/usr/bin/sh
-SRC="./soloviy/backend"
-DST="./soloviy/backend/api"
-python -m grpc_tools.protoc -I $SRC --python_out $DST --pyi_out $DST --grpc_python_out $DST $SRC/api.proto
+SRC="./soloviy/backend/protobufs"
+mkdir $SRC/lib
+protoc -I $SRC --python_betterproto_opt=pydantic_dataclasses --python_betterproto_out $SRC/lib $SRC/*.proto

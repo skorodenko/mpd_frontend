@@ -13,18 +13,25 @@ pyyaml = "^6.0"
 xdg = "^6.0.0"
 attrs = "^23.1.0"
 qtinter = "^0.11.0"
-pyside6 = "^6.5.2"
 dynaconf = "^3.2.2"
 cashews = "^6.2.0"
 diskcache = "^5.6.3"
 pydantic = "^2.3.0"
 peewee = "^3.16.3"
 rocksdict = "^0.3.13"
+betterproto = {version = "^2.0.0b6", allow-prereleases = true, extras=["compiler"]}
 
 
 [tool.poetry.group.dev.dependencies]
 req2flatpak = "^0.2.0"
-grpcio-tools = "^1.59.3"
+poethepoet = "^0.24.4"
+pytest = "^7.4.4"
+
+
+[tool.poe.tasks.compile_proto]
+cmd = "./scripts/compile_proto.sh"
+help = "Compile proto files into python code"
+
 
 [build-system]
 requires = ["poetry-core"]
