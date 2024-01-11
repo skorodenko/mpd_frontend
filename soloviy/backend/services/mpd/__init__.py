@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @attrs.define
 class MpdService(MpdServiceBase):
     mpd_binary: Optional[str] = attrs.field()
-    mpd_server: Optional[Popen] = attrs.field(init=False)
+    mpd_server: Optional[Popen] = None
     mpd_client: MPDClient = attrs.Factory(MPDClient)
 
     @mpd_binary.default
@@ -35,10 +35,12 @@ class MpdService(MpdServiceBase):
             logger.debug("Mpd binary not found in PATH")
         return binary
 
-    def __del__(self):
+    def close(self):
+        logger.debug("Gracefully closing MpdService")
         self.mpd_client.disconnect()
-        self.mpd_server.terminate()
-        self.mpd_server.wait(5)
+        if self.mpd_server:
+            self.mpd_server.terminate()
+            self.mpd_server.wait(5)
 
     async def connect(
         self, connection_credentials: ConnectionCredentials

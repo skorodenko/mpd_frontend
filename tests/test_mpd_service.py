@@ -1,32 +1,28 @@
-import time
 import pytest
-import subprocess
-from grpclib.client import Channel
-from soloviy.config import settings
+import asyncio
+import pytest_asyncio
+from grpclib.testing import ChannelFor
+from soloviy.backend.services.mpd import MpdService
 from soloviy.backend.protobufs import lib as libgrpc
+from soloviy.config import settings
 
 
+@pytest.mark.asyncio(scope="class")
 class TestMPDConnection:
     host = "localhost"
     port = settings.default.grpc_port
+    loop: asyncio.AbstractEventLoop
 
-    @pytest.fixture
-    def grpc_server(self):
-        proc = subprocess.Popen(
-            ["python", "-m", "soloviy.backend.main"],
-            stdout=subprocess.PIPE,
-        )
-
-        time.sleep(0.5)
-        yield
-
-        proc.terminate()
-        time.sleep(0.5)
+    @pytest_asyncio.fixture
+    async def grpc_channel(self):
+        service = MpdService()
+        async with ChannelFor([service]) as channel:
+            yield channel
+        service.close()
 
     @pytest.mark.asyncio
-    async def test_native_successful_connection(self, grpc_server):
-        channel = Channel(self.host, self.port)
-        service = libgrpc.MpdServiceStub(channel)
+    async def test_native_successful_connection(self, grpc_channel):
+        service = libgrpc.MpdServiceStub(grpc_channel)
 
         resp = await service.connect(
             libgrpc.ConnectionCredentials(
@@ -35,14 +31,11 @@ class TestMPDConnection:
             )
         )
 
-        channel.close()
-
         assert resp.status == libgrpc.ConnectionStatus.Connected.value
 
     @pytest.mark.asyncio
-    async def test_failed_connection(self, grpc_server):
-        channel = Channel(self.host, self.port)
-        service = libgrpc.MpdServiceStub(channel)
+    async def test_failed_connection(self, grpc_channel):
+        service = libgrpc.MpdServiceStub(grpc_channel)
 
         resp = await service.connect(
             libgrpc.ConnectionCredentials(
@@ -50,7 +43,5 @@ class TestMPDConnection:
                 password="test",
             )
         )
-
-        channel.close()
 
         assert resp.status == libgrpc.ConnectionStatus.FailedToConnect.value
