@@ -16,18 +16,18 @@ class Backend:
     port: int = settings.default.grpc_port
     mpd_service: MpdService = attrs.Factory(MpdService)
     grpc_server: Server = attrs.field()
-    
+
     @grpc_server.default
     def _factory_grpc_server(self):
         services = [self.mpd_service]
         return Server(services)
-    
+
     async def serve(self):
         with graceful_exit([self.grpc_server]):
             await self.grpc_server.start(self.host, self.port)
             await self.grpc_server.wait_closed()
 
-        
+
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     backend = Backend()

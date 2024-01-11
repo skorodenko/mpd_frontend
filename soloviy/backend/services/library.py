@@ -9,14 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_playlist(tile: MetaTile):
-    query = (
-        Library
-            .select()
-            .where(
-                getattr(Library, state["group_by"]) == tile.name
-            )
-    )
+    query = Library.select().where(getattr(Library, state["group_by"]) == tile.name)
     return sort_playlist(tile, query)
+
 
 def sort_playlist(tile: MetaTile, playlist):
     col = getattr(Library, tile.order_by[0])
@@ -26,8 +21,9 @@ def sort_playlist(tile: MetaTile, playlist):
         playlist = playlist.order_by(col)
     return playlist
 
+
 def get_song(tile: MetaTile):
-    #IMPORTANT
+    # IMPORTANT
     playlist = get_playlist(tile)
     song = playlist[tile.playing_pos]
     return song

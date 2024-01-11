@@ -13,12 +13,12 @@ sqlite_db = str(xdg_data_dir / "soloviy.db")
 state_db = str(xdg_state_dir / "state.db")
 
 settings = Dynaconf(
-    settings_file = settings_file,
-    log_file = log_file,
-    xdg_config_dir = str(xdg_config_dir),
-    xdg_data_dir = str(xdg_data_dir),
-    xdg_state_dir = str(xdg_state_dir),
-    xdg_cache_home = str(xdg_cache_dir),
-    preload = default_config,
-    merge_enable = True,
+    settings_file=settings_file,
+    log_file=log_file,
+    xdg_config_dir=str(xdg_config_dir),
+    xdg_data_dir=str(xdg_data_dir),
+    xdg_state_dir=str(xdg_state_dir),
+    xdg_cache_home=str(xdg_cache_dir),
+    preload=default_config,
+    merge_enable=True,
 )

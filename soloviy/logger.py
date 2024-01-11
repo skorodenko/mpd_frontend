@@ -22,13 +22,13 @@ LOGGING_CONFIG = {
             "stream": "ext://sys.stdout",
             "formatter": "default_formatter",
         },
-#        "file_handler": {
-#            "class": "logging.FileHandler",
-#            "filename": settings.log_file,
-#            "mode": "w",
-#            "level": "DEBUG",
-#            "formatter": "default_formatter",
-#        },
+        #        "file_handler": {
+        #            "class": "logging.FileHandler",
+        #            "filename": settings.log_file,
+        #            "mode": "w",
+        #            "level": "DEBUG",
+        #            "formatter": "default_formatter",
+        #        },
     },
     "formatters": {
         "default_formatter": {

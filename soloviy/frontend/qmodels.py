@@ -1,20 +1,23 @@
-#from soloviy.backend.db import state
+# from soloviy.backend.db import state
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
-#from soloviy.models.dbmodels import Library
-#from soloviy.api.tiling import QMetaTile
+# from soloviy.models.dbmodels import Library
+# from soloviy.api.tiling import QMetaTile
 
 FOLDER_ICON = QIcon.fromTheme("folder-music")
 PLAYING_ICON = QIcon.fromTheme("media-playback-start")
-VISIBLE_COLUMNS = ["track", "file"] # Move to config
+VISIBLE_COLUMNS = ["track", "file"]  # Move to config
+
 
 class PlaylistModel(QAbstractTableModel):
     ...
-    
+
+
 class PlaylistsModel(QAbstractListModel):
     ...
 
-#class PlaylistModel(QAbstractTableModel):
+
+# class PlaylistModel(QAbstractTableModel):
 #    def __init__(self, qmeta: QMetaTile):
 #        super().__init__()
 #        self.qmeta: QMetaTile = qmeta
@@ -25,7 +28,7 @@ class PlaylistsModel(QAbstractListModel):
 #            self.columns.index(qmeta.order_by[0]),
 #            qmeta.order_by[1]
 #        )
-#        
+#
 #    @property
 #    def query(self):
 #        return self._query
@@ -39,7 +42,7 @@ class PlaylistsModel(QAbstractListModel):
 #                return f"{h}:{m:0>2}:{s:0>2}"
 #            case _:
 #                return f"{m:0>2}:{s:0>2}"
-#    
+#
 #    def data(self, index, role):
 #        row = index.row()
 #        column = index.column()
@@ -52,10 +55,10 @@ class PlaylistsModel(QAbstractListModel):
 #        if role == Qt.ItemDataRole.DecorationRole:
 #            if column == 0 and row == self.qmeta.playing_pos:
 #                return PLAYING_ICON
-#    
+#
 #    def rowCount(self, index):
 #        return self._query.count()
-#    
+#
 #    def columnCount(self, index):
 #        return len(self.columns)
 #
@@ -65,12 +68,12 @@ class PlaylistsModel(QAbstractListModel):
 #                if section == self.columns.index("track"):
 #                    return "#"
 #                return self.columns[section]
-#    
+#
 #    def sort(self, section, order):
 #        # Updated meta tile object
 #        col_str = self.columns[section]
 #        self.qmeta.order_by = (col_str, order)
-#        
+#
 #        # Update ui with new query
 #        self.layoutAboutToBeChanged.emit()
 #        col = getattr(Library, col_str)
@@ -81,7 +84,7 @@ class PlaylistsModel(QAbstractListModel):
 #        self.layoutChanged.emit()
 #
 #
-#class PlaylistsModel(QAbstractListModel):
+# class PlaylistsModel(QAbstractListModel):
 #    def __init__(self, playlists):
 #        super().__init__()
 #        self.playlists = playlists
@@ -92,6 +95,6 @@ class PlaylistsModel(QAbstractListModel):
 #            return name
 #        if role == Qt.ItemDataRole.DecorationRole:
 #            return FOLDER_ICON
-#    
+#
 #    def rowCount(self, index):
 #        return len(self.playlists)
