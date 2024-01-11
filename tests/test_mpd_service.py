@@ -29,7 +29,7 @@ async def test_native_successful_connection(grpc_server):
     resp = await service.connect(
         libgrpc.ConnectionCredentials(
             socket = settings.mpd.native_socket, 
-            password = '',
+            password = "",
         )
     )
     
@@ -46,8 +46,8 @@ async def test_failed_connection(grpc_server):
     
     resp = await service.connect(
         libgrpc.ConnectionCredentials(
-            socket = 'test', 
-            password = 'test',
+            socket = "test", 
+            password = "test",
         )
     )
     
