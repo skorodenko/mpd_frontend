@@ -13,3 +13,4 @@ playlists_margin = 2
 
 [default]
 group_by = "directory"
+grpc_port = 50051

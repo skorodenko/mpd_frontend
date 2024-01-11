@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 
 
-service TilingAPI {
+service TilingService {
     rpc GetTiles(google.protobuf.Empty) returns (ListMetaTile);
     rpc AddTile(PlaylistName) returns (MetaTile);
     rpc DelTile(MetaTile) returns (google.protobuf.Empty);

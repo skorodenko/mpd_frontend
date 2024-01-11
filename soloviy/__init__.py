@@ -1,1 +1,1 @@
-#from soloviy import logger  # noqa: F401
+from soloviy import logger  # noqa: F401
