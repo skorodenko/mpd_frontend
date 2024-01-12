@@ -1,21 +1,38 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 
+// Service to communicate with mpd
 service MpdService {
+    // Connect to mpd instance
     rpc Connect(ConnectionCredentials) returns (ConnectionDetails);
+    // Update music DB
+    rpc UpdateDB(google.protobuf.Empty) returns (google.protobuf.Empty);
+    //rpc PlayPause() returns ();
 }
 
+message MetaPlaylist {
+    string name = 1;
+}
+
+// Credentials to connect to mpd
 message ConnectionCredentials {
+    // Socket where mpd is located
+    // Send empty string to use native mpd server
     string socket = 1;
+    // Password for mpd connection
+    // Omit if no password needed
     string password = 2;
 }
 
+// Result of mpd connection
 message ConnectionDetails {
     ConnectionStatus status = 1;
 }
 
+// Status of mpd connection
 enum ConnectionStatus {
     Connected = 0;
     FailedToConnect = 1;
