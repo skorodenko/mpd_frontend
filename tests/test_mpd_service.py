@@ -3,7 +3,6 @@ import asyncio
 import pytest_asyncio
 from shutil import which
 from unittest.mock import Mock
-from peewee import SqliteDatabase
 from grpclib.testing import ChannelFor
 from betterproto.lib.google.protobuf import Empty
 from soloviy.backend.services.mpd import MpdService
@@ -59,84 +58,13 @@ class TestMPDAppDB:
         async def update(self):
             ...
 
-        async def listallinfo(self):
-            res = [
-                {
-                    "directory": "testdir",
-                    "last-modified": "2023-07-13T15:13:40Z",
-                },
-                {
-                    "file": "testdir/song1.mp3",
-                    "last-modified": "2023-07-13T15:13:40Z",
-                    "format": "44100:24:2",
-                    "artist": ["artist1", "artist2"],
-                    "albumartist": "artist1",
-                    "title": "song1",
-                    "album": "album1",
-                    "track": "1",
-                    "date": "2023",
-                    "genre": "Test Music",
-                    "disc": "1",
-                    "time": "291",
-                    "duration": "290.899",
-                },
-                {
-                    "file": "testdir/song2.mp3",
-                    "last-modified": "2023-07-13T15:13:40Z",
-                    "format": "44100:24:2",
-                    "artist": ["artist1", "artist2"],
-                    "albumartist": "artist1",
-                    "title": "song2",
-                    "album": "album1",
-                    "track": "2",
-                    "date": "2023",
-                    "genre": ["Test Music 1", "Test Music 2"],
-                    "disc": "1",
-                    "time": "291",
-                    "duration": "290.899",
-                },
-            ]
-            return res
-
-    @pytest.fixture
-    def mem_db(self, monkeypatch):
-        db = SqliteDatabase(
-            ":memory:",
-            pragmas={
-                "journal_mode": "wal",
-            },
-        )
-        monkeypatch.setattr("soloviy.backend.services.mpd.db.db", db)
-        yield db
-        db.close()
-
-    @pytest_asyncio.fixture
-    async def grpc_channel(self):
-        service = MpdService(mpd_client=self.MockMPDClient())
+    @pytest.mark.asyncio
+    async def test_db_update(self):
+        mock_mpd = self.MockMPDClient()
+        service = MpdService(mpd_client=mock_mpd)
         async with ChannelFor([service]) as channel:
-            yield channel
+            serv = libgrpc.MpdServiceStub(channel)
+            res = await serv.update_db(Empty())
         service.close()
 
-    @pytest.mark.asyncio
-    async def test_db_update(self, mem_db, grpc_channel):
-        from soloviy.backend.services.mpd.db import Library
-
-        service = libgrpc.MpdServiceStub(grpc_channel)
-
-        await service.update_db(Empty())
-
-        record = Library.get(Library.title == "song1")
-
-        assert bool(record)
-
-    @pytest.mark.asyncio
-    async def test_composite_metadata(self, mem_db, grpc_channel):
-        from soloviy.backend.services.mpd.db import Library
-
-        service = libgrpc.MpdServiceStub(grpc_channel)
-
-        await service.update_db(Empty())
-
-        record = Library.get(Library.title == "song2")
-
-        assert record.artist == "artist1,artist2"
+        assert res == Empty()

@@ -3,11 +3,8 @@ import socket
 import logging
 import asyncio
 
-from . import db
-from . import utils
-from pydantic import TypeAdapter
 from subprocess import Popen
-from typing import Optional, List
+from typing import Optional
 from betterproto.lib.google.protobuf import Empty
 from mpd.asyncio import MPDClient
 from soloviy.config import settings
@@ -72,14 +69,5 @@ class MpdService(MpdServiceBase):
     async def update_db(self, betterproto_lib_google_protobuf_empty: Empty) -> Empty:
         logger.debug("Started db update")
         await self.mpd_client.update()
-        data = await self.mpd_client.listallinfo()
-        data = utils.group_by_folders(data)
-        for directory in data:
-            ta = TypeAdapter(List[db.LibraryModel])
-            sdata = data[directory]
-            sdata = [i for i in sdata if i.get("file")]
-            sdata = ta.validate_python(sdata, context={"directory": directory})
-            sdata = ta.dump_python(sdata)
-            db.Library.insert_many(sdata).execute()
         logger.debug("Ended db update")
         return Empty()
