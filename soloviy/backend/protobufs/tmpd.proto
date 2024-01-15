@@ -5,16 +5,29 @@ import "google/protobuf/empty.proto";
 
 
 // Service to communicate with mpd
-service MpdService {
+service TMpdService {
     // Connect to mpd instance
     rpc Connect(ConnectionCredentials) returns (ConnectionDetails);
     // Update music DB
     rpc UpdateDB(google.protobuf.Empty) returns (google.protobuf.Empty);
-    //rpc PlayPause() returns ();
+    // PlayPause music 
+    rpc PlaySong(Playlist) returns (google.protobuf.Empty);
+    // Get songs in playlist
+    rpc GetPlaylist(MetaPlaylist) returns (Playlist);
+}
+
+message Playlist {
+    MetaPlaylist meta = 1;
+    repeated Song songs = 2;
 }
 
 message MetaPlaylist {
-    string name = 1;
+    string uuid = 1;
+    string name = 2;
+    SongField sort_by = 3;
+    SortOrder sort_order = 4;
+    SongField group_by = 5;
+    int32 song_pos = 6;
 }
 
 // Credentials to connect to mpd
@@ -37,6 +50,30 @@ enum ConnectionStatus {
     Connected = 0;
     FailedToConnect = 1;
     NoMpdBinary = 2;
+}
+
+enum SortOrder {
+    Ascending = 0;
+    Descending = 1;
+}
+
+enum SongField {
+    id = 0;
+    file = 1;
+    time = 2;
+    duration = 3;
+    lastmodified = 4;
+    format = 5;
+    artist = 6;
+    albumartist = 7;
+    title = 8;
+    album = 9;
+    track = 10;
+    date = 11;
+    genre = 12;
+    composer = 13;
+    disc = 14;
+    directory = 15;
 }
 
 message Song {

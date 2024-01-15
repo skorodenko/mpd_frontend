@@ -5,7 +5,7 @@ from shutil import which
 from unittest.mock import Mock
 from grpclib.testing import ChannelFor
 from betterproto.lib.google.protobuf import Empty
-from soloviy.backend.services.mpd import MpdService
+from soloviy.backend.tmpd import TMpdService
 from soloviy.backend.protobufs import lib as libgrpc
 
 
@@ -15,7 +15,7 @@ class TestMPDConnection:
 
     @pytest_asyncio.fixture
     async def grpc_channel(self):
-        service = MpdService()
+        service = TMpdService()
         async with ChannelFor([service]) as channel:
             yield channel
         service.close()
@@ -25,7 +25,7 @@ class TestMPDConnection:
     async def test_native_successful_connection(self, grpc_channel):
         from soloviy.config import settings
 
-        service = libgrpc.MpdServiceStub(grpc_channel)
+        service = libgrpc.TMpdServiceStub(grpc_channel)
 
         resp = await service.connect(
             libgrpc.ConnectionCredentials(
@@ -38,7 +38,7 @@ class TestMPDConnection:
 
     @pytest.mark.asyncio
     async def test_failed_connection(self, grpc_channel):
-        service = libgrpc.MpdServiceStub(grpc_channel)
+        service = libgrpc.TMpdServiceStub(grpc_channel)
 
         resp = await service.connect(
             libgrpc.ConnectionCredentials(
@@ -61,9 +61,9 @@ class TestMPDAppDB:
     @pytest.mark.asyncio
     async def test_db_update(self):
         mock_mpd = self.MockMPDClient()
-        service = MpdService(mpd_client=mock_mpd)
+        service = TMpdService(mpd_client=mock_mpd)
         async with ChannelFor([service]) as channel:
-            serv = libgrpc.MpdServiceStub(channel)
+            serv = libgrpc.TMpdServiceStub(channel)
             res = await serv.update_db(Empty())
         service.close()
 

@@ -11,7 +11,7 @@ from soloviy.config import settings
 from soloviy.backend.protobufs.lib import (
     ConnectionCredentials,
     ConnectionDetails,
-    MpdServiceBase,
+    TMpdServiceBase,
     ConnectionStatus,
 )
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @attrs.define
-class MpdService(MpdServiceBase):
+class TMpdService(TMpdServiceBase):
     mpd_binary: Optional[str] = attrs.field()
     mpd_server: Optional[Popen] = None
     mpd_client: MPDClient = attrs.Factory(MPDClient)

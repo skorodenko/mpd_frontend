@@ -3,7 +3,7 @@ import asyncio
 import logging
 from grpclib.server import Server
 from grpclib.utils import graceful_exit
-from soloviy.backend.services.mpd import MpdService
+from soloviy.backend.tmpd import TMpdService
 from soloviy.config import settings
 
 
@@ -14,7 +14,7 @@ logger = logging.getLogger("soloviy.backend.main")
 class Backend:
     host: str = "localhost"
     port: int = settings.default.grpc_port
-    mpd_service: MpdService = attrs.Factory(MpdService)
+    mpd_service: TMpdService = attrs.Factory(TMpdService)
     grpc_server: Server = attrs.field()
 
     @grpc_server.default
