@@ -333,3 +333,31 @@ class TestMPDActions:
         assert tile.uuid == playlist.meta.uuid
         assert len(playlist.songs) == len(test_playlist)
         assert true == test
+
+    @pytest.mark.asyncio
+    async def test_delete_tile_invalid_arguments(self, grpc_channel):
+        with pytest.raises(grpclib.exceptions.GRPCError) as e:
+            async with ChannelFor([grpc_channel]) as channel:
+                serv = libtmpd.TMpdServiceStub(channel)
+                await serv.delete_tile(libtmpd.MetaPlaylist())
+        assert e.value.status == grpclib.Status.INVALID_ARGUMENT
+        
+    @pytest.mark.asyncio
+    async def test_delete_tile_valid_arguments(self, grpc_channel, tile_limit):
+        async with ChannelFor([grpc_channel]) as channel:
+            serv = libtmpd.TMpdServiceStub(channel)
+            metas = []
+            for _ in range(tile_limit):
+                meta = await serv.add_tile(
+                    libtmpd.MetaPlaylist(
+                        name="Dune", group_by=libtmpd.SongField.directory
+                    )
+                )
+                metas.append(meta)
+            for meta in metas:
+                await serv.delete_tile(meta)
+            res = await serv.list_playlists(Empty())
+
+        all_songs = list(Song.select())
+        assert res.value == []
+        assert all_songs == []

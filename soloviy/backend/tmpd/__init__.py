@@ -151,6 +151,21 @@ class TMpdService(TMpdServiceBase):
 
         return tile
 
+    async def delete_tile(self, meta_playlist: MetaPlaylist) -> MetaPlaylist:
+        match meta_playlist.uuid:
+            case "":
+                raise grpclib.exceptions.GRPCError(
+                    grpclib.const.Status.INVALID_ARGUMENT,
+                    "Deletion requires 'uuid'",
+                )
+            case meta_uuid:
+                tile = db.Tile.get_by_id(meta_uuid)
+                meta = model_to_dict(tile)
+                ta_meta = TypeAdapter(MetaPlaylist)
+                meta = ta_meta.validate_python(meta, from_attributes=True)
+                tile.delete_instance()
+        return meta
+    
     async def update_db(self, betterproto_lib_google_protobuf_empty: Empty) -> Empty:
         logger.debug("Started db update")
         await self.mpd_client.update()

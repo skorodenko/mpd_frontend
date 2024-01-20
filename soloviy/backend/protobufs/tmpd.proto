@@ -18,6 +18,8 @@ service TMpdService {
     rpc ListPlaylists(google.protobuf.Empty) returns (ListMetaPlaylist);
     // Returns playlist based on metadata
     rpc GetPlaylist(MetaPlaylist) returns (Playlist);
+    // Deletes tile (and connected songs) by uuid
+    rpc DeleteTile(MetaPlaylist) returns (MetaPlaylist);
     // PlayPause music 
     // rpc PlaySong(Playlist) returns (google.protobuf.Empty);
 }
