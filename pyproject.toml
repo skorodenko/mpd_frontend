@@ -32,7 +32,7 @@ pytest-asyncio = "^0.23.3"
 
 
 [tool.poe.tasks.test]
-cmd = "python -m pytest tests/"
+cmd = "python -m pytest -v tests/"
 help = "Run tests"
 
 

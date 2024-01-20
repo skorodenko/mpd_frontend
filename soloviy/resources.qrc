@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file alias="Root.qml">frontend/qml/Root.qml</file>
-    </qresource>
-</RCC>

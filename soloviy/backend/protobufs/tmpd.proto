@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package tmpd;
+
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
@@ -10,15 +12,24 @@ service TMpdService {
     rpc Connect(ConnectionCredentials) returns (ConnectionDetails);
     // Update music DB
     rpc UpdateDB(google.protobuf.Empty) returns (google.protobuf.Empty);
-    // PlayPause music 
-    rpc PlaySong(Playlist) returns (google.protobuf.Empty);
-    // Get songs in playlist
+    // Adds tile based on tile
+    rpc AddTile(MetaPlaylist) returns (MetaPlaylist);
+    // Returns list of all meta playlists
+    rpc ListPlaylists(google.protobuf.Empty) returns (ListMetaPlaylist);
+    // Returns playlist based on metadata
     rpc GetPlaylist(MetaPlaylist) returns (Playlist);
+    // PlayPause music 
+    // rpc PlaySong(Playlist) returns (google.protobuf.Empty);
 }
+
 
 message Playlist {
     MetaPlaylist meta = 1;
     repeated Song songs = 2;
+}
+
+message ListMetaPlaylist {
+    repeated MetaPlaylist value = 1;
 }
 
 message MetaPlaylist {
@@ -28,6 +39,7 @@ message MetaPlaylist {
     SortOrder sort_order = 4;
     SongField group_by = 5;
     int32 song_pos = 6;
+    bool locked = 7;
 }
 
 // Credentials to connect to mpd
@@ -58,7 +70,7 @@ enum SortOrder {
 }
 
 enum SongField {
-    id = 0;
+    none = 0;
     file = 1;
     time = 2;
     duration = 3;
@@ -77,20 +89,18 @@ enum SongField {
 }
 
 message Song {
-    int64 id = 1;
-    string directory = 2;
-    string file = 3;
-    int64 time = 4;
-    float duration = 5;
-    google.protobuf.Timestamp lastmodified = 6;
-    string format = 7;
-    string artist = 8;
-    string albumartist = 9;
-    string title = 10;
-    string album = 11;
-    int64 track = 12;
-    string date = 13;
-    string genre = 14;
-    string composer = 15;
-    int64 disc = 16;
+    string file = 1;
+    int64 time = 2;
+    float duration = 3;
+    google.protobuf.Timestamp lastmodified = 4;
+    string format = 5;
+    string artist = 6;
+    string albumartist = 7;
+    string title = 8;
+    string album = 9;
+    int64 track = 10;
+    int32 date = 11;
+    string genre = 12;
+    string composer = 13;
+    int64 disc = 14;
 }
