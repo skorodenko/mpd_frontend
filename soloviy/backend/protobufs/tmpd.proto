@@ -21,7 +21,7 @@ service TMpdService {
     // Deletes tile (and connected songs) by uuid
     rpc DeleteTile(MetaPlaylist) returns (MetaPlaylist);
     // PlayPause music 
-    // rpc PlaySong(Playlist) returns (google.protobuf.Empty);
+    // rpc PlaySong(Playlist) returns (Playlist);
 }
 
 

@@ -53,7 +53,7 @@ class TestMPDConnection:
 
 
 @pytest.mark.asyncio(scope="class")
-class TestMPDActions:
+class TestMPDDBActions:
     loop: asyncio.AbstractEventLoop
 
     class MockMPDClient(Mock):
