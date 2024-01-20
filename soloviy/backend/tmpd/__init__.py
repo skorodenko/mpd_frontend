@@ -1,13 +1,15 @@
+from datetime import datetime
 import attrs
 import socket
 import logging
 import asyncio
 import grpclib
 from subprocess import Popen
+from peewee import DoesNotExist
 from pydantic import TypeAdapter
-from playhouse.shortcuts import model_to_dict
 from mpd.asyncio import MPDClient
 from soloviy.config import settings
+from playhouse.shortcuts import model_to_dict
 from soloviy.backend.tmpd import db, models
 from betterproto.lib.google.protobuf import Empty
 from soloviy.backend.protobufs.lib.tmpd import (
@@ -88,6 +90,19 @@ class TMpdService(TMpdServiceBase):
         query = db.Tile.select().order_by(-db.Tile.updated, -db.Tile.locked)
         return query
 
+    def _update_tile_db(
+        self, meta: models.MetaPlaylistModel, include: list[str] = []
+    ) -> models.MetaPlaylistModel:
+        tile = db.Tile.get_by_id(meta.uuid)
+        tile.update(
+            **meta.model_dump(exclude=["uuid", "name", "group_by"], include=include)
+        ).execute()
+        tile = db.Tile.get_by_id(meta.uuid)
+        tile = model_to_dict(tile)
+        ta = TypeAdapter(models.MetaPlaylistModel)
+        meta = ta.validate_python(tile, from_attributes=True)
+        return meta
+
     async def _get_playlist(self, args: list[str]) -> list[models.SongModel]:
         logger.debug(f"Get (mpd) playlist: '{args}'")
         songs = await self.mpd_client.find(*args)
@@ -96,6 +111,22 @@ class TMpdService(TMpdServiceBase):
         ta = TypeAdapter(list[models.SongModel])
         songs = ta.validate_python(songs)
         return songs
+
+    async def toggle_lock(self, meta_playlist: MetaPlaylist) -> MetaPlaylist:
+        try:
+            tile = db.Tile.get_by_id(meta_playlist.uuid)
+            tile.locked = not tile.locked
+            tile.updated = datetime.now()
+            tile.save()
+        except DoesNotExist:
+            raise grpclib.exceptions.GRPCError(
+                grpclib.const.Status.NOT_FOUND,
+                f"No playlist with uuid: '{meta_playlist.uuid}'",
+            )
+        tile = model_to_dict(tile)
+        ta_meta = TypeAdapter(MetaPlaylist)
+        meta = ta_meta.validate_python(tile, from_attributes=True)
+        return meta
 
     async def list_playlists(
         self, betterproto_lib_google_protobuf_empty: Empty
@@ -108,11 +139,12 @@ class TMpdService(TMpdServiceBase):
     async def get_playlist(self, meta_playlist: MetaPlaylist) -> Playlist:
         meta = models.MetaPlaylistModel.model_validate(meta_playlist)
         try:
+            meta = self._update_tile_db(meta, include=["sort_by", "sort_order"])
             songs = meta.db_playlist_query()
-        except ValueError:
+        except DoesNotExist:
             raise grpclib.exceptions.GRPCError(
-                grpclib.const.Status.INVALID_ARGUMENT,
-                "Invalid arguments for getting playlist",
+                grpclib.const.Status.NOT_FOUND,
+                f"No playlist with uuid: '{meta.uuid}'",
             )
         songs = list(songs.dicts())
         ta_songs = TypeAdapter(list[Song])
@@ -147,9 +179,9 @@ class TMpdService(TMpdServiceBase):
 
         tile = model_to_dict(tile)
         ta_meta = TypeAdapter(MetaPlaylist)
-        tile = ta_meta.validate_python(tile, from_attributes=True)
+        meta = ta_meta.validate_python(tile, from_attributes=True)
 
-        return tile
+        return meta
 
     async def delete_tile(self, meta_playlist: MetaPlaylist) -> MetaPlaylist:
         match meta_playlist.uuid:
@@ -165,7 +197,7 @@ class TMpdService(TMpdServiceBase):
                 meta = ta_meta.validate_python(meta, from_attributes=True)
                 tile.delete_instance()
         return meta
-    
+
     async def update_db(self, betterproto_lib_google_protobuf_empty: Empty) -> Empty:
         logger.debug("Started db update")
         await self.mpd_client.update()

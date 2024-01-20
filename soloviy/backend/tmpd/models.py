@@ -45,15 +45,11 @@ class MetaPlaylistModel(Base):
     sort_by: SongField
     sort_order: SortOrder
     group_by: SongField
-    song_pos: int
     locked: bool
 
     def db_playlist_query(self):
         query = db.Song.select().join(db.Tile)
-        if self.uuid:
-            query = query.where(db.Song.tile.uuid == self.uuid)
-        else:
-            raise ValueError("DB playlist query should have 'uuid'")
+        query = query.where(db.Song.tile.uuid == self.uuid)
         match self.sort_by:
             case SongField.directory | SongField.none:
                 sort_order = getattr(db.Song, "track")

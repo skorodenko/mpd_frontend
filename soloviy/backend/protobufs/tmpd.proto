@@ -20,6 +20,8 @@ service TMpdService {
     rpc GetPlaylist(MetaPlaylist) returns (Playlist);
     // Deletes tile (and connected songs) by uuid
     rpc DeleteTile(MetaPlaylist) returns (MetaPlaylist);
+    // Locks the tile from cycling
+    rpc ToggleLock(MetaPlaylist) returns (MetaPlaylist);
     // PlayPause music 
     // rpc PlaySong(Playlist) returns (Playlist);
 }
@@ -28,6 +30,7 @@ service TMpdService {
 message Playlist {
     MetaPlaylist meta = 1;
     repeated Song songs = 2;
+    int32 song_pos = 3;
 }
 
 message ListMetaPlaylist {
@@ -40,8 +43,7 @@ message MetaPlaylist {
     SongField sort_by = 3;
     SortOrder sort_order = 4;
     SongField group_by = 5;
-    int32 song_pos = 6;
-    bool locked = 7;
+    bool locked = 6;
 }
 
 // Credentials to connect to mpd

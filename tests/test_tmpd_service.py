@@ -65,17 +65,11 @@ class TestMPDDBActions:
 
             data = test_playlist
             match args:
-                case ["(base 'Dune')", "sort", "-track"]:
+                case ["(base 'Dune')", _, _]:
                     data.sort(key=lambda x: int(x["track"]), reverse=True)
                     return data
-                case ["(base 'Dune')", "sort", "track"]:
-                    data.sort(key=lambda x: int(x["track"]))
-                    return data
-                case ["(artist == 'Hans Zimmer')", "sort", "duration"]:
+                case ["(artist == 'Hans Zimmer')", _, _]:
                     data.sort(key=lambda x: float(x["duration"]))
-                    return data
-                case ["(artist == 'Hans Zimmer')", "sort", "-duration"]:
-                    data.sort(key=lambda x: float(x["duration"]), reverse=True)
                     return data
 
     @pytest.fixture(params=[1, 2, 3, 4])
@@ -187,12 +181,12 @@ class TestMPDDBActions:
         assert not_in_list not in res.value
 
     @pytest.mark.asyncio
-    async def test_get_playlist_invalid_arguments(self, grpc_channel):
+    async def test_get_playlist_invalid_playlist(self, grpc_channel):
         with pytest.raises(grpclib.exceptions.GRPCError) as e:
             async with ChannelFor([grpc_channel]) as channel:
                 serv = libtmpd.TMpdServiceStub(channel)
                 await serv.get_playlist(libtmpd.MetaPlaylist())
-        assert e.value.status == grpclib.Status.INVALID_ARGUMENT
+        assert e.value.status == grpclib.Status.NOT_FOUND
 
     @pytest.mark.asyncio
     async def test_get_playlist_directory_not_found(self, grpc_channel):
@@ -268,7 +262,8 @@ class TestMPDDBActions:
             )
             playlist = await serv.get_playlist(
                 libtmpd.MetaPlaylist(
-                    uuid=tile.uuid, sort_order=libtmpd.SortOrder.Descending
+                    uuid=tile.uuid,
+                    sort_order=libtmpd.SortOrder.Descending,
                 )
             )
         test_playlist.sort(key=lambda x: int(x["track"]), reverse=True)
@@ -288,7 +283,6 @@ class TestMPDDBActions:
                 libtmpd.MetaPlaylist(
                     name="Hans Zimmer",
                     group_by=libtmpd.SongField.artist,
-                    sort_by=libtmpd.SongField.duration,
                 )
             )
             playlist = await serv.get_playlist(
@@ -314,8 +308,6 @@ class TestMPDDBActions:
                 libtmpd.MetaPlaylist(
                     name="Hans Zimmer",
                     group_by=libtmpd.SongField.artist,
-                    sort_by=libtmpd.SongField.duration,
-                    sort_order=libtmpd.SortOrder.Descending,
                 )
             )
             playlist = await serv.get_playlist(
@@ -341,7 +333,7 @@ class TestMPDDBActions:
                 serv = libtmpd.TMpdServiceStub(channel)
                 await serv.delete_tile(libtmpd.MetaPlaylist())
         assert e.value.status == grpclib.Status.INVALID_ARGUMENT
-        
+
     @pytest.mark.asyncio
     async def test_delete_tile_valid_arguments(self, grpc_channel, tile_limit):
         async with ChannelFor([grpc_channel]) as channel:
@@ -361,3 +353,27 @@ class TestMPDDBActions:
         all_songs = list(Song.select())
         assert res.value == []
         assert all_songs == []
+
+    @pytest.mark.asyncio
+    async def test_toggle_lock_invalid_arguments(self, grpc_channel):
+        with pytest.raises(grpclib.exceptions.GRPCError) as e:
+            async with ChannelFor([grpc_channel]) as channel:
+                serv = libtmpd.TMpdServiceStub(channel)
+                await serv.toggle_lock(libtmpd.MetaPlaylist())
+        assert e.value.status == grpclib.Status.NOT_FOUND
+
+    @pytest.mark.asyncio
+    async def test_toggle_lock_valid_arguments(self, grpc_channel, tile_limit):
+        async with ChannelFor([grpc_channel]) as channel:
+            serv = libtmpd.TMpdServiceStub(channel)
+            for _ in range(tile_limit):
+                meta = await serv.add_tile(
+                    libtmpd.MetaPlaylist(
+                        name="Dune", group_by=libtmpd.SongField.directory
+                    )
+                )
+            meta = await serv.toggle_lock(meta)
+            res = await serv.list_playlists(Empty())
+
+        assert meta.locked is True
+        assert res.value[0] == meta
