@@ -1,0 +1,5 @@
+module soloviy
+
+Root 1.0 Root.qml
+PagePlaylists 1.0 PagePlaylists.qml
+PagePlayer 1.0 PagePlayer.qml

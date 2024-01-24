@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="Root.qml">qml/Root.qml</file>
+        <file alias="Root.qml">qml/soloviy/Root.qml</file>
     </qresource>
 </RCC>
