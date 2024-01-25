@@ -1,6 +1,6 @@
 import sys
 import qtinter
-import soloviy.frontend.resources_rc
+import soloviy.frontend.resources_rc  # noqa: F401
 from PySide6.QtCore import QUrl
 from PySide6.QtWidgets import QApplication
 from PySide6.QtQml import (
