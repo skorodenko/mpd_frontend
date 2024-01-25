@@ -48,11 +48,11 @@ class Song(BaseModel):
     albumartist = CharField()
     title = CharField()
     album = CharField()
-    track = IntegerField()
-    date = IntegerField()
+    track = IntegerField(null=True)
+    date = IntegerField(null=True)
     genre = CharField()
     composer = CharField()
-    disc = IntegerField()
+    disc = IntegerField(null=True)
 
 
 db.create_tables([Tile, Song])
