@@ -30,7 +30,7 @@ class TestMPDConnection:
 
         resp = await backend.connect(
             models.ConnectionCredentials(
-                socket=settings.mpd.native_socket,
+                socket=settings.default.native_socket,
                 password="",
             )
         )
@@ -70,7 +70,7 @@ class TestMPDDBActions:
     @pytest.fixture(params=[1, 2, 3, 4])
     def tile_limit(self, request, monkeypatch):
         monkeypatch.setattr(
-            "soloviy.config.settings.soloviy.tiling_mode", request.param
+            "soloviy.config.settings.prod.tiling_mode", request.param
         )
         return request.param
 

@@ -1,16 +1,15 @@
 [logging]
 level = "DEBUG"
 
-[mpd]
-native_config = "@format {this.xdg_config_dir}/mpd.conf"
-native_socket = "@format {this.xdg_data_dir}/mpd.socket"
+[prod]
 socket = ""
-connection_timeout = 10
-
-[soloviy]
 tiling_mode = 4
 playlists_margin = 2
+group_by = "directory"
+connection_timeout = 10
 
 [default]
-group_by = "directory"
 grpc_port = 50051
+grpc_host = "@format {this.xdg_data_dir}/grpc.socket"
+native_config = "@format {this.xdg_config_dir}/mpd.conf"
+native_socket = "@format {this.xdg_data_dir}/mpd.socket"

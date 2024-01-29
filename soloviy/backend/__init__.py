@@ -47,11 +47,11 @@ class TMpdBackend(QObject):
         self, connection_credentials: ConnectionCredentials
     ) -> ConnectionStatus:
         logger.debug("Establishing connection to mpd")
-        if connection_credentials.socket == settings.mpd.native_socket:
+        if connection_credentials.socket == settings.default.native_socket:
             logger.debug("Starting mpd server instance")
             if self.mpd_binary:
                 self.mpd_server.start(
-                    self.mpd_binary, [settings.mpd.native_config, "--no-daemon"]
+                    self.mpd_binary, [settings.default.native_config, "--no-daemon"]
                 )
                 await asyncio.sleep(0.5)
             else:
@@ -140,8 +140,8 @@ class TMpdBackend(QObject):
                 "Invalid arguments for creating new tile",
             )
 
-        if self.all_tiles == settings.soloviy.tiling_mode:
-            if self.locked_tiles < settings.soloviy.tiling_mode:
+        if self.all_tiles == settings.prod.tiling_mode:
+            if self.locked_tiles < settings.prod.tiling_mode:
                 tiles = list(self.stacked_tiles)
                 poptile = tiles.pop()
                 poptile.delete_instance()
