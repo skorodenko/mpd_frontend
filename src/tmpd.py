@@ -1,6 +1,7 @@
 import socket
 import logging
 import asyncio
+from enum import IntEnum
 from dataclasses import dataclass, field
 from PySide6.QtCore import QObject, QProcess
 from datetime import datetime
@@ -8,10 +9,9 @@ from peewee import DoesNotExist
 from pydantic import TypeAdapter
 from mpd.asyncio import MPDClient
 from playhouse.shortcuts import model_to_dict
-from src.backend import db
-from src.config import settings
-from src.backend import exceptions, utils
-from src.backend.models import (
+from src.config import config
+from src.models import db
+from src.models.pyd import (
     ConnectionCredentials,
     ConnectionStatus,
     MetaPlaylist,
@@ -24,9 +24,31 @@ from src.backend.models import (
 logger = logging.getLogger(__name__)
 
 
+class Status(IntEnum):
+    NOT_FOUND = 1
+    BAD_REQUEST = 2
+
+
+@dataclass
+class TMPDException(Exception):
+    status: Status
+    message: str = ""
+
+
+def factory_mpd_binary() -> bool:
+    from shutil import which
+
+    binary = which("mpd")
+    if binary:
+        logger.debug(f"Found 'mpd' binary: {binary}")
+    else:
+        logger.debug("Mpd binary not found in PATH")
+    return binary
+
+
 @dataclass
 class TMpdBackend(QObject):
-    mpd_binary: str | None = field(default_factory=utils.factory_mpd_binary)
+    mpd_binary: str | None = field(default_factory=factory_mpd_binary)
     mpd_server: QProcess = field(default_factory=QProcess)
     mpd_client: MPDClient = field(default_factory=MPDClient)
 
@@ -47,11 +69,11 @@ class TMpdBackend(QObject):
         self, connection_credentials: ConnectionCredentials
     ) -> ConnectionStatus:
         logger.debug("Establishing connection to mpd")
-        if connection_credentials.socket == settings.default.native_socket:
+        if connection_credentials.socket == config.default.native_socket:
             logger.debug("Starting mpd server instance")
             if self.mpd_binary:
                 self.mpd_server.start(
-                    self.mpd_binary, [settings.default.native_config, "--no-daemon"]
+                    self.mpd_binary, [config.default.native_config, "--no-daemon"]
                 )
                 await asyncio.sleep(0.5)
             else:
@@ -103,8 +125,8 @@ class TMpdBackend(QObject):
             tile.updated = datetime.now()
             tile.save()
         except DoesNotExist:
-            raise exceptions.TMPDException(
-                exceptions.Status.NOT_FOUND,
+            raise TMPDException(
+                Status.NOT_FOUND,
                 f"No playlist with uuid: '{meta.uuid}'",
             )
         tile = model_to_dict(tile)
@@ -123,8 +145,8 @@ class TMpdBackend(QObject):
             meta = self._update_tile_db(meta, include=["sort_by", "sort_order"])
             songs = meta.db_playlist_query()
         except DoesNotExist:
-            raise exceptions.TMPDException(
-                exceptions.Status.NOT_FOUND, f"No playlist with uuid: '{meta.uuid}'"
+            raise TMPDException(
+                Status.NOT_FOUND, f"No playlist with uuid: '{meta.uuid}'"
             )
         songs = list(songs.dicts())
         ta_songs = TypeAdapter(list[Song])
@@ -135,13 +157,13 @@ class TMpdBackend(QObject):
         try:
             query = meta.mpd_playlist_query()
         except ValueError:
-            raise exceptions.TMPDException(
-                exceptions.Status.BAD_REQUEST,
+            raise TMPDException(
+                Status.BAD_REQUEST,
                 "Invalid arguments for creating new tile",
             )
 
-        if self.all_tiles == settings.prod.tiling_mode:
-            if self.locked_tiles < settings.prod.tiling_mode:
+        if self.all_tiles == config.prod.tiling_mode:
+            if self.locked_tiles < config.prod.tiling_mode:
                 tiles = list(self.stacked_tiles)
                 poptile = tiles.pop()
                 poptile.delete_instance()
@@ -165,8 +187,8 @@ class TMpdBackend(QObject):
     async def delete_tile(self, meta_playlist: MetaPlaylist) -> MetaPlaylist:
         match meta_playlist.uuid:
             case None:
-                raise exceptions.TMPDException(
-                    exceptions.Status.BAD_REQUEST,
+                raise TMPDException(
+                    Status.BAD_REQUEST,
                     "Deletion requires 'uuid'",
                 )
             case meta_uuid:

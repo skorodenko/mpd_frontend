@@ -1,6 +1,6 @@
 from enum import IntEnum
 from datetime import datetime
-from src.backend import db
+from src.models import db
 from pydantic import (
     BaseModel,
     Field,

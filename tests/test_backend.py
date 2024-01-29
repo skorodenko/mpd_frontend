@@ -3,9 +3,9 @@ import asyncio
 import pytest_asyncio
 from shutil import which
 from unittest.mock import Mock
-from src.backend import models
-from src.backend.db import Song, Tile
-from src.backend import exceptions
+from src.models import pyd
+from src.tmpd import TMPDException, Status
+from src.models.db import Song, Tile
 
 
 TABLES = [Song, Tile]
@@ -17,7 +17,7 @@ class TestMPDConnection:
 
     @pytest_asyncio.fixture
     async def backend(self):
-        from src.backend import TMpdBackend
+        from src.tmpd import TMpdBackend
 
         service = TMpdBackend()
         yield service
@@ -26,25 +26,25 @@ class TestMPDConnection:
     @pytest.mark.skipif(not bool(which("mpd")), reason="No mpd binary found in PATH")
     @pytest.mark.asyncio
     async def test_native_successful_connection(self, backend):
-        from src.config import settings
+        from src.config import config
 
         resp = await backend.connect(
-            models.ConnectionCredentials(
-                socket=settings.default.native_socket,
+            pyd.ConnectionCredentials(
+                socket=config.default.native_socket,
                 password="",
             )
         )
-        assert resp == models.ConnectionStatus.Connected
+        assert resp == pyd.ConnectionStatus.Connected
 
     @pytest.mark.asyncio
     async def test_failed_connection(self, backend):
         resp = await backend.connect(
-            models.ConnectionCredentials(
+            pyd.ConnectionCredentials(
                 socket="test",
                 password="test",
             )
         )
-        assert resp == models.ConnectionStatus.FailedToConnect
+        assert resp == pyd.ConnectionStatus.FailedToConnect
 
 
 @pytest.mark.asyncio(scope="class")
@@ -70,13 +70,13 @@ class TestMPDDBActions:
     @pytest.fixture(params=[1, 2, 3, 4])
     def tile_limit(self, request, monkeypatch):
         monkeypatch.setattr(
-            "src.config.settings.prod.tiling_mode", request.param
+            "src.config.config.prod.tiling_mode", request.param
         )
         return request.param
 
     @pytest_asyncio.fixture
     async def backend(self):
-        from src.backend import TMpdBackend
+        from src.tmpd import TMpdBackend
 
         service = TMpdBackend(mpd_client=self.MockMPDClient())
         yield service
@@ -113,16 +113,16 @@ class TestMPDDBActions:
 
     @pytest.mark.asyncio
     async def test_add_tile_invalid_arguments(self, backend):
-        with pytest.raises(exceptions.TMPDException) as e:
-            await backend.add_tile(models.MetaPlaylist())
-        assert e.value.status == exceptions.Status.BAD_REQUEST
+        with pytest.raises(TMPDException) as e:
+            await backend.add_tile(pyd.MetaPlaylist())
+        assert e.value.status == Status.BAD_REQUEST
 
     @pytest.mark.asyncio
     async def test_add_tile_valid_arguments(self, backend, tile_limit):
         metas = []
         for _ in range(tile_limit):
             meta = await backend.add_tile(
-                models.MetaPlaylist(name="Dune", group_by=models.SongField.directory)
+                pyd.MetaPlaylist(name="Dune", group_by=pyd.SongField.directory)
             )
             metas.insert(0, meta)
         res = await backend.list_playlists()
@@ -134,7 +134,7 @@ class TestMPDDBActions:
     async def test_add_tile_cycle(self, backend, tile_limit):
         for i in range(tile_limit + 1):
             tile = await backend.add_tile(
-                models.MetaPlaylist(name="Dune", group_by=models.SongField.directory)
+                pyd.MetaPlaylist(name="Dune", group_by=pyd.SongField.directory)
             )
             if i == 0:
                 should_be_removed = tile
@@ -147,8 +147,8 @@ class TestMPDDBActions:
     async def test_add_tile_locked_cycle(self, backend, tile_limit):
         for i in range(tile_limit + 1):
             tile = await backend.add_tile(
-                models.MetaPlaylist(
-                    name="Dune", group_by=models.SongField.directory, locked=True
+                pyd.MetaPlaylist(
+                    name="Dune", group_by=pyd.SongField.directory, locked=True
                 )
             )
             if i == tile_limit:
@@ -160,20 +160,20 @@ class TestMPDDBActions:
 
     @pytest.mark.asyncio
     async def test_get_playlist_invalid_playlist(self, backend):
-        with pytest.raises(exceptions.TMPDException) as e:
-            await backend.get_playlist(models.MetaPlaylist())
-        assert e.value.status == exceptions.Status.NOT_FOUND
+        with pytest.raises(TMPDException) as e:
+            await backend.get_playlist(pyd.MetaPlaylist())
+        assert e.value.status == Status.NOT_FOUND
 
     @pytest.mark.asyncio
     async def test_get_playlist_directory_not_found(self, backend):
         tile = await backend.add_tile(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 name="not existing directory",
-                group_by=models.SongField.directory,
+                group_by=pyd.SongField.directory,
             )
         )
         playlist = await backend.get_playlist(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 uuid=tile.uuid,
             )
         )
@@ -182,13 +182,13 @@ class TestMPDDBActions:
     @pytest.mark.asyncio
     async def test_get_playlist_artist_not_found(self, backend):
         tile = await backend.add_tile(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 name="not existing artist",
-                group_by=models.SongField.artist,
+                group_by=pyd.SongField.artist,
             )
         )
         playlist = await backend.get_playlist(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 uuid=tile.uuid,
             )
         )
@@ -199,13 +199,13 @@ class TestMPDDBActions:
         from tests.data import test_playlist
 
         tile = await backend.add_tile(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 name="Dune",
-                group_by=models.SongField.directory,
+                group_by=pyd.SongField.directory,
             )
         )
         playlist = await backend.get_playlist(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 uuid=tile.uuid,
             )
         )
@@ -220,15 +220,15 @@ class TestMPDDBActions:
         from tests.data import test_playlist
 
         tile = await backend.add_tile(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 name="Dune",
-                group_by=models.SongField.directory,
+                group_by=pyd.SongField.directory,
             )
         )
         playlist = await backend.get_playlist(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 uuid=tile.uuid,
-                sort_order=models.SortOrder.Descending,
+                sort_order=pyd.SortOrder.Descending,
             )
         )
         test_playlist.sort(key=lambda x: int(x["track"]), reverse=True)
@@ -242,15 +242,15 @@ class TestMPDDBActions:
         from tests.data import test_playlist
 
         tile = await backend.add_tile(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 name="Hans Zimmer",
-                group_by=models.SongField.artist,
+                group_by=pyd.SongField.artist,
             )
         )
         playlist = await backend.get_playlist(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 uuid=tile.uuid,
-                sort_by=models.SongField.duration,
+                sort_by=pyd.SongField.duration,
             )
         )
         test_playlist.sort(key=lambda x: float(x["duration"]))
@@ -264,16 +264,16 @@ class TestMPDDBActions:
         from tests.data import test_playlist
 
         tile = await backend.add_tile(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 name="Hans Zimmer",
-                group_by=models.SongField.artist,
+                group_by=pyd.SongField.artist,
             )
         )
         playlist = await backend.get_playlist(
-            models.MetaPlaylist(
+            pyd.MetaPlaylist(
                 uuid=tile.uuid,
-                sort_by=models.SongField.duration,
-                sort_order=models.SortOrder.Descending,
+                sort_by=pyd.SongField.duration,
+                sort_order=pyd.SortOrder.Descending,
             )
         )
         test_playlist.sort(key=lambda x: float(x["duration"]), reverse=True)
@@ -284,16 +284,16 @@ class TestMPDDBActions:
 
     @pytest.mark.asyncio
     async def test_delete_tile_invalid_arguments(self, backend):
-        with pytest.raises(exceptions.TMPDException) as e:
-            await backend.delete_tile(models.MetaPlaylist())
-        assert e.value.status == exceptions.Status.BAD_REQUEST
+        with pytest.raises(TMPDException) as e:
+            await backend.delete_tile(pyd.MetaPlaylist())
+        assert e.value.status == Status.BAD_REQUEST
 
     @pytest.mark.asyncio
     async def test_delete_tile_valid_arguments(self, backend, tile_limit):
         metas = []
         for _ in range(tile_limit):
             meta = await backend.add_tile(
-                models.MetaPlaylist(name="Dune", group_by=models.SongField.directory)
+                pyd.MetaPlaylist(name="Dune", group_by=pyd.SongField.directory)
             )
             metas.append(meta)
         for meta in metas:
@@ -306,15 +306,15 @@ class TestMPDDBActions:
 
     @pytest.mark.asyncio
     async def test_toggle_lock_invalid_arguments(self, backend):
-        with pytest.raises(exceptions.TMPDException) as e:
-            await backend.toggle_lock(models.MetaPlaylist())
-        assert e.value.status == exceptions.Status.NOT_FOUND
+        with pytest.raises(TMPDException) as e:
+            await backend.toggle_lock(pyd.MetaPlaylist())
+        assert e.value.status == Status.NOT_FOUND
 
     @pytest.mark.asyncio
     async def test_toggle_lock_valid_arguments(self, backend, tile_limit):
         for _ in range(tile_limit):
             meta = await backend.add_tile(
-                models.MetaPlaylist(name="Dune", group_by=models.SongField.directory)
+                pyd.MetaPlaylist(name="Dune", group_by=pyd.SongField.directory)
             )
         meta = await backend.toggle_lock(meta)
         res = await backend.list_playlists()

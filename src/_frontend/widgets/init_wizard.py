@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWizard, QMainWindow, QWidget, QLabel, QFileDialog
 from src.frontend.ui.ui_init_wizard import Ui_Wizard
 
 # from soloviy.backend.db import state
-from src.config import settings
+from src.config import config
 # from soloviy.api.mpd_connector import ConnectionStatus
 
 
@@ -187,7 +187,7 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
                     AlertPage.wizardStart, AlertStyle.ERROR, "Please select setup type"
                 )
                 return False
-        if cpage == self.wizardServerConfig and not settings.mpd.socket:
+        if cpage == self.wizardServerConfig and not config.mpd.socket:
             host = self.wizardServerConfig_host.text()
             port = self.wizardServerConfig_port.text()
             password = self.wizardServerConfig_password.text()
@@ -201,7 +201,7 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
             self.socket = socket
             self.connect_mpd.emit(self.socket)
             return False
-        if cpage == self.wizardLocalConfig and not settings.mpd.socket:
+        if cpage == self.wizardLocalConfig and not config.mpd.socket:
             if not self.wizardLocalConfig_musicfolder_text.text():
                 self.alert.emit(
                     AlertPage.wizardLocalConfig,
@@ -209,7 +209,7 @@ class InitWizard(QWizard, Ui_Wizard, SignalsMixin):
                     "Please select music collection",
                 )
             else:
-                socket = settings.mpd.native_socket
+                socket = config.mpd.native_socket
                 self.socket = socket
                 self.connect_mpd.emit(self.socket)
             return False

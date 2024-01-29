@@ -5,7 +5,7 @@ from peewee import fn
 from typing import Optional
 
 # from soloviy.models import dbmodels
-from src.config import settings
+from src.config import config
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QMainWindow, QDialog
 from dynaconf.loaders.toml_loader import write
@@ -29,5 +29,5 @@ class Settings(QDialog, Ui_Form):
     @staticmethod
     def persist_settings():
         logger.info("Persisted settings")
-        data = settings.as_dict()
-        write(settings.settings_file, data)
+        data = config.as_dict()
+        write(config.settings_file, data)

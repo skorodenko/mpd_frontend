@@ -4,7 +4,7 @@ import qtinter
 import pathlib
 import datetime
 import asyncio
-from src.config import settings
+from src.config import config
 from src.frontend.qmodels import PlaylistsModel
 from src.frontend.ui.ui_main_window import Ui_MainWindow
 from src.frontend.widgets.init_wizard import InitWizard
@@ -51,14 +51,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, SignalsMixin):
 
     def _initial_configuration(self):
         logger.info("Started initial configuration")
-        if not settings.mpd.socket:
+        if not config.mpd.socket:
             if self.init_wizard.exec() == QDialog.DialogCode.Rejected:
                 self.close()
             else:
                 self.update_db.emit()
                 # self.settings.persist_settings()
         else:
-            self.init_wizard.connect_mpd.emit(settings.mpd.socket)
+            self.init_wizard.connect_mpd.emit(config.mpd.socket)
 
     @backend.default
     def _start_backend(self):
