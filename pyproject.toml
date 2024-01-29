@@ -19,6 +19,7 @@ diskcache = "^5.6.3"
 peewee = "^3.16.3"
 rocksdict = "^0.3.13"
 pydantic = "^2.5.3"
+pyside6 = "^6.6.1"
 
 
 [tool.poetry.group.dev.dependencies]
