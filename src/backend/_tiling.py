@@ -2,11 +2,11 @@ import attrs
 import grpc
 from functools import wraps
 from typing import List, Optional
-from soloviy.backend.api import api_pb2
-from soloviy.backend.db import state
-from soloviy.backend.models.pydantic import MetaTile
-from soloviy.backend.api.api_pb2_grpc import TilingAPIServicer
-from soloviy.config import settings
+from src.backend.api import api_pb2
+from src.backend.db import state
+from src.backend.models.pydantic import MetaTile
+from src.backend.api.api_pb2_grpc import TilingAPIServicer
+from src.config import settings
 
 
 @attrs.define

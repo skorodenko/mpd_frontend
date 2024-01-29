@@ -1,8 +1,8 @@
 import attrs
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QFrame
-from soloviy.frontend.ui.ui_playlist_tile import Ui_Frame
-from soloviy.frontend import qmodels
+from src.frontend.ui.ui_playlist_tile import Ui_Frame
+from src.frontend import qmodels
 # from soloviy.api.tiling import QMetaTile
 # from soloviy.api.mpd_connector import MPDAction
 

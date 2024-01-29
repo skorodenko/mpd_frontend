@@ -3,7 +3,7 @@ import logging
 from typing import Optional
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtWidgets import QWidget, QGridLayout
-from soloviy.frontend.widgets.playlist_tile import PlaylistTile
+from src.frontend.widgets.playlist_tile import PlaylistTile
 # from soloviy.api.tiling import TilingAPI, MetaTile
 # from soloviy.api.mpd_connector import MPDAction
 

@@ -8,10 +8,10 @@ from peewee import DoesNotExist
 from pydantic import TypeAdapter
 from mpd.asyncio import MPDClient
 from playhouse.shortcuts import model_to_dict
-from soloviy.backend import db
-from soloviy.config import settings
-from soloviy.backend import exceptions, utils
-from soloviy.backend.models import (
+from src.backend import db
+from src.config import settings
+from src.backend import exceptions, utils
+from src.backend.models import (
     ConnectionCredentials,
     ConnectionStatus,
     MetaPlaylist,

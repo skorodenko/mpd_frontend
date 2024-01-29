@@ -3,9 +3,9 @@ import asyncio
 import pytest_asyncio
 from shutil import which
 from unittest.mock import Mock
-from soloviy.backend import models
-from soloviy.backend.db import Song, Tile
-from soloviy.backend import exceptions
+from src.backend import models
+from src.backend.db import Song, Tile
+from src.backend import exceptions
 
 
 TABLES = [Song, Tile]
@@ -17,7 +17,7 @@ class TestMPDConnection:
 
     @pytest_asyncio.fixture
     async def backend(self):
-        from soloviy.backend import TMpdBackend
+        from src.backend import TMpdBackend
 
         service = TMpdBackend()
         yield service
@@ -26,7 +26,7 @@ class TestMPDConnection:
     @pytest.mark.skipif(not bool(which("mpd")), reason="No mpd binary found in PATH")
     @pytest.mark.asyncio
     async def test_native_successful_connection(self, backend):
-        from soloviy.config import settings
+        from src.config import settings
 
         resp = await backend.connect(
             models.ConnectionCredentials(
@@ -70,13 +70,13 @@ class TestMPDDBActions:
     @pytest.fixture(params=[1, 2, 3, 4])
     def tile_limit(self, request, monkeypatch):
         monkeypatch.setattr(
-            "soloviy.config.settings.prod.tiling_mode", request.param
+            "src.config.settings.prod.tiling_mode", request.param
         )
         return request.param
 
     @pytest_asyncio.fixture
     async def backend(self):
-        from soloviy.backend import TMpdBackend
+        from src.backend import TMpdBackend
 
         service = TMpdBackend(mpd_client=self.MockMPDClient())
         yield service
