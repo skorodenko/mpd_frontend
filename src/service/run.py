@@ -3,7 +3,7 @@ import asyncio
 import logging
 from grpclib.server import Server
 from grpclib.utils import graceful_exit
-from src.backend.tmpd import TMpdService
+from src.service.tmpd import TMpdService
 from src.config import settings
 
 

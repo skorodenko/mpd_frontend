@@ -9,10 +9,10 @@ from peewee import DoesNotExist
 from pydantic import TypeAdapter
 from mpd.asyncio import MPDClient
 from src.config import settings
+from src.service.tmpd import db, pyd
 from playhouse.shortcuts import model_to_dict
-from src.backend.tmpd import db, models
 from betterproto.lib.google.protobuf import Empty
-from src.backend.protobufs.lib.tmpd import (
+from src.service.lib.tmpd import (
     ListMetaPlaylist,
     TMpdServiceBase,
     ConnectionCredentials,
@@ -91,24 +91,24 @@ class TMpdService(TMpdServiceBase):
         return query
 
     def _update_tile_db(
-        self, meta: models.MetaPlaylistModel, include: list[str] = []
-    ) -> models.MetaPlaylistModel:
+        self, meta: pyd.MetaPlaylistModel, include: list[str] = []
+    ) -> pyd.MetaPlaylistModel:
         tile = db.Tile.get_by_id(meta.uuid)
         tile.update(
             **meta.model_dump(exclude=["uuid", "name", "group_by"], include=include)
         ).execute()
         tile = db.Tile.get_by_id(meta.uuid)
         tile = model_to_dict(tile)
-        ta = TypeAdapter(models.MetaPlaylistModel)
+        ta = TypeAdapter(pyd.MetaPlaylistModel)
         meta = ta.validate_python(tile, from_attributes=True)
         return meta
 
-    async def _get_playlist(self, args: list[str]) -> list[models.SongModel]:
+    async def _get_playlist(self, args: list[str]) -> list[pyd.SongModel]:
         logger.debug(f"Get (mpd) playlist: '{args}'")
         songs = await self.mpd_client.find(*args)
         if not songs:
             return []
-        ta = TypeAdapter(list[models.SongModel])
+        ta = TypeAdapter(list[pyd.SongModel])
         songs = ta.validate_python(songs)
         return songs
 
@@ -137,7 +137,7 @@ class TMpdService(TMpdServiceBase):
         return ListMetaPlaylist(meta)
 
     async def get_playlist(self, meta_playlist: MetaPlaylist) -> Playlist:
-        meta = models.MetaPlaylistModel.model_validate(meta_playlist)
+        meta = pyd.MetaPlaylistModel.model_validate(meta_playlist)
         try:
             meta = self._update_tile_db(meta, include=["sort_by", "sort_order"])
             songs = meta.db_playlist_query()
@@ -152,7 +152,7 @@ class TMpdService(TMpdServiceBase):
         return Playlist(meta=meta_playlist, songs=songs)
 
     async def add_tile(self, meta_playlist: MetaPlaylist) -> MetaPlaylist:
-        meta = models.MetaPlaylistModel.model_validate(meta_playlist)
+        meta = pyd.MetaPlaylistModel.model_validate(meta_playlist)
         try:
             query = meta.mpd_playlist_query()
         except ValueError:

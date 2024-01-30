@@ -5,9 +5,9 @@ import pytest_asyncio
 from shutil import which
 from unittest.mock import Mock
 from grpclib.testing import ChannelFor
-from src.backend.tmpd.db import Song, Tile
+from src.service.tmpd.db import Song, Tile
 from betterproto.lib.google.protobuf import Empty
-from src.backend.protobufs.lib import tmpd as libtmpd
+from src.service.lib import tmpd as libtmpd
 
 
 TABLES = [Song, Tile]
@@ -19,7 +19,7 @@ class TestMPDConnection:
 
     @pytest_asyncio.fixture
     async def grpc_channel(self):
-        from src.backend.tmpd import TMpdService
+        from src.service.tmpd import TMpdService
 
         service = TMpdService()
         async with ChannelFor([service]) as channel:
@@ -81,7 +81,7 @@ class TestMPDDBActions:
 
     @pytest_asyncio.fixture
     async def grpc_channel(self):
-        from src.backend.tmpd import TMpdService
+        from src.service.tmpd import TMpdService
 
         mock_mpd = self.MockMPDClient()
         service = TMpdService(mpd_client=mock_mpd)

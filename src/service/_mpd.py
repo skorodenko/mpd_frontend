@@ -6,7 +6,7 @@ import logging
 from subprocess import Popen
 from PIL import Image, ImageQt
 from io import BytesIO
-from src.backend.db import state
+from src.service.db import state
 from enum import Enum, auto
 from typing import List
 from pydantic import TypeAdapter
@@ -14,9 +14,9 @@ from mpd.asyncio import MPDClient
 
 # from soloviy.backend.api import library
 from src.config import settings
-from src.backend.models.db import Library
-from src.backend.models import pydantic as pmodels
-from src.backend.api import api_pb2_grpc, api_pb2
+from src.service.models.db import Library
+from src.service.models import pydantic as pmodels
+from src.service.api import api_pb2_grpc, api_pb2
 
 
 logger = logging.getLogger(__name__)

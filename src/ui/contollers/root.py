@@ -5,9 +5,9 @@ import pathlib
 import datetime
 import asyncio
 from src.config import settings
-from src.frontend.qmodels import PlaylistsModel
-from src.frontend.widgets.init_wizard import InitWizard
-from src.frontend.widgets.settings import Settings
+from src.ui.qtmodels import PlaylistsModel
+from src.ui.widgets.init_wizard import InitWizard
+from src.ui.widgets.settings import Settings
 from PySide6.QtGui import QActionGroup, QAction, QIcon, QPixmap, QFont
 from PySide6.QtCore import QDir, QTimer, Signal, Slot, QProcess, QObject
 from PySide6.QtWidgets import QMainWindow, QDialog, QApplication

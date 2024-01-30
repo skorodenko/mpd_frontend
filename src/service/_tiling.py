@@ -2,10 +2,10 @@ import attrs
 import grpc
 from functools import wraps
 from typing import List, Optional
-from src.backend.api import api_pb2
-from src.backend.db import state
-from src.backend.models.pydantic import MetaTile
-from src.backend.api.api_pb2_grpc import TilingAPIServicer
+from src.service.api import api_pb2
+from src.service.db import state
+from src.service.models.pydantic import MetaTile
+from src.service.api.api_pb2_grpc import TilingAPIServicer
 from src.config import settings
 
 

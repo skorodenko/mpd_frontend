@@ -7,8 +7,8 @@ from pydantic import (
     ConfigDict,
     field_validator,
 )
-from src.backend.tmpd import db
-from src.backend.protobufs.lib.tmpd import SongField, SortOrder
+from src.service.tmpd import db
+from src.service.lib.tmpd import SongField, SortOrder
 
 
 class Base(BaseModel):
