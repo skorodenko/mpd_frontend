@@ -24,14 +24,14 @@ from src.models.pyd import (
 logger = logging.getLogger(__name__)
 
 
-class Status(IntEnum):
+class TMPDRequestStatus(IntEnum):
     NOT_FOUND = 1
     BAD_REQUEST = 2
 
 
 @dataclass
 class TMPDException(Exception):
-    status: Status
+    status: TMPDRequestStatus
     message: str = ""
 
 
@@ -126,7 +126,7 @@ class TMpdBackend(QObject):
             tile.save()
         except DoesNotExist:
             raise TMPDException(
-                Status.NOT_FOUND,
+                TMPDRequestStatus.NOT_FOUND,
                 f"No playlist with uuid: '{meta.uuid}'",
             )
         tile = model_to_dict(tile)
@@ -146,7 +146,7 @@ class TMpdBackend(QObject):
             songs = meta.db_playlist_query()
         except DoesNotExist:
             raise TMPDException(
-                Status.NOT_FOUND, f"No playlist with uuid: '{meta.uuid}'"
+                TMPDRequestStatus.NOT_FOUND, f"No playlist with uuid: '{meta.uuid}'"
             )
         songs = list(songs.dicts())
         ta_songs = TypeAdapter(list[Song])
@@ -158,7 +158,7 @@ class TMpdBackend(QObject):
             query = meta.mpd_playlist_query()
         except ValueError:
             raise TMPDException(
-                Status.BAD_REQUEST,
+                TMPDRequestStatus.BAD_REQUEST,
                 "Invalid arguments for creating new tile",
             )
 
@@ -188,7 +188,7 @@ class TMpdBackend(QObject):
         match meta_playlist.uuid:
             case None:
                 raise TMPDException(
-                    Status.BAD_REQUEST,
+                    TMPDRequestStatus.BAD_REQUEST,
                     "Deletion requires 'uuid'",
                 )
             case meta_uuid:

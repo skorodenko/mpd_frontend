@@ -4,7 +4,7 @@ import pytest_asyncio
 from shutil import which
 from unittest.mock import Mock
 from src.models import pyd
-from src.tmpd import TMPDException, Status
+from src.tmpd import TMPDException, TMPDRequestStatus
 from src.models.db import Song, Tile
 
 
@@ -115,7 +115,7 @@ class TestMPDDBActions:
     async def test_add_tile_invalid_arguments(self, backend):
         with pytest.raises(TMPDException) as e:
             await backend.add_tile(pyd.MetaPlaylist())
-        assert e.value.status == Status.BAD_REQUEST
+        assert e.value.status == TMPDRequestStatus.BAD_REQUEST
 
     @pytest.mark.asyncio
     async def test_add_tile_valid_arguments(self, backend, tile_limit):
@@ -162,7 +162,7 @@ class TestMPDDBActions:
     async def test_get_playlist_invalid_playlist(self, backend):
         with pytest.raises(TMPDException) as e:
             await backend.get_playlist(pyd.MetaPlaylist())
-        assert e.value.status == Status.NOT_FOUND
+        assert e.value.status == TMPDRequestStatus.NOT_FOUND
 
     @pytest.mark.asyncio
     async def test_get_playlist_directory_not_found(self, backend):
@@ -286,7 +286,7 @@ class TestMPDDBActions:
     async def test_delete_tile_invalid_arguments(self, backend):
         with pytest.raises(TMPDException) as e:
             await backend.delete_tile(pyd.MetaPlaylist())
-        assert e.value.status == Status.BAD_REQUEST
+        assert e.value.status == TMPDRequestStatus.BAD_REQUEST
 
     @pytest.mark.asyncio
     async def test_delete_tile_valid_arguments(self, backend, tile_limit):
@@ -308,7 +308,7 @@ class TestMPDDBActions:
     async def test_toggle_lock_invalid_arguments(self, backend):
         with pytest.raises(TMPDException) as e:
             await backend.toggle_lock(pyd.MetaPlaylist())
-        assert e.value.status == Status.NOT_FOUND
+        assert e.value.status == TMPDRequestStatus.NOT_FOUND
 
     @pytest.mark.asyncio
     async def test_toggle_lock_valid_arguments(self, backend, tile_limit):
