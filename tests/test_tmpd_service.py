@@ -5,9 +5,9 @@ import pytest_asyncio
 from shutil import which
 from unittest.mock import Mock
 from grpclib.testing import ChannelFor
-from soloviy.backend.tmpd.db import Song, Tile
+from src.backend.tmpd.db import Song, Tile
 from betterproto.lib.google.protobuf import Empty
-from soloviy.backend.protobufs.lib import tmpd as libtmpd
+from src.backend.protobufs.lib import tmpd as libtmpd
 
 
 TABLES = [Song, Tile]
@@ -19,7 +19,7 @@ class TestMPDConnection:
 
     @pytest_asyncio.fixture
     async def grpc_channel(self):
-        from soloviy.backend.tmpd import TMpdService
+        from src.backend.tmpd import TMpdService
 
         service = TMpdService()
         async with ChannelFor([service]) as channel:
@@ -29,7 +29,7 @@ class TestMPDConnection:
     @pytest.mark.skipif(not bool(which("mpd")), reason="No mpd binary found in PATH")
     @pytest.mark.asyncio
     async def test_native_successful_connection(self, grpc_channel):
-        from soloviy.config import settings
+        from src.config import settings
 
         service = libtmpd.TMpdServiceStub(grpc_channel)
         resp = await service.connect(
@@ -75,13 +75,13 @@ class TestMPDDBActions:
     @pytest.fixture(params=[1, 2, 3, 4])
     def tile_limit(self, request, monkeypatch):
         monkeypatch.setattr(
-            "soloviy.config.settings.soloviy.tiling_mode", request.param
+            "src.config.settings.soloviy.tiling_mode", request.param
         )
         return request.param
 
     @pytest_asyncio.fixture
     async def grpc_channel(self):
-        from soloviy.backend.tmpd import TMpdService
+        from src.backend.tmpd import TMpdService
 
         mock_mpd = self.MockMPDClient()
         service = TMpdService(mpd_client=mock_mpd)

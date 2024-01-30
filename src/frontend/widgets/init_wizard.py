@@ -4,10 +4,10 @@ import qtinter
 from enum import Enum
 from PySide6.QtCore import Signal, QDir, QPropertyAnimation, Slot
 from PySide6.QtWidgets import QWizard, QMainWindow, QWidget, QLabel, QFileDialog
-from soloviy.frontend.ui.ui_init_wizard import Ui_Wizard
+from src.frontend.ui.ui_init_wizard import Ui_Wizard
 
 # from soloviy.backend.db import state
-from soloviy.config import settings
+from src.config import settings
 # from soloviy.api.mpd_connector import ConnectionStatus
 
 

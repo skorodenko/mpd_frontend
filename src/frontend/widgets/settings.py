@@ -5,11 +5,11 @@ from peewee import fn
 from typing import Optional
 
 # from soloviy.models import dbmodels
-from soloviy.config import settings
+from src.config import settings
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QMainWindow, QDialog
 from dynaconf.loaders.toml_loader import write
-from soloviy.frontend.ui.ui_settings import Ui_Form
+from src.frontend.ui.ui_settings import Ui_Form
 
 
 logger = logging.getLogger(__name__)

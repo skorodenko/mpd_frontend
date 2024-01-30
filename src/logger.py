@@ -1,5 +1,5 @@
 import logging.config
-from soloviy.config import settings
+from src.config import settings
 
 LOGGING_CONFIG = {
     "version": 1,

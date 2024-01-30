@@ -8,11 +8,11 @@ from subprocess import Popen
 from peewee import DoesNotExist
 from pydantic import TypeAdapter
 from mpd.asyncio import MPDClient
-from soloviy.config import settings
+from src.config import settings
 from playhouse.shortcuts import model_to_dict
-from soloviy.backend.tmpd import db, models
+from src.backend.tmpd import db, models
 from betterproto.lib.google.protobuf import Empty
-from soloviy.backend.protobufs.lib.tmpd import (
+from src.backend.protobufs.lib.tmpd import (
     ListMetaPlaylist,
     TMpdServiceBase,
     ConnectionCredentials,

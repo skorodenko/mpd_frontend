@@ -1,6 +1,6 @@
 import datetime
 from uuid import uuid4
-from soloviy.config import sqlite_db
+from src.config import sqlite_db
 from peewee import (
     Model,
     SqliteDatabase,

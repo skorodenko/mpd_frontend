@@ -3,8 +3,8 @@ import asyncio
 import logging
 from grpclib.server import Server
 from grpclib.utils import graceful_exit
-from soloviy.backend.tmpd import TMpdService
-from soloviy.config import settings
+from src.backend.tmpd import TMpdService
+from src.config import settings
 
 
 logger = logging.getLogger("soloviy.backend.main")
