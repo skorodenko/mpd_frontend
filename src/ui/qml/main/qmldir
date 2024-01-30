@@ -1,4 +1,4 @@
-module soloviy
+module main
 
 Root 1.0 Root.qml
 PagePlaylists 1.0 PagePlaylists.qml

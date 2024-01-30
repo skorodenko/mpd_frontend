@@ -30,4 +30,11 @@ Kirigami.ScrollablePage {
             }
         }
     }
+
+    QQC2.Label {
+        // Center label horizontally and vertically within parent object
+        anchors.centerIn: parent
+        text: qsTr("Hello World!")
+    }
+
 }
