@@ -74,9 +74,7 @@ class TestMPDDBActions:
 
     @pytest.fixture(params=[1, 2, 3, 4])
     def tile_limit(self, request, monkeypatch):
-        monkeypatch.setattr(
-            "src.config.config.prod.tiling_mode", request.param
-        )
+        monkeypatch.setattr("src.config.config.prod.tiling_mode", request.param)
         return request.param
 
     @pytest_asyncio.fixture
@@ -115,10 +113,10 @@ class TestMPDDBActions:
         assert res == Empty()
 
     @pytest.mark.asyncio
-    async def test_list_playlists_empty(self, grpc_channel):
+    async def test_list_tile_empty(self, grpc_channel):
         async with ChannelFor([grpc_channel]) as channel:
             serv = libtmpd.TMpdServiceStub(channel)
-            res = await serv.list_playlists(Empty())
+            res = await serv.list_tile(Empty())
         assert res.value == []
 
     @pytest.mark.asyncio
@@ -141,7 +139,7 @@ class TestMPDDBActions:
                     )
                 )
                 metas.insert(0, meta)
-            res = await serv.list_playlists(Empty())
+            res = await serv.list_tile(Empty())
 
         assert len(res.value) == tile_limit
         assert res.value == metas
@@ -158,7 +156,7 @@ class TestMPDDBActions:
                 )
                 if i == 0:
                     should_be_removed = tile
-            res = await serv.list_playlists(Empty())
+            res = await serv.list_tile(Empty())
 
         assert len(res.value) == tile_limit
         assert should_be_removed not in res.value
@@ -175,7 +173,7 @@ class TestMPDDBActions:
                 )
                 if i == tile_limit:
                     not_in_list = tile
-            res = await serv.list_playlists(Empty())
+            res = await serv.list_tile(Empty())
 
         assert len(res.value) == tile_limit
         assert not_in_list not in res.value
@@ -348,7 +346,7 @@ class TestMPDDBActions:
                 metas.append(meta)
             for meta in metas:
                 await serv.delete_tile(meta)
-            res = await serv.list_playlists(Empty())
+            res = await serv.list_tile(Empty())
 
         all_songs = list(Song.select())
         assert res.value == []
@@ -373,7 +371,7 @@ class TestMPDDBActions:
                     )
                 )
             meta = await serv.toggle_lock(meta)
-            res = await serv.list_playlists(Empty())
+            res = await serv.list_tile(Empty())
 
         assert meta.locked is True
         assert res.value[0] == meta

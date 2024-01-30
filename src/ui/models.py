@@ -13,11 +13,10 @@ class PlaylistModel(QAbstractTableModel):
 class PlaylistsModel(QAbstractListModel):
     def __init__(self):
         self.update_playlists()
-        
+
     def update_playlists(self):
         self.layoutAboutToBeChanged.emit()
-        
-        
+
         self.layoutChanged.emit()
 
 
