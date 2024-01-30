@@ -6,7 +6,7 @@ from src.service.api import api_pb2
 from src.service.db import state
 from src.service.models.pydantic import MetaTile
 from src.service.api.api_pb2_grpc import TilingAPIServicer
-from src.config import settings
+from src.config import config
 
 
 @attrs.define
@@ -31,7 +31,7 @@ class TilingAPI(TilingAPIServicer):
 
     @property
     def tmode(self) -> int:
-        return settings.soloviy.tiling_mode
+        return config.soloviy.tiling_mode
 
     @property
     def locked(self) -> int:

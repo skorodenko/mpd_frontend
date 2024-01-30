@@ -21,6 +21,7 @@ rocksdict = "^0.3.13"
 betterproto = {version = "^2.0.0b6", allow-prereleases = true, extras=["compiler"]}
 grpcio-tools = "^1.60.0"
 pydantic = "^2.5.3"
+pyside6 = "^6.6.1"
 
 
 [tool.poetry.group.dev.dependencies]

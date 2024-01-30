@@ -12,7 +12,7 @@ default_config = str(pathlib.Path("./settings.default.toml"))
 sqlite_db = str(xdg_data_dir / "soloviy.db")
 state_db = str(xdg_state_dir / "state.db")
 
-settings = Dynaconf(
+config = Dynaconf(
     settings_file=settings_file,
     log_file=log_file,
     xdg_config_dir=str(xdg_config_dir),

@@ -1,11 +1,11 @@
 import logging.config
-from src.config import settings
+from src.config import config
 
 LOGGING_CONFIG = {
     "version": 1,
     "loggers": {
         "": {
-            "level": settings.logging.level,
+            "level": config.logging.level,
             "propagate": False,
             "handlers": ["stream_handler"],
         },

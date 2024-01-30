@@ -8,7 +8,7 @@ from subprocess import Popen
 from peewee import DoesNotExist
 from pydantic import TypeAdapter
 from mpd.asyncio import MPDClient
-from src.config import settings
+from src.config import config
 from src.service.tmpd import db, pyd
 from playhouse.shortcuts import model_to_dict
 from betterproto.lib.google.protobuf import Empty
@@ -46,6 +46,19 @@ class TMpdService(TMpdServiceBase):
             logger.debug("Mpd binary not found in PATH")
         return binary
 
+    @property
+    def locked_tiles(self) -> int:
+        return db.Tile.select().where(db.Tile.locked == True).count()  # noqa: E712
+
+    @property
+    def all_tiles(self) -> int:
+        return db.Tile.select().count()  # noqa: E712
+
+    @property
+    def stacked_tiles(self) -> db.Tile:
+        query = db.Tile.select().order_by(-db.Tile.updated, -db.Tile.locked)
+        return query
+
     def close(self):
         logger.debug("Gracefully closing MpdService")
         if self.mpd_client.connected:
@@ -58,11 +71,11 @@ class TMpdService(TMpdServiceBase):
         self, connection_credentials: ConnectionCredentials
     ) -> ConnectionDetails:
         logger.debug("Establishing connection to mpd")
-        if connection_credentials.socket == settings.mpd.native_socket:
+        if connection_credentials.socket == config.default.native_socket:
             logger.debug("Starting mpd server instance")
             if self.mpd_binary:
                 self.mpd_server = Popen(
-                    [self.mpd_binary, settings.mpd.native_config, "--no-daemon"]
+                    [self.mpd_binary, config.default.native_config, "--no-daemon"]
                 )
                 await asyncio.sleep(0.5)
             else:
@@ -76,19 +89,6 @@ class TMpdService(TMpdServiceBase):
         except (socket.gaierror, ConnectionRefusedError):
             logger.warning(f"Failed to connect to mpd: {_socket}")
             return ConnectionDetails(ConnectionStatus.FailedToConnect)
-
-    @property
-    def locked_tiles(self) -> int:
-        return db.Tile.select().where(db.Tile.locked == True).count()  # noqa: E712
-
-    @property
-    def all_tiles(self) -> int:
-        return db.Tile.select().count()  # noqa: E712
-
-    @property
-    def stacked_tiles(self) -> db.Tile:
-        query = db.Tile.select().order_by(-db.Tile.updated, -db.Tile.locked)
-        return query
 
     def _update_tile_db(
         self, meta: pyd.MetaPlaylistModel, include: list[str] = []
@@ -161,8 +161,8 @@ class TMpdService(TMpdServiceBase):
                 "Invalid arguments for creating new tile",
             )
 
-        if self.all_tiles == settings.soloviy.tiling_mode:
-            if self.locked_tiles < settings.soloviy.tiling_mode:
+        if self.all_tiles == config.prod.tiling_mode:
+            if self.locked_tiles < config.prod.tiling_mode:
                 tiles = list(self.stacked_tiles)
                 poptile = tiles.pop()
                 poptile.delete_instance()

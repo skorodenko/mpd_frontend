@@ -29,12 +29,12 @@ class TestMPDConnection:
     @pytest.mark.skipif(not bool(which("mpd")), reason="No mpd binary found in PATH")
     @pytest.mark.asyncio
     async def test_native_successful_connection(self, grpc_channel):
-        from src.config import settings
+        from src.config import config
 
         service = libtmpd.TMpdServiceStub(grpc_channel)
         resp = await service.connect(
             libtmpd.ConnectionCredentials(
-                socket=settings.mpd.native_socket,
+                socket=config.default.native_socket,
                 password="",
             )
         )
@@ -75,7 +75,7 @@ class TestMPDDBActions:
     @pytest.fixture(params=[1, 2, 3, 4])
     def tile_limit(self, request, monkeypatch):
         monkeypatch.setattr(
-            "src.config.settings.soloviy.tiling_mode", request.param
+            "src.config.config.prod.tiling_mode", request.param
         )
         return request.param
 

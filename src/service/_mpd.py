@@ -13,7 +13,7 @@ from pydantic import TypeAdapter
 from mpd.asyncio import MPDClient
 
 # from soloviy.backend.api import library
-from src.config import settings
+from src.config import config
 from src.service.models.db import Library
 from src.service.models import pydantic as pmodels
 from src.service.api import api_pb2_grpc, api_pb2
@@ -56,11 +56,11 @@ class MpdService(api_pb2_grpc.MpdAPIServicer):
 
     async def mpd_connect(self, _socket: str):
         logger.info("Connecting to mpd")
-        if _socket == settings.mpd.native_socket:
+        if _socket == config.mpd.native_socket:
             if not self.mpd_binary:
                 logger.error("Can't find mpd binary in PATH")
             logger.info("Starting native mpd server")
-            self.mpd_server = Popen(["mpd", settings.mpd.native_config, "--no-daemon"])
+            self.mpd_server = Popen(["mpd", config.mpd.native_config, "--no-daemon"])
             await asyncio.sleep(0.5)
         try:
             logging.debug(f"Socket: {_socket}")
@@ -273,5 +273,5 @@ class MpdService(api_pb2_grpc.MpdAPIServicer):
         #    self.idle.cancel()
         if self.client and self.client.connected:
             self.client.disconnect()
-        if settings.mpd.socket == settings.mpd.native_socket:
+        if config.mpd.socket == config.mpd.native_socket:
             self.mpd_server.wait(2)
