@@ -5,7 +5,7 @@ import pathlib
 import datetime
 import asyncio
 from src.config import config
-from src.ui.qtmodels import PlaylistsModel
+from src.ui.models import PlaylistsModel
 from src.ui.widgets.init_wizard import InitWizard
 from src.ui.widgets.settings import Settings
 from PySide6.QtGui import QActionGroup, QAction, QIcon, QPixmap, QFont

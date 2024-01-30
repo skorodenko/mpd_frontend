@@ -1,11 +1,8 @@
 # from soloviy.backend.db import state
-from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
 # from soloviy.models.dbmodels import Library
 # from soloviy.api.tiling import QMetaTile
 
-FOLDER_ICON = QIcon.fromTheme("folder-music")
-PLAYING_ICON = QIcon.fromTheme("media-playback-start")
 VISIBLE_COLUMNS = ["track", "file"]  # Move to config
 
 
@@ -14,7 +11,14 @@ class PlaylistModel(QAbstractTableModel):
 
 
 class PlaylistsModel(QAbstractListModel):
-    ...
+    def __init__(self):
+        self.update_playlists()
+        
+    def update_playlists(self):
+        self.layoutAboutToBeChanged.emit()
+        
+        
+        self.layoutChanged.emit()
 
 
 # class PlaylistModel(QAbstractTableModel):

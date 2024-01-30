@@ -14,7 +14,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     engine = QQmlApplicationEngine()
-    engine.addImportPath("/home/rinkuro/Sandbox/Soloviy/soloviy/frontend/qml")
+    engine.addImportPath("/home/rinkuro/Sandbox/Soloviy/src/ui/qml")
     engine.quit.connect(app.quit)
     engine.load(QUrl.fromLocalFile(":/Root.qml"))
 
