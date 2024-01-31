@@ -71,6 +71,16 @@ class TestMPDDBActions:
                 case ["(artist == 'Hans Zimmer')", _, _]:
                     data.sort(key=lambda x: float(x["duration"]))
                     return data
+        
+        async def list(self, *args):
+            match args:
+                case ["artist"]:
+                    return [{"artist": "Hans Zimmer"}, {"artist": ""}]
+        
+        async def lsinfo(self, *args):
+            match args:
+                case [""]:
+                    return [{"directory": "Dune"}, {"directory": ""}]
 
     @pytest.fixture(params=[1, 2, 3, 4])
     def tile_limit(self, request, monkeypatch):
@@ -111,6 +121,24 @@ class TestMPDDBActions:
             serv = libtmpd.TMpdServiceStub(channel)
             res = await serv.update_db(Empty())
         assert res == Empty()
+        
+    @pytest.mark.asyncio
+    async def test_list_playlists_artist(self, grpc_channel):
+        async with ChannelFor([grpc_channel]) as channel:
+            serv = libtmpd.TMpdServiceStub(channel)
+            res = await serv.list_playlists(libtmpd.PlaylistsQuery(
+                group=libtmpd.SongField.artist
+            ))
+        assert res.value == ["Hans Zimmer"]
+
+    @pytest.mark.asyncio
+    async def test_list_playlists_directory(self, grpc_channel):
+        async with ChannelFor([grpc_channel]) as channel:
+            serv = libtmpd.TMpdServiceStub(channel)
+            res = await serv.list_playlists(libtmpd.PlaylistsQuery(
+                group=libtmpd.SongField.directory
+            ))
+        assert res.value == ["Dune"]
 
     @pytest.mark.asyncio
     async def test_list_tile_empty(self, grpc_channel):

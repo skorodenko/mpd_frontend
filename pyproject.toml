@@ -12,7 +12,6 @@ pillow = "^9.5.0"
 pyyaml = "^6.0"
 xdg = "^6.0.0"
 attrs = "^23.1.0"
-qtinter = "^0.11.0"
 dynaconf = "^3.2.2"
 cashews = "^6.2.0"
 diskcache = "^5.6.3"
@@ -21,6 +20,7 @@ rocksdict = "^0.3.13"
 betterproto = {version = "^2.0.0b6", allow-prereleases = true, extras=["compiler"]}
 grpcio-tools = "^1.60.0"
 pydantic = "^2.5.3"
+qasync = "^0.27.1"
 pyside6 = "^6.6.1"
 
 

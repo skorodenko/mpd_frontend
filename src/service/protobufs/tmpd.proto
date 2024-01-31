@@ -12,18 +12,30 @@ service TMpdService {
     rpc Connect(ConnectionCredentials) returns (ConnectionDetails);
     // Update music DB
     rpc UpdateDB(google.protobuf.Empty) returns (google.protobuf.Empty);
+    // Lists playlists with certain query
+    rpc ListPlaylists(PlaylistsQuery) returns (Playlists);
     // Adds tile based on tile
     rpc AddTile(MetaPlaylist) returns (MetaPlaylist);
     // Returns list of all meta playlists
-    rpc ListPlaylists(google.protobuf.Empty) returns (ListMetaPlaylist);
+    rpc ListTile(google.protobuf.Empty) returns (ListMetaPlaylist);
     // Returns playlist based on metadata
-    rpc GetPlaylist(MetaPlaylist) returns (Playlist);
-    // Deletes tile (and connected songs) by uuid
     rpc DeleteTile(MetaPlaylist) returns (MetaPlaylist);
     // Locks the tile from cycling
+    rpc GetPlaylist(MetaPlaylist) returns (Playlist);
+    // Deletes tile (and connected songs) by uuid
     rpc ToggleLock(MetaPlaylist) returns (MetaPlaylist);
     // PlayPause music 
     // rpc PlaySong(Playlist) returns (Playlist);
+}
+
+
+message PlaylistsQuery {
+    SongField group = 1;
+}
+
+
+message Playlists {
+    repeated string value = 1;
 }
 
 

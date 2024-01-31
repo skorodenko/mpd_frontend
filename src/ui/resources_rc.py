@@ -6,7 +6,7 @@
 from PySide6 import QtCore
 
 qt_resource_data = b"\
-\x00\x00\x01f\
+\x00\x00\x01\xc9\
 i\
 mport QtQuick 2.\
 15\x0aimport QtQuic\
@@ -16,21 +16,27 @@ ntrols 2.15 as Q\
 QC2\x0aimport org.k\
 de.kirigami 2.20\
  as Kirigami\x0aimp\
-ort main 1.0\x0a\x0a\x0aK\
-irigami.Applicat\
-ionWindow {\x0a    \
-id: root\x0a    tit\
-le: qsTr(\x22Solovi\
-y\x22)\x0a    pageStac\
-k.initialPage: [\
-playlists, playe\
-r]\x0a    \x0a    Page\
-Playlists {\x0a    \
-    id: playlist\
-s\x0a    }\x0a\x0a    Pag\
-ePlayer {\x0a      \
-  id: player\x0a   \
- }\x0a}\x0a\
+ort main 1.0 as \
+Main\x0aimport cont\
+rollers 1.0 as U\
+IC\x0a\x0a\x0aKirigami.Ap\
+plicationWindow \
+{\x0a    id: root\x0a \
+   title: qsTr(\x22\
+Soloviy\x22)\x0a    pa\
+geStack.initialP\
+age: [playlists,\
+ player]\x0a    \x0a  \
+  Component.onCo\
+mpleted: UIC.Mai\
+n.connect()\x0a    \
+\x0a    Main.PagePl\
+aylists {\x0a      \
+  id: playlists\x0a\
+    }\x0a\x0a    Main.\
+PagePlayer {\x0a   \
+     id: player\x0a\
+    }\x0a}\x0a\
 "
 
 qt_resource_name = b"\
@@ -44,20 +50,13 @@ qt_resource_struct = b"\
 \x00\x00\x00\x00\x00\x02\x00\x00\x00\x01\x00\x00\x00\x01\
 \x00\x00\x00\x00\x00\x00\x00\x00\
 \x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\
-\x00\x00\x01\x8dY\x8d\x9b\x1e\
+\x00\x00\x01\x8d`\x10\xcd+\
 "
 
-
 def qInitResources():
-    QtCore.qRegisterResourceData(
-        0x03, qt_resource_struct, qt_resource_name, qt_resource_data
-    )
-
+    QtCore.qRegisterResourceData(0x03, qt_resource_struct, qt_resource_name, qt_resource_data)
 
 def qCleanupResources():
-    QtCore.qUnregisterResourceData(
-        0x03, qt_resource_struct, qt_resource_name, qt_resource_data
-    )
-
+    QtCore.qUnregisterResourceData(0x03, qt_resource_struct, qt_resource_name, qt_resource_data)
 
 qInitResources()

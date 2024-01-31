@@ -1042,21 +1042,15 @@ files = [
 ]
 
 [[package]]
-name = "qtinter"
-version = "0.11.0"
-description = "Interop between asyncio and Qt for Python"
+name = "qasync"
+version = "0.27.1"
+description = "Python library for using asyncio in Qt-based applications"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8,<4.0"
 files = [
-    {file = "qtinter-0.11.0-py3-none-any.whl", hash = "sha256:0d4814cb2ddffb8138b618f8e95687e2c3144b76f095b5c9e3abe08090d773f1"},
-    {file = "qtinter-0.11.0.tar.gz", hash = "sha256:0d4d9e4c3c3c6789a19c9b1c2e098491ed36f0a8d106162c2679dd05e460bffd"},
+    {file = "qasync-0.27.1-py3-none-any.whl", hash = "sha256:5d57335723bc7d9b328dadd8cb2ed7978640e4bf2da184889ce50ee3ad2602c7"},
+    {file = "qasync-0.27.1.tar.gz", hash = "sha256:8dc768fd1ee5de1044c7c305eccf2d39d24d87803ea71189d4024fb475f4985f"},
 ]
-
-[package.extras]
-pyqt5 = ["PyQt5"]
-pyqt6 = ["PyQt6"]
-pyside2 = ["PySide2"]
-pyside6 = ["PySide6"]
 
 [[package]]
 name = "req2flatpak"
@@ -1194,4 +1188,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "c4199a61fa844b8b82c1c60889ffb8473ac278a678fe0e63218c15a61f0f5e4c"
+content-hash = "7c76cb04a39f983dbd92320d7b9481087db3b1bfd273fbdfa61f0e64a9e29d1d"

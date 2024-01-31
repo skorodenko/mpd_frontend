@@ -542,9 +542,9 @@ pyyaml==6.0.1 ; python_version >= "3.11" and python_version < "3.12" \
     --hash=sha256:fca0e3a251908a499833aa292323f32437106001d436eca0e6e7833256674585 \
     --hash=sha256:fd1592b3fdf65fff2ad0004b5e363300ef59ced41c2e6b3a99d4089fa8c5435d \
     --hash=sha256:fd66fc5d0da6d9815ba2cebeb4205f95818ff4b79c3ebe268e75d961704af52f
-qtinter==0.11.0 ; python_version >= "3.11" and python_version < "3.12" \
-    --hash=sha256:0d4814cb2ddffb8138b618f8e95687e2c3144b76f095b5c9e3abe08090d773f1 \
-    --hash=sha256:0d4d9e4c3c3c6789a19c9b1c2e098491ed36f0a8d106162c2679dd05e460bffd
+qasync==0.27.1 ; python_version >= "3.11" and python_version < "3.12" \
+    --hash=sha256:5d57335723bc7d9b328dadd8cb2ed7978640e4bf2da184889ce50ee3ad2602c7 \
+    --hash=sha256:8dc768fd1ee5de1044c7c305eccf2d39d24d87803ea71189d4024fb475f4985f
 rocksdict==0.3.20 ; python_version >= "3.11" and python_version < "3.12" \
     --hash=sha256:055b7f1a82106c10c56b3a453c4e6cd7f37e2506d2a5ef69d3d0e2d5d78a6170 \
     --hash=sha256:0d963f4b3c3c2eef315a314ceedb9fbc44dd2bee934fd0c6f50ed4c2cb991161 \

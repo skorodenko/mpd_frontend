@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, Coroutine
 import attrs
 import socket
 import logging
@@ -14,6 +15,8 @@ from playhouse.shortcuts import model_to_dict
 from betterproto.lib.google.protobuf import Empty
 from src.service.lib.tmpd import (
     ListMetaPlaylist,
+    Playlists,
+    PlaylistsQuery,
     TMpdServiceBase,
     ConnectionCredentials,
     ConnectionDetails,
@@ -90,6 +93,18 @@ class TMpdService(TMpdServiceBase):
             logger.warning(f"Failed to connect to mpd: {_socket}")
             return ConnectionDetails(ConnectionStatus.FailedToConnect)
 
+    async def list_playlists(self, playlists_query: PlaylistsQuery) -> Playlists:
+        match playlists_query.group:
+            case SongField.directory:
+                data = await self.mpd_client.lsinfo("")
+                playlists = list(map(lambda x: x.get("directory"), data))
+            case group:
+                gname = SongField(group).name
+                data = await self.mpd_client.list(gname)
+                playlists = list(map(lambda x: x.get(gname), data))
+        playlists = list(filter(bool, playlists))
+        return Playlists(playlists)
+
     def _update_tile_db(
         self, meta: pyd.MetaPlaylistModel, include: list[str] = []
     ) -> pyd.MetaPlaylistModel:
@@ -128,7 +143,7 @@ class TMpdService(TMpdServiceBase):
         meta = ta_meta.validate_python(tile, from_attributes=True)
         return meta
 
-    async def list_playlists(
+    async def list_tile(
         self, betterproto_lib_google_protobuf_empty: Empty
     ) -> ListMetaPlaylist:
         tiles = list(self.stacked_tiles.dicts())

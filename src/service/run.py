@@ -25,6 +25,7 @@ class Backend:
     async def serve(self):
         with graceful_exit([self.grpc_server, self.mpd_service]):
             await self.grpc_server.start(self.host, self.port)
+            logger.debug("Service started")
             await self.grpc_server.wait_closed()
 
 

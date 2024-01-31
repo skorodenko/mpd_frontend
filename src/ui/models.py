@@ -1,23 +1,50 @@
-# from soloviy.backend.db import state
-from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
-# from soloviy.models.dbmodels import Library
-# from soloviy.api.tiling import QMetaTile
+import qasync
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt, QAbstractTableModel, QAbstractListModel
+from PySide6.QtQml import QmlElement
+from grpclib.client import Channel
+from src.config import config
+from src.service.lib.tmpd import TMpdServiceStub, PlaylistsQuery, SongField
+
 
 VISIBLE_COLUMNS = ["track", "file"]  # Move to config
+
+QML_IMPORT_NAME = "models"
+QML_IMPORT_MAJOR_VERSION = 1
+QML_IMPORT_MINOR_VERSION = 0 # Optional
 
 
 class PlaylistModel(QAbstractTableModel):
     ...
 
 
+@QmlElement
 class PlaylistsModel(QAbstractListModel):
     def __init__(self):
-        self.update_playlists()
+        super().__init__()
+        self.playlists = []
 
-    def update_playlists(self):
+    @qasync.asyncSlot()
+    async def update_playlists(self):
         self.layoutAboutToBeChanged.emit()
-
+        channel = Channel("localhost", config.default.grpc_port)
+        service = TMpdServiceStub(channel)
+        playlists = await service.list_playlists(
+            PlaylistsQuery(group = SongField.directory)
+        )
+        self.playlists = playlists.value
         self.layoutChanged.emit()
+    
+    def data(self, index, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            name = self.roleNames().get(role)
+            if name == b"name":
+                return self.playlists[index.row()]
+        
+    def roleNames(self):
+        return {Qt.DisplayRole: b"name"}
+
+    def rowCount(self, index) -> int:
+        return len(self.playlists)
 
 
 # class PlaylistModel(QAbstractTableModel):
