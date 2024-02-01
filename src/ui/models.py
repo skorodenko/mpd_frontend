@@ -26,7 +26,7 @@ class PlaylistsModel(QAbstractListModel):
     @qasync.asyncSlot()
     async def update_playlists(self):
         self.layoutAboutToBeChanged.emit()
-        channel = Channel("localhost", config.default.grpc_port)
+        channel = Channel(path=config.default.grpc_host)
         service = TMpdServiceStub(channel)
         playlists = await service.list_playlists(
             PlaylistsQuery(group = SongField.directory)

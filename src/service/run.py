@@ -12,8 +12,7 @@ logger = logging.getLogger("soloviy.backend.main")
 
 @attrs.define
 class Backend:
-    host: str = "localhost"
-    port: int = config.default.grpc_port
+    host_path: str = config.default.grpc_host
     mpd_service: TMpdService = attrs.Factory(TMpdService)
     grpc_server: Server = attrs.field()
 
@@ -24,7 +23,7 @@ class Backend:
 
     async def serve(self):
         with graceful_exit([self.grpc_server, self.mpd_service]):
-            await self.grpc_server.start(self.host, self.port)
+            await self.grpc_server.start(path=self.host_path)
             logger.debug("Service started")
             await self.grpc_server.wait_closed()
 

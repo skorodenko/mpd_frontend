@@ -1,5 +1,6 @@
-import logging
 import qasync
+import asyncio
+import logging
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtQml import QmlElement, QmlSingleton
 from grpclib.client import Channel
@@ -24,13 +25,19 @@ class Main(QObject):
     
     @qasync.asyncSlot()
     async def connect(self):
-        channel = Channel("127.0.0.1", config.default.grpc_port)
-        service = TMpdServiceStub(channel)
-        status = await service.connect(
-            ConnectionCredentials(
-                socket = config.default.native_socket
-            )
-        )
+        SLEEP_TIME = 3
+        for _ in range(SLEEP_TIME * 4):
+            try:
+                channel = Channel(path=config.default.grpc_host)
+                service = TMpdServiceStub(channel)
+                status = await service.connect(
+                    ConnectionCredentials(
+                        socket = config.default.native_socket
+                    )
+                )
+                break
+            except ConnectionRefusedError:
+                await asyncio.sleep(0.25)
         
         if status.status == ConnectionStatus.Connected:
             self.connected.emit()  

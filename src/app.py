@@ -26,8 +26,7 @@ def runner():
         engine = QQmlApplicationEngine()
         engine.addImportPath("/home/rinkuro/Sandbox/Soloviy/src/ui/qml")
         
-        #server = subprocess.Popen(["python", "-m", "src.service.run"])
-        #sleep(2)
+        server = subprocess.Popen(["python", "-m", "src.service.run"])
         
         engine.load(QUrl.fromLocalFile(":/Root.qml"))
         engine.quit.connect(app.quit)
@@ -40,11 +39,10 @@ def runner():
         ...
     
     finally:   
-        #try:
-        #    server.wait(2)   
-        #except subprocess.TimeoutExpired:
-        #    server.kill()
-        ...
+        try:
+            server.wait(2)   
+        except subprocess.TimeoutExpired:
+            server.kill()
         
 
 if __name__ == "__main__":

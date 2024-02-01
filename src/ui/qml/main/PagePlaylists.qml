@@ -49,7 +49,7 @@ Kirigami.ScrollablePage {
         id: playlists_view
         anchors.fill: parent
         model: playlists_model
-        delegate: Text {
+        delegate: QQC2.Label {
                 required property string name
                 text: name
             }
