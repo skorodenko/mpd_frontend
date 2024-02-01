@@ -76,12 +76,12 @@ class TMpdService(TMpdServiceBase):
         logger.debug("Establishing connection to mpd")
         if connection_credentials.socket == config.default.native_socket:
             logger.debug("Starting mpd server instance")
-            if self.mpd_binary:
+            if self.mpd_binary and not self.mpd_server:
                 self.mpd_server = Popen(
                     [self.mpd_binary, config.default.native_config, "--no-daemon"]
                 )
                 await asyncio.sleep(0.5)
-            else:
+            elif not self.mpd_binary:
                 logger.warning("Mpd binary not found")
                 return ConnectionDetails(ConnectionStatus.NoMpdBinary)
         try:
