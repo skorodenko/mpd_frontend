@@ -16,6 +16,7 @@ from betterproto.lib.google.protobuf import Empty
 from src.service.lib.tmpd import (
     ListMetaPlaylist,
     Playlists,
+    PlaylistName,
     PlaylistsQuery,
     TMpdServiceBase,
     ConnectionCredentials,
@@ -97,12 +98,14 @@ class TMpdService(TMpdServiceBase):
         match playlists_query.group:
             case SongField.directory:
                 data = await self.mpd_client.lsinfo("")
-                playlists = list(map(lambda x: x.get("directory"), data))
+                playlists = list(map(lambda x: {"name": x.get("directory")}, data))
             case group:
                 gname = SongField(group).name
                 data = await self.mpd_client.list(gname)
-                playlists = list(map(lambda x: x.get(gname), data))
-        playlists = list(filter(bool, playlists))
+                playlists = list(map(lambda x: {"name": x.get(gname)}, data))
+        playlists = list(filter(lambda x: x.get("name"), playlists))
+        ta = TypeAdapter(list[PlaylistName])
+        playlists = ta.validate_python(playlists, from_attributes=True)
         return Playlists(playlists)
 
     def _update_tile_db(

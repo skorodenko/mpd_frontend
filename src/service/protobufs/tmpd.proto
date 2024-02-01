@@ -35,7 +35,12 @@ message PlaylistsQuery {
 
 
 message Playlists {
-    repeated string value = 1;
+    repeated PlaylistName value = 1;
+}
+
+
+message PlaylistName {
+    string name = 1;
 }
 
 
@@ -45,9 +50,11 @@ message Playlist {
     int32 song_pos = 3;
 }
 
+
 message ListMetaPlaylist {
     repeated MetaPlaylist value = 1;
 }
+
 
 message MetaPlaylist {
     string uuid = 1;
@@ -57,6 +64,7 @@ message MetaPlaylist {
     SongField group_by = 5;
     bool locked = 6;
 }
+
 
 // Credentials to connect to mpd
 message ConnectionCredentials {
@@ -68,10 +76,12 @@ message ConnectionCredentials {
     string password = 2;
 }
 
+
 // Result of mpd connection
 message ConnectionDetails {
     ConnectionStatus status = 1;
 }
+
 
 // Status of mpd connection
 enum ConnectionStatus {
@@ -80,10 +90,12 @@ enum ConnectionStatus {
     NoMpdBinary = 2;
 }
 
+
 enum SortOrder {
     Ascending = 0;
     Descending = 1;
 }
+
 
 enum SongField {
     none = 0;
@@ -103,6 +115,7 @@ enum SongField {
     disc = 14;
     directory = 15;
 }
+
 
 message Song {
     string file = 1;

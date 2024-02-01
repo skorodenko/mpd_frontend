@@ -38,7 +38,7 @@ class PlaylistsModel(QAbstractListModel):
         if role == Qt.ItemDataRole.DisplayRole:
             name = self.roleNames().get(role)
             if name == b"name":
-                return self.playlists[index.row()]
+                return self.playlists[index.row()].name
         
     def roleNames(self):
         return {Qt.DisplayRole: b"name"}

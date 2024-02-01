@@ -129,7 +129,8 @@ class TestMPDDBActions:
             res = await serv.list_playlists(libtmpd.PlaylistsQuery(
                 group=libtmpd.SongField.artist
             ))
-        assert res.value == ["Hans Zimmer"]
+        assert len(res.value) == 1
+        assert res.value[0].name == "Hans Zimmer"
 
     @pytest.mark.asyncio
     async def test_list_playlists_directory(self, grpc_channel):
@@ -138,7 +139,8 @@ class TestMPDDBActions:
             res = await serv.list_playlists(libtmpd.PlaylistsQuery(
                 group=libtmpd.SongField.directory
             ))
-        assert res.value == ["Dune"]
+        assert len(res.value) == 1
+        assert res.value[0].name == "Dune"
 
     @pytest.mark.asyncio
     async def test_list_tile_empty(self, grpc_channel):
