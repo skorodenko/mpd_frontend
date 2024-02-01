@@ -1,5 +1,5 @@
 import qasync
-from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt, QAbstractTableModel, QAbstractListModel
+from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
 from PySide6.QtQml import QmlElement
 from grpclib.client import Channel
 from src.config import config

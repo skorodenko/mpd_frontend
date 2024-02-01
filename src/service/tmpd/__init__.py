@@ -1,17 +1,16 @@
-from datetime import datetime
-from typing import Any, Coroutine
 import attrs
 import socket
 import logging
 import asyncio
 import grpclib
 from subprocess import Popen
+from datetime import datetime
 from peewee import DoesNotExist
 from pydantic import TypeAdapter
 from mpd.asyncio import MPDClient
+from playhouse.shortcuts import model_to_dict
 from src.config import config
 from src.service.tmpd import db, pyd
-from playhouse.shortcuts import model_to_dict
 from betterproto.lib.google.protobuf import Empty
 from src.service.lib.tmpd import (
     ListMetaPlaylist,
