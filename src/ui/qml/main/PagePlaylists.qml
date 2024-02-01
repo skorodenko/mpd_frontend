@@ -49,9 +49,22 @@ Kirigami.ScrollablePage {
         id: playlists_view
         anchors.fill: parent
         model: playlists_model
-        delegate: QQC2.Label {
-                required property string name
+        delegate: Item {
+            height: 30
+            width: playlists_view.width
+            
+            required property string name
+            
+            QQC2.Label {
                 text: name
+                font.pixelSize: 14
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 15
+                anchors.rightMargin: 15
+                anchors.verticalCenter: parent.verticalCenter
+                elide: Text.ElideRight
             }
+        }
     }
 }

@@ -14,7 +14,7 @@ from peewee import (
 
 
 db = SqliteDatabase(
-    sqlite_db,
+    ":memory:",
     pragmas={
         "journal_mode": "wal",
         "foreign_keys": 1,

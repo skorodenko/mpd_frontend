@@ -35,6 +35,8 @@ class Main(QObject):
                         socket = config.default.native_socket
                     )
                 )
+                if status == ConnectionStatus.FailedToConnect:
+                    continue
                 break
             except ConnectionRefusedError:
                 await asyncio.sleep(0.25)
