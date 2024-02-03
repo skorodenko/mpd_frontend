@@ -24,10 +24,11 @@ service TMpdService {
     rpc GetPlaylist(MetaPlaylist) returns (Playlist);
     // Deletes tile (and connected songs) by uuid
     rpc ToggleLock(MetaPlaylist) returns (MetaPlaylist);
+    // Get current playlists group
+    rpc PlaylistsGroup(PlaylistsQuery) returns (PlaylistsQuery);
     // PlayPause music 
     // rpc PlaySong(Playlist) returns (Playlist);
 }
-
 
 message PlaylistsQuery {
     SongField group = 1;

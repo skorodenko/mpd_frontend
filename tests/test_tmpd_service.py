@@ -8,6 +8,7 @@ from grpclib.testing import ChannelFor
 from src.service.tmpd.db import Song, Tile
 from betterproto.lib.google.protobuf import Empty
 from src.service.lib import tmpd as libtmpd
+from src import const
 
 
 TABLES = [Song, Tile]
@@ -53,6 +54,43 @@ class TestMPDConnection:
 
 
 @pytest.mark.asyncio(scope="class")
+class TestMPDConfigActions:
+    loop: asyncio.AbstractEventLoop
+
+    @pytest_asyncio.fixture
+    async def grpc_channel(self):
+        from src.service.tmpd import TMpdService
+
+        service = TMpdService()
+        async with ChannelFor([service]) as channel:
+            yield channel
+        service.close()
+
+    @pytest.fixture(params=const.ALLOWED_GROUP_BY)
+    def mock_group_config(self, request, monkeypatch):
+        monkeypatch.setattr("src.config.config.prod.group_by", request.param.name)
+        return request.param
+
+    @pytest.mark.asyncio
+    async def test_group_by_set(self, grpc_channel, mock_group_config):
+        serv = libtmpd.TMpdServiceStub(grpc_channel)
+        resp = await serv.playlists_group(
+            libtmpd.PlaylistsQuery(
+                group=mock_group_config
+            )
+        )
+        assert resp.group == mock_group_config
+    
+    @pytest.mark.asyncio
+    async def test_group_by_get_default(self, grpc_channel):
+        serv = libtmpd.TMpdServiceStub(grpc_channel)
+        resp = await serv.playlists_group(
+            libtmpd.PlaylistsQuery()
+        )
+        assert resp.group == libtmpd.SongField.directory
+        
+
+@pytest.mark.asyncio(scope="class")
 class TestMPDDBActions:
     loop: asyncio.AbstractEventLoop
 
@@ -76,6 +114,16 @@ class TestMPDDBActions:
             match args:
                 case ["artist"]:
                     return [{"artist": "Hans Zimmer"}, {"artist": ""}]
+                case ["albumartist"]:
+                    return [{"albumartist": "Hans Zimmer"}, {"albumartist": ""}]
+                case ["album"]:
+                    return [{"album": "Dune (Original Motion Picture Soundtrack)"}, {"album": ""}]
+                case ["date"]:
+                    return [{"date": "2021"}]
+                case ["genre"]:
+                    return [{"genre": "Soundtrack"}]
+                case ["composer"]:
+                    return [{"composer": "Hans Zimmer"}]
         
         async def lsinfo(self, *args):
             match args:
@@ -95,6 +143,10 @@ class TestMPDDBActions:
         service = TMpdService(mpd_client=mock_mpd)
         yield service
         service.close()
+    
+    @pytest.fixture(params=const.ALLOWED_GROUP_BY)
+    def allowed_playlist_group(self, request):
+        return request.param
 
     @pytest.fixture(autouse=True)
     def mem_db(self):
@@ -123,24 +175,20 @@ class TestMPDDBActions:
         assert res == Empty()
         
     @pytest.mark.asyncio
-    async def test_list_playlists_artist(self, grpc_channel):
+    async def test_list_playlists_none(self, grpc_channel):
         async with ChannelFor([grpc_channel]) as channel:
             serv = libtmpd.TMpdServiceStub(channel)
-            res = await serv.list_playlists(libtmpd.PlaylistsQuery(
-                group=libtmpd.SongField.artist
-            ))
-        assert len(res.value) == 1
-        assert res.value[0].name == "Hans Zimmer"
+            res = await serv.list_playlists(libtmpd.PlaylistsQuery())
+        assert len(res.value) == 0
 
     @pytest.mark.asyncio
-    async def test_list_playlists_directory(self, grpc_channel):
+    async def test_list_playlists_allowed_groups(self, grpc_channel, allowed_playlist_group):
         async with ChannelFor([grpc_channel]) as channel:
             serv = libtmpd.TMpdServiceStub(channel)
             res = await serv.list_playlists(libtmpd.PlaylistsQuery(
-                group=libtmpd.SongField.directory
+                group=allowed_playlist_group
             ))
         assert len(res.value) == 1
-        assert res.value[0].name == "Dune"
 
     @pytest.mark.asyncio
     async def test_list_tile_empty(self, grpc_channel):

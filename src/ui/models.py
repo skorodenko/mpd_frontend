@@ -1,7 +1,8 @@
 import qasync
-from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel
+from PySide6.QtCore import Qt, QAbstractTableModel, QAbstractListModel, Signal
 from PySide6.QtQml import QmlElement
 from grpclib.client import Channel
+from src import const
 from src.config import config
 from src.service.lib.tmpd import TMpdServiceStub, PlaylistsQuery, SongField
 
@@ -17,19 +18,65 @@ class PlaylistModel(QAbstractTableModel):
     ...
 
 
+
 @QmlElement
-class PlaylistsModel(QAbstractListModel):
+class PlaylistsGroup(QAbstractListModel):
+    updated: Signal = Signal(int, arguments=["index"])
+    
+    def __init__(self):
+        super().__init__()
+        self.groups = const.ALLOWED_GROUP_BY
+        self.active = SongField.directory.value
+
+    @qasync.asyncSlot(int)
+    async def setActive(self, index: int):
+        channel = Channel(path=config.default.grpc_host)
+        service = TMpdServiceStub(channel)
+        await service.playlists_group(
+            PlaylistsQuery(SongField(index))
+        )
+        self.refresh()
+    
+    @qasync.asyncSlot()
+    async def refresh(self):
+        channel = Channel(path=config.default.grpc_host)
+        service = TMpdServiceStub(channel)
+        active_group = await service.playlists_group(
+            PlaylistsQuery()
+        )
+        self.active = active_group.group
+        self.updated.emit(self.active)
+    
+    def data(self, index, role):
+        name = self.roleNames().get(role)
+        if name == b"name":
+            return self.groups[index.row()].name.capitalize()
+        if name == b"value":
+            return self.groups[index.row()].value
+        
+    def roleNames(self):
+        return {
+            Qt.DisplayRole + 0: b"name", 
+            Qt.DisplayRole + 1: b"value",
+        }
+
+    def rowCount(self, index) -> int:
+        return len(self.groups)
+
+
+@QmlElement
+class Playlists(QAbstractListModel):
     def __init__(self):
         super().__init__()
         self.playlists = []
 
-    @qasync.asyncSlot()
-    async def update_playlists(self):
+    @qasync.asyncSlot(int)
+    async def refresh(self, group: int):
         self.layoutAboutToBeChanged.emit()
         channel = Channel(path=config.default.grpc_host)
         service = TMpdServiceStub(channel)
         playlists = await service.list_playlists(
-            PlaylistsQuery(group = SongField.directory)
+            PlaylistsQuery(group = SongField(group))
         )
         self.playlists = playlists.value
         self.layoutChanged.emit()

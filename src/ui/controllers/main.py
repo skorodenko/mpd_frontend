@@ -25,7 +25,7 @@ class Main(QObject):
     
     @qasync.asyncSlot()
     async def connect(self):
-        SLEEP_TIME = 3
+        SLEEP_TIME = 10
         for _ in range(SLEEP_TIME * 4):
             try:
                 channel = Channel(path=config.default.grpc_host)

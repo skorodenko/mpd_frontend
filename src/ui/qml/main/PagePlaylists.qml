@@ -21,27 +21,30 @@ Kirigami.ScrollablePage {
             }
 
             QQC2.ComboBox {
-                id: searchField
+                id: group_combo
+                textRole: "name"
+                valueRole: "value"
+                onActivated: groups_model.setActive(currentValue)
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
-                model: ListModel {
-                    id: model
-                    ListElement { text: "Banana" }
-                    ListElement { text: "Apple" }
-                    ListElement { text: "Coconut" }
-                }
+                model: groups_model
             }
         }
     }
 
-    UIM.PlaylistsModel {
+    UIM.PlaylistsGroup {
+        id: groups_model
+        onUpdated: function(index) { playlists_model.refresh(index) }
+    }
+
+    UIM.Playlists {
         id: playlists_model
     }
     
     Connections {
         target: UIC.Main
         function onConnected() {
-            playlists_model.update_playlists()
+            groups_model.refresh()
         }
     }
     

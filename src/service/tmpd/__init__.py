@@ -95,6 +95,8 @@ class TMpdService(TMpdServiceBase):
 
     async def list_playlists(self, playlists_query: PlaylistsQuery) -> Playlists:
         match playlists_query.group:
+            case SongField.none:
+                return Playlists()
             case SongField.directory:
                 data = await self.mpd_client.lsinfo("")
                 playlists = list(map(lambda x: {"name": x.get("directory")}, data))
@@ -107,6 +109,14 @@ class TMpdService(TMpdServiceBase):
         playlists = ta.validate_python(playlists, from_attributes=True)
         return Playlists(playlists)
 
+    async def playlists_group(self, playlists_query: PlaylistsQuery) -> PlaylistsQuery:
+        group = SongField(playlists_query.group)
+        if group == SongField.none:
+            group = getattr(SongField, config.prod.group_by)
+        else:
+            config.prod.group_by = group.name
+        return PlaylistsQuery(group)
+    
     def _update_tile_db(
         self, meta: pyd.MetaPlaylistModel, include: list[str] = []
     ) -> pyd.MetaPlaylistModel:

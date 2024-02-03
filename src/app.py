@@ -4,11 +4,9 @@ import qasync
 import signal
 import asyncio
 import subprocess
-from time import sleep
-import src.ui.resources_rc
+import src.ui.resources_rc  # noqa: F401
 from PySide6.QtCore import QUrl
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 # from soloviy.config import settings
 
